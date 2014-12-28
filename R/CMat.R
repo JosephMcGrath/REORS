@@ -1,4 +1,4 @@
-CMat <- function(classed, refernce, ret = "", reOrg = FALSE, stand = TRUE){
+CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 #Function to calculate the confusion matrix between two raster layers.
 #Calculates a wide variety of accuracy measures.
 #Added functionality with unsupervised classifications to link up best
@@ -20,13 +20,13 @@ CMat <- function(classed, refernce, ret = "", reOrg = FALSE, stand = TRUE){
 #Args:
 #  classed: Raster, or name of raster containing hard clustered values.
 #  refernce: Raster or name of raster containing reference values
-#  ret: One of several methods of data to return:
+#  retT: One of several methods of data to return:
 #   "kappa" will return kappa and accuracy values only.
 #   "order" will return the sequence the classes were reorganised into.
 #   All other values will return the full set of data.
 #  reOrg: If the values should be reorganised based on how well the classes
 #   fit the reference values. Mainly useful for unsupervised classifications,
-#   where classes are assigned in a random order.
+#   where classes are assigned in a random/meaningless order.
 #  stand: If the confusion matrix should be standardised (locked between 0 and
 #   1). Makes it more comparable between classifications with different
 #   numbers of pixels.
@@ -189,13 +189,12 @@ CMat <- function(classed, refernce, ret = "", reOrg = FALSE, stand = TRUE){
   
 #--Return requested statistics------------------------------------------------
 
-##Adjust for single return() call                                             <-- Modify to single return call for simplicity.
-  if (ret == "kappa"){
-    return(c(kppa,oAcc))
-  } else if (ret == "order"){ 
-    return(large)
+  if (retT == "kappa"){
+    ret <- c(kppa,oAcc)
+  } else if (retT == "order"){ 
+    ret <- large
   }else {
-    return(list(
+    ret <- list(
      adjusted = sMat,
      kappaValue = as.vector(kppa),
      producersAccuracy = pAcc,
@@ -208,7 +207,9 @@ CMat <- function(classed, refernce, ret = "", reOrg = FALSE, stand = TRUE){
      #totalAllocationDisagreement = aDissSum,
      #totalDisagreement = tDiss,
      reorganising = large,
-     unadjusted = temp)
+     unadjusted = temp
     )
   }
+  
+  return(ret)
 }
