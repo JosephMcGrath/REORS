@@ -1,0 +1,11 @@
+Package: REORS
+Version: 0.0.8.
+Date: 2014.12.27
+Title: R scripts for Earth observation and remote sensing.
+Author: Joseph McGrath <joseph.mcgrath@outlook.com>
+Maintainer: Joseph McGrath <joseph.mcgrath@outlook.com>
+Depends: R (>= 0.99), raster
+Description: A collection of functions to aid in Earth observation and
+      remote sensing. Focus is on ease of use & functions relating to
+      classification.
+License: GPL version 3 or newer
