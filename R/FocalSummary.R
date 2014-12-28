@@ -1,7 +1,7 @@
 FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
 #Calculates how high above the surrounding area each cell is.
 #
-#Requires: WMat
+#Requires: WMat, RasterLoad
 #
 #Hypsometric integral source: 
 # Pike,R.J., Wilson,S.E. (1971). 
@@ -9,7 +9,8 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
 # analysis. Geological Society of America Bulletin, 82, 1079-1084
 #
 #Args:
-#  mapIn: The raster file to use in calculation
+#  rasterIn: The raster file to use in calculation, passed through RasterLoad,
+#   though only the first layer is taken at the present time.
 #  kernelSize: The size of kernel to use
 #  sumFun: A function used to summarise the kernel e.g. min, of max.
 #   Will only use the first result of a function if it returns are multiple.
@@ -24,6 +25,8 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
 #  Name of the resulting output file
   
   mUse <- WMat(kernelSize)
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+  rasterIn <- raster(rasterIn, layer = 1)
   
   if(!is.function(sumFun)){
     sumFun <- tolower(sumFun)

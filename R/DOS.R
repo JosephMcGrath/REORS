@@ -5,13 +5,16 @@ DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
 #Probably better than nothing for further calculations however.
 #Works by subtracting minimum values from each band.
 #
+#Requires: RasterLoad
+#
 #Args:
-#  rasterIn: the raster to correct
+#  rasterIn: the raster to correct, passed through RasterIn
 #  fileName: the name of the file to write out, defaults to a temporary file
 #Returns:
 #  A rasterLayer of the resulting calculation
   
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   blocks <- blockSize(rasterIn)
   rasterTemp <- brick(rasterIn, values = FALSE)

@@ -2,6 +2,8 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
  directions = c(100, 125, 150), autoPlot = TRUE){
 #Function to calculate a hill-shade from multiple angles simultaneously
 #
+#Requires: RasterLoad
+#
 #Args:
 #  rasterIn: The raster file to be shaded - probably should be a DEM
 #  fileOut: The location to write to, if omitted is not written to memory
@@ -13,6 +15,8 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
 #  A rasterStack of the result, all values stored as 8 bit integers.
 
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+  rasterIn <- raster(rasterIn, layer = 1)
   
   checkVal <- FALSE
   

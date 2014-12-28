@@ -1,5 +1,5 @@
 library("raster")
-rasterIn <- brick("C:/GIS Layers/Bretford LS imagery/Subset.tif")
+rasterIn <- brick()
 nCentre <- 4
 fileOut <- tempfile()
 crispOut <- tempfile()

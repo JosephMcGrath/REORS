@@ -11,14 +11,15 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = tempfile()){
 #   -List, containing any of the above, or another list.
 #  retForm: Format to return data in, may be:
 #   -"stack" for a RasterStack
-#   -"brick" for a RasterBrick. May take a LONG time to process.
-#   ="list"  for a list of objects. Mainly for different extents ect.
+#   -"brick" for a RasterBrick. May take a LONG time to process
+#   -"list"  for a list of objects. Mainly for different extents ect (default)
 #  fileOut: The location to save the output, if it is a RasterBrick
 #
 #Returns:
 #  Either a RasterStack, RasterBrick or list containing the input data.
   
   library("raster")
+  retForm <- tolower(retForm)
   
 #--Convert inputs into a list-------------------------------------------------
   RasterLoadRec <- function(x){
@@ -31,10 +32,11 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = tempfile()){
       if(class(x[[i]])[1] == "character"){
         for(j in x[[i]]){
           if(file.exists(j)){                                                 #<-- Test if it is a compatible format?
-            if(nlayers(brick(j)) == 1){
-              ret <- append(ret, raster(x[[i]]))
+            temp <- brick(j)
+            if(nlayers(temp) == 1){
+              ret <- append(ret, raster(j))
             } else {
-              ret <- append(ret, brick(x[[i]]))
+              ret <- append(ret, temp)
             }
           } else warning((sprintf("File doesn't exist: %s", j)))
         }
@@ -48,10 +50,12 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = tempfile()){
   dataIn <- RasterLoadRec(dataIn)
   
 #--Convert to specified output------------------------------------------------
-  allSame <- TRUE
-  for(i in 1:length(dataIn)){
-    if(!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
-      allSame <- FALSE
+  if(retForm != "list"){
+    allSame <- TRUE
+    for(i in 1:length(dataIn)){
+      if(!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
+        allSame <- FALSE
+      }
     }
   }
   

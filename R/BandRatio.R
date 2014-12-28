@@ -1,8 +1,10 @@
 BandRatio <- function(rasterIn, band1, band2, fileName = tempfile()){
 #Calculates band ratios of a multi-layer raster.
 #
+#Requires: RasterLoad
+#
 #Args:
-#  rasterIn: the multi-layered raster to use
+#  rasterIn: the multi-layered raster to use, passed through RasterLoad
 #  band1: the band serving as the numerator
 #  band2: the band serving as the denominator
 #  fileName: the name of the file to write out, defaults to a temporary file
@@ -10,6 +12,7 @@ BandRatio <- function(rasterIn, band1, band2, fileName = tempfile()){
 #  A rasterLayer of the resulting calculation
   
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   blocks <- blockSize(rasterIn)
   rasterTemp <- raster(rasterIn)

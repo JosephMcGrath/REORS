@@ -4,7 +4,7 @@ GaussianSmooth <- function(rasterIn, kernelSize, outName = tempfile(),
 #Sigma value for calculating the Gaussian distribution is adjusted -  roughly 
 # calibrated to cover the entire kernel (not guaranteed to be exact).
 #
-#Requires: WMat
+#Requires: WMat, RasterLoad
 #
 #Args:
 #  rasterIn: the raster file to be smoothed
@@ -18,6 +18,8 @@ GaussianSmooth <- function(rasterIn, kernelSize, outName = tempfile(),
 #  The name of the smoothed raster output
   
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+  rasterIn <- raster(rasterIn, layer = 1)
   
   if(round(kernelSize) %% 2 == 0) stop("Cannot have even number or rows/columns")
   

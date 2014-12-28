@@ -1,5 +1,5 @@
 #Topographic openness calculation.
-rasterIn <- raster("C:/GIS Layers/UK/SRTM tile/n52_w002_1arc_v3.tif")
+rasterIn <- raster()
   
   distMat <- WMat(5)
   

@@ -26,6 +26,7 @@ KMeans <- function(rasterIn, nCentres = 10, fileName = tempfile(), itts = 1,
 
 #--Set up and build the initial centres---------------------------------------
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   #Standardisation step here
   

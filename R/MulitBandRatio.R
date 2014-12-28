@@ -1,6 +1,8 @@
 MulitBandRatio <- function(rasterIn, bands, fileName = tempfile()){
 #Simultaneously calculates multiple band ratios for a multi-band raster input
 #
+#Requires: RasterLoad
+#
 #Args:
 #  rasterIn: the multi-layered raster to use
 #  bands: A list containing pairs of bands to take as ratios
@@ -9,6 +11,7 @@ MulitBandRatio <- function(rasterIn, bands, fileName = tempfile()){
 #  A rasterBrick of the various ratios, in order.
   
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   inTest <- FALSE
   if(length(bands) < 2)inTest <- TRUE

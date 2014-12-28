@@ -2,6 +2,8 @@ NDVI <- function(rasterIn, NIR, VIS, fileName = tempfile()){                  #<
 #A specialised form of band maths, may be replaced later with a more general
 # function incorperating several common functions
 #
+#Requires: RasterLoad
+#
 #Args:
 #  rasterIn: the multi-layered raster to use
 #  NIR: the band of rasterIn that represents the near-infrared wavelength
@@ -11,6 +13,7 @@ NDVI <- function(rasterIn, NIR, VIS, fileName = tempfile()){                  #<
 #  A rasterLayer of the resulting calculation
   
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   blocks <- blockSize(rasterIn)
   rasterTemp <- raster(rasterIn)

@@ -1,6 +1,7 @@
 Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
  fileName = tempfile(), silent = TRUE){
-#Takes all values in a given raster and scales them to be between 0 and 1     <--Add 8bit signed functionality? Or more general minMax values?
+#Takes all values in a given raster and scales them to be between a set
+# minimum and maximum
 #
 #Args:
 #  rasterIn: the raster file to be normalised

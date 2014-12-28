@@ -6,6 +6,8 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 #To-do notes:
 #-All options should output a spatial* object
 #
+#Requires: RasterLoad
+#
 #Args:
 #  rasterIn: Raster* object to extract values from
 #  nProfile: Number of profiles to take (ignored for "lines" & "shape")
@@ -24,7 +26,9 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 #  A list of two items:
 #   -Matrix of DN values
 #   -Coordinates/shapefile that was used to create them.
+
   library("raster")
+  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   specProf <- matrix(nrow = nProfile, ncol = nlayers(rasterIn))
   
