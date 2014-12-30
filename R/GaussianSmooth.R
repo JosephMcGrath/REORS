@@ -7,15 +7,15 @@ GaussianSmooth <- function(rasterIn, kernelSize, outName = tempfile(),
 #Requires: WMat, RasterLoad
 #
 #Args:
-#  rasterIn: the raster file to be smoothed
-#  kernelSize: the size of kernel to smooth with
+#  rasterIn: the raster file to be smoothed.
+#  kernelSize: the size of kernel to smooth using.
 #  outName: the name to be given to the resulting file.
 #  sig: the value of sigma used in the calculation of the filter. Higher
 #   values will give a more focused filter.
 #  type: to be passed to WMat - the shape of kernel to use.
 #
 #Returns:
-#  The name of the smoothed raster output
+#  A RasterLayer containing the smoothed results.
   
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")

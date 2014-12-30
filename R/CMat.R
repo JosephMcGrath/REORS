@@ -18,10 +18,10 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 #   Volume 32, p4407-4429.
 #
 #Args:
-#  classed: Raster, or name of raster containing hard clustered values.
-#  refernce: Raster or name of raster containing reference values
+#  classed: RasterLayer, or name of raster containing hard clustered values.
+#  refernce: RasterLayer or name of raster containing reference values.
 #  retT: One of several methods of data to return:
-#   "kappa" will return kappa and accuracy values only.
+#   "brief" will return kappa and accuracy values only.
 #   "order" will return the sequence the classes were reorganised into.
 #   All other values will return the full set of data.
 #  reOrg: If the values should be reorganised based on how well the classes
@@ -189,7 +189,7 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   
 #--Return requested statistics------------------------------------------------
 
-  if (retT == "kappa"){
+  if (retT == "brief"){
     ret <- c(kppa,oAcc)
   } else if (retT == "order"){ 
     ret <- large

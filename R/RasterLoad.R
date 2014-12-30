@@ -13,7 +13,7 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = tempfile()){
 #   -"stack" for a RasterStack
 #   -"brick" for a RasterBrick. May take a LONG time to process
 #   -"list"  for a list of objects. Mainly for different extents ect (default)
-#  fileOut: The location to save the output, if it is a RasterBrick
+#  fileOut: The location to save the output, if it is a RasterBrick.
 #
 #Returns:
 #  Either a RasterStack, RasterBrick or list containing the input data.

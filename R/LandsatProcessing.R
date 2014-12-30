@@ -20,7 +20,7 @@ LandsatProcessing <- function(filePath, LsType = NA,
 #   importance is fixing the band order of LS8 due to autosorting issues.
 #  crsUse: Optional input for coordinate reference system to project the
 #   output into, if omitted, no projection is used.
-#  silent: If the algorithm should 
+#  silent: should the function work without progress reports?
 #
 #Returns:
 #  None, files are written to disk in working directory, file names will be

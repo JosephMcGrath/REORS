@@ -4,12 +4,14 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 #For lines and polygoins, calculates the mean values.
 #
 #To-do notes:
-#-All options should output a spatial* object
+#-All options should output a spatial* object, currently points only gives
+# coordinates.
+#-Proper key for profile plotting.
 #
 #Requires: RasterLoad
 #
 #Args:
-#  rasterIn: Raster* object to extract values from
+#  rasterIn: Raster* object to extract values from.
 #  nProfile: Number of profiles to take (ignored for "lines" & "shape")
 #  type: What type of input should be used?
 #   -points: Profiles for each point.
@@ -19,8 +21,9 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 #  plotL: Which layer should be used to plot when selecting areas?
 #  stand: Should the data be standardised before plotting?
 #  silent: Should progress be printed to the console?
-#  csvOut: Optional - write spectral profiles to csv, does not require file
-#   extension adding in the text.
+#  shapeIn: If type is "shape", this is where the shapefile is given.
+#  csvOut: A string of the file name to write the profile to. If omitted, the
+#   file is not written.
 #
 #Returns:
 #  A list of two items:
@@ -41,9 +44,7 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
   
 #--Calculation using shape-files----------------------------------------------
   if(type == "shape"){
-    #stop("Not yet implemented, sorry\n")                                      #<--Figure out file structure for shapefiles.
-    #Load the shapefile
-    
+  
     if(class(shapeIn)[1] == "SpatialLines" |
      class(shapeIn)[1] == "SpatialLinesDataFrame"){
       specProf <- t(extract(rasterIn, shapeIn, along = TRUE)[[1]])
@@ -142,5 +143,5 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
     )
   }
   
-  return(list(specProf, AOI))
+  return(list("Profile" = specProf, "Area used"= AOI))
 }

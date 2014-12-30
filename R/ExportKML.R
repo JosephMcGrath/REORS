@@ -1,16 +1,17 @@
 ExportKML <- function(rasterIn, fileOut, colUse = "terrain", blurVal = 1){
-#Wrapper function for the KML function, very little added functionality
+#Wrapper function for the KML function, very little added functionality.
+# Plans to add some more useful features later.
 #
 #To do notes:                                                                 <--Added functionality, not sure how practical.
 #-Export RGB images to KML
 #
 #Args:
-#  rasterIn: the raster layer to be exported, currently only supports
+#  rasterIn: the RasterLayer to be exported, currently only supports
 #   single layer rasters, multi-layers are possible though.
 #  fileOut: the name to be given to the output KML file.
 #  colUse: Which colour palette to build, currently can be "rainbow", "heat",
 #   or "terrain". More colours to come later.
-#  blurVal: The blur value to be passed directly to the KML function
+#  blurVal: The blur value to be passed directly to the KML function.
 #
 #Returns
 #  None, file output to system.

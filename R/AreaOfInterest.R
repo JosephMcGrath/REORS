@@ -13,8 +13,8 @@ AreaOfInterest <- function(rasterIn, maskLayer = "box",
 #  fileName:  The name to save the file as, defaults to temporary file.
 #
 #Returns
-#  Name of the written file
-
+#  A new raster* object with the modified extent.
+  
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   

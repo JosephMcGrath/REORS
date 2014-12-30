@@ -1,18 +1,17 @@
 Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
  fileName = tempfile(), silent = TRUE){
 #Takes all values in a given raster and scales them to be between a set
-# minimum and maximum
+# minimum and maximum.
 #
 #Args:
-#  rasterIn: the raster file to be normalised
-#  minMax: The minimum/maximum values to stretch to.
+#  rasterIn: The raster file to be normalised.
+#  minMax: The minimum/maximum values to stretch to as a vector.
 #  intLock: Boolean; should it round to the nearest whole number?
-#  fileName: the location to save the result, if absent will save as a
-#   temporary file.
-#  silent: should information about progress be returned?
+#  fileName: The location to save the result, defaults to a temporary file.
+#  silent: Should information about progress be returned?
 #
 #Returns:
-#  A raster file with the results of normalisation, also saves a file output
+#  A Raster* object with the results of normalisation, also saves a file output
   
   library("raster")
 

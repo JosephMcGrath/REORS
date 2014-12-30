@@ -8,8 +8,7 @@ RasterShell <- function(rasterIn, layers = nlayers(rasterIn),
 #  rasterIn: The raster object to take metadata values from.
 #  layers: How many layers should the returned object have room for? Defaults
 #   to the same as the input file.
-#  fileOut: The directory to save the file to (not sure it works with an empty
-#   raster as there's no data to save).
+#  fileOut: The directory to save the file to, defaults to a temporary file.  <--Not sure it works with an empty raster as there's no data to save.
 #
 #Returns:
 #  A RasterLayer/RasterBrick (depending on the number of layers requested)

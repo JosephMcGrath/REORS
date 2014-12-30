@@ -8,7 +8,7 @@ MulitBandRatio <- function(rasterIn, bands, fileName = tempfile()){
 #  bands: A list containing pairs of bands to take as ratios
 #  fileName: the name of the file to write out, defaults to a temporary file
 #Returns:
-#  A rasterBrick of the various ratios, in order.
+#  A RasterBrick of the various ratios, in order.
   
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")

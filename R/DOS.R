@@ -8,10 +8,11 @@ DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
 #Requires: RasterLoad
 #
 #Args:
-#  rasterIn: the raster to correct, passed through RasterIn
-#  fileName: the name of the file to write out, defaults to a temporary file
+#  rasterIn: the raster to correct, passed through RasterLoad.
+#  fileName: the name of the file to write out, defaults to a temporary file.
+#  silent: should the function work without progress reports?
 #Returns:
-#  A rasterLayer of the resulting calculation
+#  A rasterLayer of the image after subtraction.
   
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
@@ -26,7 +27,7 @@ DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
   
   for(i in 1:blocks$n){
     if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
-     i, round(blocks$n, i / blocks$n * 100)))
+     i, blocks$n, round(i / blocks$n * 100)))
     tempValues <- getValues(
      rasterIn,
      row = blocks$row[i],

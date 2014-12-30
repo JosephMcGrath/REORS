@@ -16,13 +16,13 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
 #   Will only use the first result of a function if it returns are multiple.
 #   Special cases are input as strings:
 #    "range" for the difference between max and min values (e.g. for relief).
-#    "hyps" for hypsometric integral
-#    "AMin" for the difference between centre and minimum of the window
-#    "BMax" for the difference between maximum and centre of the window
-#  outName: Name to be used in output, defaults to 
+#    "hyps" for hypsometric integral.
+#    "AMin" for the difference between centre and minimum of the window.
+#    "BMax" for the difference between maximum and centre of the window.
+#  outName: Name to be used in output, defaults to temporary file.
 #
 #Returns:
-#  Name of the resulting output file
+#  A RasterLayer containing the summarised values.
   
   mUse <- WMat(kernelSize)
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")

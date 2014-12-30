@@ -5,14 +5,15 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
 #Requires: RasterLoad
 #
 #Args:
-#  rasterIn: The raster file to be shaded - probably should be a DEM
-#  fileOut: The location to write to, if omitted is not written to memory
-#  angle: A vector of three azimuths of illumination, in RGB order
-#  directions: A vector of three directions of illumination, in RGB order
+#  rasterIn: The raster file to be shaded - probably should be a DEM.
+#  fileOut: The location to write to, if omitted is not written to memory.
+#  angle: A vector of three azimuths of illumination, in RGB order.
+#  directions: A vector of three directions of illumination, in RGB order.
 #  autoPlot: Boolean - should the result be plotted on completion?
 #
 #Returns:
-#  A rasterStack of the result, all values stored as 8 bit integers.
+#  A rasterStack (RasterBrick if writing to file) of the result, all
+#   values stored as 8 bit integers.
 
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")

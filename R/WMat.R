@@ -3,8 +3,10 @@ WMat <- function(matSize, type = "circle"){
 #For use in focal calculations
 #
 #Args:
-#  matSize: the size to use for the edges of the matrix
-#  type: shape to use for the matrix, square by default, also accepts circle
+#  matSize: The size to use for the edges of the matrix.
+#  type: Shape to use for the matrix:
+#   -"circle" an approximately circular matrix. (default)
+#   -"square" for a standard square matrix.
 #
 #Returns:
 #  A matrix of weights, either 1 or NA

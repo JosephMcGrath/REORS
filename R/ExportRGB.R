@@ -3,10 +3,10 @@ ExportRGB <- function(rasterIn, colPal = rainbow, colDepth = 512,
 #A function to write an image as an 8-bit RGB file, for non-GIS uses.
 #
 #Args:
-#  rasterIn: The (single layer) image to 
-#  colPal: A function that builds a colour palette (in hex codes)
+#  rasterIn: The (single layer) image to be exported.
+#  colPal: A function that builds a colour palette (in hex codes).
 #  colDepth: The number of layers of colour to be saved.
-#  fileOut: Where to save the end result, defaults 
+#  fileOut: Where to save the end result, defaults to temporary.
 #
 #Returns:
 #  An 8 bit RGB image, also saved to file.

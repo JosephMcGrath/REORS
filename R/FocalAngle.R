@@ -10,11 +10,11 @@ FocalAngle <- function(rasterIn, kernelSize, outName = tempfile()){
 #Args:
 #  rasterIn: The raster file to use in calculation, passed through RasterLoad,
 #   though only the first layer is taken at the present time.
-#  kernelSize: The size of kernel to use
+#  kernelSize: The size of kernel to use in focal calculations.
 #  outName: Name to be used in output, defaults to a temporary file.
 #
 #Returns:
-#  Name of the resulting output file
+#  The RasterLayer containing calculated angles, also saved to disk.
   
   library("raster")
   

@@ -1,16 +1,16 @@
 NDVI <- function(rasterIn, NIR, VIS, fileName = tempfile()){                  #<-- Merge with BandRatio? Create specialist band math function?
 #A specialised form of band maths, may be replaced later with a more general
-# function incorperating several common functions
+# function incorporating several common functions.
 #
 #Requires: RasterLoad
 #
 #Args:
-#  rasterIn: the multi-layered raster to use
-#  NIR: the band of rasterIn that represents the near-infrared wavelength
-#  VIS: the band of rasterIn that represents the visible red wavelength
-#  fileName: the name of the file to write out, defaults to a temporary file
+#  rasterIn: the multi-layered raster to use.
+#  NIR: the band of rasterIn that represents the near-infrared wavelength.
+#  VIS: the band of rasterIn that represents the visible red wavelength.
+#  fileName: the name of the file to write out, defaults to a temporary file.
 #Returns:
-#  A rasterLayer of the resulting calculation
+#  A RasterLayer of NDVI values.
   
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
