@@ -38,8 +38,10 @@ A list of two items:
 \author{Joseph McGrath}
 
 \examples{
+\dontrun{
 r <- brick(ncol = 50, nrow = 50, nl = 4)
 values(r) <- sample(1:2500, 10000, TRUE)
 r <- SpectralProfiler(r, 3)
 r
+}
 }

@@ -1,5 +1,6 @@
 \name{RasterLoad}
 \alias{RasterLoad}
+\alias{RasterBrowse}
 
 \title{
 Versatile method for loading raster data into R.
@@ -7,24 +8,18 @@ Versatile method for loading raster data into R.
 
 \description{
 Loads data from multiple, potentially different sources into a single object.
-Designed to be inserted into other functions for simplicity, can have rasters with different grids by returning a list.
+Designed to be inserted into other functions for simplicity, can have rasters with different grids by returning a list.\\
+RasterBrowse is a wrapper function, but using choose.files to select files in the browsing window, also defaults to "stack" output.
 }
 
 \usage{
 RasterLoad(dataIn, retForm = "list", fileOut = tempfile())
+RasterBrowse(retForm = "stack", fileOut = tempfile())
 }
 
 \arguments{
-  \item{dataIn}{dataIn: A list of the different files to be conglomerated, formats used:
-  -RasterLayer
-  -RasterBrick
-  -RasterStack
-  -Character vector, containing the names of files to be loaded.
-  -List, containing any of the above, or another list.}
-  \item{retForm}{retForm: Format to return data in, may be:
-  -"stack" for a RasterStack
-  -"brick" for a RasterBrick. May take a LONG time to process
-  -"list"  for a list of objects. Mainly for different extents ect (default)}
+  \item{dataIn}{dataIn: A list of the different files to be conglomerated, formats used: RasterLayer, RasterBrick RasterStack, Character vector, containing the names of files to be loaded, List, containing any of the above, or another list.}
+  \item{retForm}{retForm: Format to return data in, may be:  "stack" for a RasterStack, "brick" for a RasterBrick. May take a LONG time to process, "list"  for a list of objects. Mainly for different extents ect (default)}
   \item{fileOut}{The location to save the output, if it is a RasterBrick.}
 }
 

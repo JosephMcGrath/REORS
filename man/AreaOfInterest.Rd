@@ -27,10 +27,12 @@ A new raster* object with the modified extent.
 \author{Joseph McGrath}
 
 \examples{
+\dontrun{
 r <- raster(ncol = 50, nrow = 50)
 values(r) <- sample(1:2500, 2500, TRUE)
 r
 r <- AreaOfInterest(r)
 r
 plot(r)
+}
 }

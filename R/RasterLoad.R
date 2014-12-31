@@ -50,8 +50,8 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = tempfile()){
   dataIn <- RasterLoadRec(dataIn)
   
 #--Convert to specified output------------------------------------------------
+  allSame <- TRUE
   if(retForm != "list"){
-    allSame <- TRUE
     for(i in 1:length(dataIn)){
       if(!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
         allSame <- FALSE

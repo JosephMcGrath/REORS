@@ -16,7 +16,7 @@ To install the package, copy the following text into the R console:
     library("devtools")
     install_github("JosephMcGrath/REORS")
     library("REORS")
-And for any later sessions use:
+The devtools package may suggest that RTools needs to be installed for packages to be built - this does not seem to impede workings here. And for any later sessions use:
 
     library("REORS")
 To load the library (also loads the raster package and all its dependancies).
