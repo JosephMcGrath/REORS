@@ -14,7 +14,6 @@ function(rasterIn, npc = nlayers(rasterIn), sampleSize = NULL, fileName = tempfi
 \arguments{
   \item{rasterIn}{The raster file to perform principal component analysis on.}
   \item{npc}{The number of components to return. Defaults to the number of layers of rasterIn.}
-  \item{sampleSize}{The sample size used to estimate principal components, taken randomly. If omitted will use entire image via layerStats.}
   \item{fileName}{Name of file to save to, defaults to a temporary file.}
   \item{silent}{should the function work without progress reports?}
 }
@@ -23,7 +22,11 @@ function(rasterIn, npc = nlayers(rasterIn), sampleSize = NULL, fileName = tempfi
 As the calculation of a correlation matrix can take a long time (~4 hours when testing with a full Landsat scene), functionality to take a random sample and estimate principal components from there has been added. Transformation of image to PCA takes the same duration after that.
 }
 
-\value{A RasterBrick containing the principal components.}
+\value{
+A matrix of two items
+  \item{Raster}{The image calculated from principal components.}
+  \item{Eigens}{A matrix containing the eigenvectors, eigenvalues & standard deviations.}
+}
 
 \author{Joseph McGrath}
 
