@@ -121,6 +121,3 @@ PCA <- function(rasterIn, npc = NULL, fileName = tempfile(), silent = TRUE){
   
   return(list("Raster" = rasterTemp, "Eigens" = valMat))
 }
-
-test <- covM(rasterTest, silent = FALSE)
-plotRGB(test[[1]], stretch = "hist")
