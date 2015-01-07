@@ -1,4 +1,5 @@
-FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
+FocalSummary <- function(rasterIn, kernelSize, sumFun,
+ fileOut = tempfile(pattern = "REORS")){
 #Calculates how high above the surrounding area each cell is.
 #
 #Requires: WMat, RasterLoad
@@ -19,7 +20,7 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
 #    "hyps" for hypsometric integral.
 #    "AMin" for the difference between centre and minimum of the window.
 #    "BMax" for the difference between maximum and centre of the window.
-#  outName: Name to be used in output, defaults to temporary file.
+#  fileOut: Name to be used in output, defaults to temporary file.
 #
 #Returns:
 #  A RasterLayer containing the summarised values.
@@ -56,7 +57,7 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun, outName = tempfile()){
        return(sumFun(x[!is.na(x)])[1])
      } else return(NA)
    },
-   filename = outName,
+   filename = fileOut,
    format = "GTiff",
    overwrite = TRUE
   )

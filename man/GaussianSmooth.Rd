@@ -10,13 +10,13 @@ Uses a Gaussian weighting to smooth an image input. Currently only works on sing
 }
 
 \usage{
-GaussianSmooth(rasterIn, kernelSize, outName = tempfile(), sig = 1, type = "circle")
+GaussianSmooth(rasterIn, kernelSize, fileOut = tempfile(pattern = "REORS"), sig = 1, type = "circle")
 }
 
 \arguments{
   \item{rasterIn}{The raster file to be smoothed}
   \item{kernelSize}{The size of kernel to smooth using.}
-  \item{outName}{the name to be given to the resulting file.}
+  \item{fileOut}{the name to be given to the resulting file.}
   \item{sig}{the value of sigma used in the calculation of the filter. Higher values will give a more focused filter.}
   \item{type}{to be passed to WMat - the shape of kernel to use.}
 }

@@ -1,5 +1,5 @@
 Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
- fileName = tempfile(), silent = TRUE){
+ fileOut = tempfile(pattern = "REORS"), silent = TRUE){
 #Takes all values in a given raster and scales them to be between a set
 # minimum and maximum.
 #
@@ -7,21 +7,27 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
 #  rasterIn: The raster file to be normalised.
 #  minMax: The minimum/maximum values to stretch to as a vector.
 #  intLock: Boolean; should it round to the nearest whole number?
-#  fileName: The location to save the result, defaults to a temporary file.
+#  fileOut: The location to save the result, defaults to a temporary file.
 #  silent: Should information about progress be returned?
 #
 #Returns:
 #  A Raster* object with the results of normalisation, also saves a file output
   
   library("raster")
+  library("REORS")
 
 #--Set up and detect data type to use-----------------------------------------
-  ret <- rasterIn
-  rasterIn <- setMinMax(rasterIn)
-  mv <- list(minValue(rasterIn), maxValue(rasterIn), maxValue(rasterIn) - minValue(rasterIn))
-  blocks <- blockSize(rasterIn)
+  if(!silent) cat("Calculating minimum and maximum values of input.\n")
   
-  if(!silent) print(rasterIn)
+  rasterIn <- RasterLoad(rasterIn, "stack")  
+  rasterIn <- setMinMax(rasterIn)
+  
+  mv <- list(minValue(rasterIn), maxValue(rasterIn),
+   maxValue(rasterIn) - minValue(rasterIn)
+  )
+  
+  ret <- RasterShell(rasterIn)
+  blocks <- blockSize(rasterIn)
   
   if(intLock){
     dataTypeD <- sprintf(
@@ -31,32 +37,25 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
     )
   } else dataTypeD <- "FLT8S"
   
-  ret <- writeStart(x = ret, filename = fileName, format = "GTiff",
+  ret <- writeStart(x = ret, filename = fileOut, format = "GTiff",
    datatype = dataTypeD, overwrite = TRUE
   )
   
 #--Perform the calculations---------------------------------------------------
+  if(!silent) cat("Calculating standardised values.\n")
   for(j in 1:blocks$n){
     if(!silent) cat(sprintf("Processing block %s of %s\n", j, blocks$n))
     
+    #as.matrix to stop errors with a single layer.
     tempValues <- as.matrix(getValues(
      rasterIn,
      row = blocks$row[j],
      nrow = blocks$nrow[j]
     ))
     
-    #Not using apply currently to access the min/max values properly          <--See if it's more efficient to change to apply if I can
-    if(intLock){
-      for(i in 1:ncol(tempValues)){
-        tempValues[, i] <- round((tempValues[, i] - mv[[1]][i]) /
-         (mv[[3]][i]) * (minMax[2] - minMax[1]) + minMax[1])
-      }
-    } else {
-      for(i in 1:ncol(tempValues)){
-        tempValues[, i] <- (tempValues[, i] - mv[[1]][i]) /
-         (mv[[3]][i]) * (minMax[2] - minMax[1]) + minMax[1]
-      }
-    }
+    tempValues <- t((t(tempValues) - mv[[1]]) / mv[[3]]
+     * (minMax[2] - minMax[1]) + minMax[1])
+    if(intLock) tempValues <- round(tempValues)
     
     ret <- writeValues(
      x = ret,
@@ -66,8 +65,6 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
   }
   
   ret <- writeStop(ret)
-  
-  if(!silent) print(ret)
   
   return(ret)
 }

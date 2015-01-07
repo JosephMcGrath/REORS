@@ -12,12 +12,12 @@ Probably better than nothing for further calculations however.
 }
 
 \usage{
-DOS(rasterIn, fileName = tempfile(), silent = TRUE)
+DOS(rasterIn, fileName = tempfile(pattern = "REORS"), silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{the raster to correct, passed through RasterLoad}
-  \item{fileName}{the name of the file to write out, defaults to a temporary file.}
+  \item{fileOut}{the name of the file to write out, defaults to a temporary file.}
   \item{silent}{should the function work without progress reports?}
 }
 

@@ -10,14 +10,15 @@ Divides one band by the other, giving the ratio, commonly used to isolate specif
 }
 
 \usage{
-BandRatio(rasterIn, band1, band2, fileName = tempfile())
+BandRatio(rasterIn, band1, band2, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
 }
 
 \arguments{
-  \item{rasterIn}{the multi-layered raster to use, passed through RasterLoad.}
-  \item{band1}{the band serving as the numerator.}
-  \item{band2}{the band serving as the denominator.}
-  \item{fileName}{Athe name of the file to write out, defaults to a temporary file.}
+  \item{rasterIn}{The multi-layered raster to use, passed through RasterLoad.}
+  \item{band1}{The band serving as the numerator.}
+  \item{band2}{The band serving as the denominator.}
+  \item{fileOut}{The name of the file to write out, defaults to a temporary file.}
+  \item{silent}{Should the function work without progress reports?}
 }
 
 \value{A RasterLayer of the resulting calculation.}

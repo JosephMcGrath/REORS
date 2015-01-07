@@ -1,15 +1,18 @@
-GaussianSmooth <- function(rasterIn, kernelSize, outName = tempfile(),
- sig = 1, type = "circle"){
+GaussianSmooth <- function(rasterIn, kernelSize,
+ fileOut = tempfile(pattern = "REORS"), sig = 1, type = "circle"){
 #Smooths the supplied raster using a Gaussian filter.
-#Sigma value for calculating the Gaussian distribution is adjusted -  roughly 
+#Sigma value for calculating the Gaussian distribution is adjusted -  roughly
 # calibrated to cover the entire kernel (not guaranteed to be exact).
+#
+#ToDo:
+#  Merge with the WMat function, to give more flexibility.
 #
 #Requires: WMat, RasterLoad
 #
 #Args:
 #  rasterIn: the raster file to be smoothed.
 #  kernelSize: the size of kernel to smooth using.
-#  outName: the name to be given to the resulting file.
+#  fileOut: the name to be given to the resulting file.
 #  sig: the value of sigma used in the calculation of the filter. Higher
 #   values will give a more focused filter.
 #  type: to be passed to WMat - the shape of kernel to use.
@@ -18,12 +21,16 @@ GaussianSmooth <- function(rasterIn, kernelSize, outName = tempfile(),
 #  A RasterLayer containing the smoothed results.
   
   library("raster")
+  library("REORS")
+  
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+#Can only use the one layer of a raster here, defaulting to the first.
   rasterIn <- raster(rasterIn, layer = 1)
   
-  if(round(kernelSize) %% 2 == 0) stop("Cannot have even number or rows/columns")
+  if(round(kernelSize) %% 2 == 0){
+    stop("Cannot have even number or rows/columns")
+  }
   
-  library("raster")
   ret <- matrix(ncol = kernelSize, nrow = kernelSize)
   
   mid <- ceiling(ncol(ret) / 2)
@@ -48,7 +55,7 @@ GaussianSmooth <- function(rasterIn, kernelSize, outName = tempfile(),
        return(sum(x, na.rm = TRUE))
      } else return(NA)
    },
-   filename = outName,
+   filename = fileOut,
    format = "GTiff",
    overwrite = TRUE
   )

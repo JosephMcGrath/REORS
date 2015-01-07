@@ -1,4 +1,5 @@
-FocalAngle <- function(rasterIn, kernelSize, outName = tempfile()){
+FocalAngle <- function(rasterIn, kernelSize,
+ fileOut = tempfile(pattern = "REORS")){
 #Calculates the standard deviations of the angles between the central cell of
 # a kernel and all other cells. Something of a precursor to calculating 
 # topographic openness.
@@ -11,12 +12,13 @@ FocalAngle <- function(rasterIn, kernelSize, outName = tempfile()){
 #  rasterIn: The raster file to use in calculation, passed through RasterLoad,
 #   though only the first layer is taken at the present time.
 #  kernelSize: The size of kernel to use in focal calculations.
-#  outName: Name to be used in output, defaults to a temporary file.
+#  fileOut: Name to be used in output, defaults to a temporary file.
 #
 #Returns:
 #  The RasterLayer containing calculated angles, also saved to disk.
   
   library("raster")
+  library("REORS")
   
 #--Create the matrix to run over the data-------------------------------------
 
@@ -46,7 +48,7 @@ FocalAngle <- function(rasterIn, kernelSize, outName = tempfile()){
        sd(tan(x / mDist), na.rm=TRUE)
      } else return(NA)
    },
-   filename = outName,
+   filename = fileOut,
    format = "GTiff",
    overwrite = TRUE
   )

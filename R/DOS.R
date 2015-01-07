@@ -1,4 +1,5 @@
-DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
+DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
+ silent = TRUE){
 #Applies simple dark object subtraction to an image.
 #No benefit for the purpose of visualisation in most cases,
 # as it's often applied when rendering.
@@ -9,7 +10,7 @@ DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
 #
 #Args:
 #  rasterIn: the raster to correct, passed through RasterLoad.
-#  fileName: the name of the file to write out, defaults to a temporary file.
+#  fileOut: the name of the file to write out, defaults to a temporary file.
 #  silent: should the function work without progress reports?
 #Returns:
 #  A rasterLayer of the image after subtraction.
@@ -19,11 +20,11 @@ DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
   
   blocks <- blockSize(rasterIn)
   rasterTemp <- brick(rasterIn, values = FALSE)
-  rasterTemp <- writeStart(rasterTemp, filename = fileName, format = "GTiff",
+  rasterTemp <- writeStart(rasterTemp, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   minV <- minValue(rasterIn)
   
-  if(!silent) cat("Processing:\n")
+  if(!silent) cat("Applying simple dark object subtraction:\n")
   
   for(i in 1:blocks$n){
     if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
@@ -34,15 +35,7 @@ DOS <- function(rasterIn, fileName = tempfile(), silent = TRUE){
      nrow = blocks$nrow[i]
     )
     
-    tempValues <- t(
-     apply(
-       X = tempValues,
-       MARGIN = 1,
-       FUN = function(x){
-         x - minV
-       }
-      )
-     )
+    tempValues <- t(t(tempValues) - minV)
     
     rasterTemp <- writeValues(
      x = rasterTemp,

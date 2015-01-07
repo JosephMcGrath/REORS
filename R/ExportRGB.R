@@ -1,6 +1,9 @@
 ExportRGB <- function(rasterIn, colPal = rainbow, colDepth = 512,
- fileOut = tempfile()){
+ fileOut = tempfile(pattern = "REORS")){
 #A function to write an image as an 8-bit RGB file, for non-GIS uses.
+#
+#ToDo:
+#  Also export an image by taking three layers and standardising them.
 #
 #Args:
 #  rasterIn: The (single layer) image to be exported.
@@ -12,6 +15,7 @@ ExportRGB <- function(rasterIn, colPal = rainbow, colDepth = 512,
 #  An 8 bit RGB image, also saved to file.
 
   library("raster")
+  
   colPal <- colPal(colDepth)
   rasterIn <- setMinMax(rasterIn)
   minMax <- c(minValue(rasterIn), maxValue(rasterIn) - minValue(rasterIn)

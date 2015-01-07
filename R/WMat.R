@@ -2,6 +2,10 @@ WMat <- function(matSize, type = "circle"){
 #Creates a matrix of weights with the desired size and shape
 #For use in focal calculations
 #
+#ToDo:
+#  Option to weight the matrix (would merge the GaussianSmooth and
+#   FocalSummary functions.
+#
 #Args:
 #  matSize: The size to use for the edges of the matrix.
 #  type: Shape to use for the matrix:
@@ -11,9 +15,8 @@ WMat <- function(matSize, type = "circle"){
 #Returns:
 #  A matrix of weights, either 1 or NA
   
-  library("raster")
-  
-  if(round(matSize) %% 2 == 0) stop("Cannot have even number or rows/columns")
+  if(round(matSize) %% 2 == 0) stop("Cannot have even number or rows/columns.")
+  if(matSize < 3) stop("Must have a weights matrix larger than 3.\n")
   
   ret <- matrix(rep(1, matSize ^ 2), ncol = matSize)
   

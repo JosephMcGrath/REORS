@@ -10,14 +10,14 @@ Calculates values using a circular kernel, rather than the standard square one. 
 }
 
 \usage{
-FocalSummary(rasterIn, kernelSize, sumFun, outName = tempfile())
+FocalSummary(rasterIn, kernelSize, sumFun, fileOut = tempfile(pattern = "REORS"))
 }
 
 \arguments{
   \item{rasterIn}{The raster file to use in calculation, passed through RasterLoad, though only the first layer is taken at the present time.}
   \item{kernelSize}{The size of kernel to use}
   \item{sumFun}{A function used to summarise the kernel e.g. min, of max. Will only use the first result of a function if it returns are multiple. Special cases are input as strings: "range" for the difference between max and min values (e.g. for relief). "hyps" for hypsometric integral. "AMin" for the difference between centre and minimum of the window. "BMax" for the difference between maximum and centre of the window.}
-  \item{outName}{Name to be used in output, defaults to temporary file.}
+  \item{fileOut}{Name to be used in output, defaults to temporary file.}
 }
 
 \value{A RasterLayer containing the summarised values.}

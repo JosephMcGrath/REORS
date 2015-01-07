@@ -10,7 +10,7 @@ The exported file is set up to be used in non-GIS/spatial programs.
 }
 
 \usage{
-ExportRGB(rasterIn, colPal = rainbow, colDepth = 512, fileOut = tempfile())
+ExportRGB(rasterIn, colPal = rainbow, colDepth = 512, fileOut = tempfile(pattern = "REORS")))
 }
 
 \arguments{

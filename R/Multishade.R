@@ -6,7 +6,7 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
 #
 #Args:
 #  rasterIn: The raster file to be shaded - probably should be a DEM.
-#  fileOut: The location to write to, if omitted is not written to memory.
+#  fileOut: The location to write to, if omitted is not written to memory.    <--May be best to always write to file?
 #  angle: A vector of three azimuths of illumination, in RGB order.
 #  directions: A vector of three directions of illumination, in RGB order.
 #  autoPlot: Boolean - should the result be plotted on completion?

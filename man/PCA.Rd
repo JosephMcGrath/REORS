@@ -8,13 +8,14 @@ Calculates or estimates principal components for an input image.
 }
 
 \usage{
-function(rasterIn, npc = nlayers(rasterIn), sampleSize = NULL, fileName = tempfile(), silent = TRUE)
+function(rasterIn, npc = nlayers(rasterIn), sampleSize = NULL, fileOut = tempfile(pattern = "REORS"), standOut = FALSE, silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{The raster file to perform principal component analysis on.}
   \item{npc}{The number of components to return. Defaults to the number of layers of rasterIn.}
-  \item{fileName}{Name of file to save to, defaults to a temporary file.}
+  \item{fileOut}{Name of file to save to, defaults to a temporary file.}
+  \item{standOut}{Should the end result be standardised between 0 and 1 (using the Standardise function).}
   \item{silent}{should the function work without progress reports?}
 }
 

@@ -10,13 +10,13 @@ Calculates the vertical angle between the centre-points of a focal window and it
 }
 
 \usage{
-FocalAngle(rasterIn, kernelSize, outName = tempfile())
+FocalAngle(rasterIn, kernelSize, fileOut = tempfile(pattern = "REORS"))
 }
 
 \arguments{
   \item{rasterIn}{The raster file to use in calculation, passed through RasterLoad, though only the first layer is taken at the present time.}
   \item{kernelSize}{The size of kernel to use in focal calculations.}
-  \item{outName}{Name to be used in output, defaults to a temporary file.}
+  \item{fileOut}{Name to be used in output, defaults to a temporary file.}
 }
 
 \value{The RasterLayer containing calculated angles, also saved to disk.}

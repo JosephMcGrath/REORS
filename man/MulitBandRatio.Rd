@@ -10,13 +10,14 @@ Calculates many band ratios in one pass, useful for cases where there are a larg
 }
 
 \usage{
-MulitBandRatio(rasterIn, bands, fileName = tempfile())
+MulitBandRatio(rasterIn, bands, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{the multi-layered raster to use}
   \item{bands}{A list containing pairs of bands to take as ratios}
-  \item{fileName}{the name of the file to write out, defaults to a temporary file}
+  \item{fileOut}{the name of the file to write out, defaults to a temporary file}
+  \item{silent}{should the function work without progress reports?}
 }
 
 \value{A RasterBrick of the various ratios, in order.}

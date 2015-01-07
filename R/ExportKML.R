@@ -2,7 +2,7 @@ ExportKML <- function(rasterIn, fileOut, colUse = "terrain", blurVal = 1){
 #Wrapper function for the KML function, very little added functionality.
 # Plans to add some more useful features later.
 #
-#To do notes:                                                                 <--Added functionality, not sure how practical.
+#To do notes:                                                                 <--Added functionality, not sure how practical it is to implement.
 #-Export RGB images to KML
 #
 #Args:
@@ -13,7 +13,7 @@ ExportKML <- function(rasterIn, fileOut, colUse = "terrain", blurVal = 1){
 #   or "terrain". More colours to come later.
 #  blurVal: The blur value to be passed directly to the KML function.
 #
-#Returns
+#Returns:
 #  None, file output to system.
 
   library("raster")

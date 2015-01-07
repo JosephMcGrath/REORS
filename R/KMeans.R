@@ -1,19 +1,27 @@
-KMeans <- function(rasterIn, nCentres = 10, fileName = tempfile(), itts = 1,
- breakCon = 5, distM = "euc", silent = TRUE, interPlot = FALSE){
+KMeans <- function(rasterIn, nCentres = 10, itts = 1,
+ fileOut = tempfile(pattern = "REORS"), breakCon = 0.05, standIn = FALSE,
+ distM = "euc", silent = TRUE, interPlot = FALSE){
 #Standard k-means clustering algorithm.
 #Somewhat of a work in progress, data still needs to be standardised before
 # input to avoid artificial weighting and weighting of inputs still
 # needs to be added.
+#
+#Requires: RasterLoad, RasterShell, Standardise
+#
+#ToDo:
+#Could probably be sped up by replacing apply with matrix algebra. Pretty big
+# overhaul though.
 #
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
 #   cleaning function first?
 #  nCentres: How many clusters should the data be split into? Empty clusters
 #   are deleted as the algorithm progresses - may change this later.
-#  fileName: Name to write file to, defaults to temporary file.
 #  itts: Maximum number of iterations to run the algorithm for.
+#  fileOut: Name to write file to, defaults to temporary file.
 #  breakCon: How little variation between iterations will break the loop early
 #   not very well implemented yet - just sum of distances.
+#  standIn: Should the data be locked between 0 and 1 before classification?
 #  distM: Distance measure to calculate memberships:
 #    "euc" = euclidean distance
 #    "man" = Manhattan distance
@@ -28,13 +36,20 @@ KMeans <- function(rasterIn, nCentres = 10, fileName = tempfile(), itts = 1,
   library("raster")
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
-  #Standardisation step here
+  if(silent){
+    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1))
+  } else {
+    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = FALSE)
+  }
   
-  if(is.na(maxValue(rasterIn)[1])) rasterIn <- setMinMax(rasterIn)
+  if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
   blocks <- blockSize(rasterIn)
   centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
   rasterTemp <- raster(rasterIn)
+  
+  colnames(centres) <- sprintf("c%s", 1:nCentres)
+  rownames(centres) <- sprintf("Layer %s", 1:nlayers(rasterIn))
   
   for(i in 1:nlayers(rasterIn)){
     centres[i, ] <- seq(
@@ -44,7 +59,10 @@ KMeans <- function(rasterIn, nCentres = 10, fileName = tempfile(), itts = 1,
     )
   }
   
-  if(!silent) print(centres)
+  if(!silent){
+    cat("Initial centres:\n")
+    print(centres)
+  }
   
 #--Set up distance measure of choice------------------------------------------
   if(distM == "euc"){
@@ -63,13 +81,12 @@ KMeans <- function(rasterIn, nCentres = 10, fileName = tempfile(), itts = 1,
     tempCentres <- centres * 0
     classCount <- rep(0, ncol(centres))
     
-    rasterTemp <- writeStart(rasterTemp, filename = fileName,
+    rasterTemp <- writeStart(rasterTemp, filename = fileOut,
      format = "GTiff", overwrite = TRUE
     )
     
 #--Calculate memberships and new centres--------------------------------------
     for(j in 1:blocks$n){
-      tempTime <- Sys.time()
       if(!silent) cat(sprintf("\tProcessing block %s of %s\n", j, blocks$n))
       
       tempValue <- getValues(
@@ -125,11 +142,9 @@ KMeans <- function(rasterIn, nCentres = 10, fileName = tempfile(), itts = 1,
     
     if(interPlot) plot(rasterTemp)
     
-    print(Sys.time() - tempTime)
-    
   }
   
 #--End of function------------------------------------------------------------
   
-  return(rasterTemp)
+  return(list("Raster" = rasterTemp, "Centers" = centres))
 }

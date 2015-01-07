@@ -10,14 +10,15 @@ A specialised form of band maths, intended to detect/highlight vegetation.
 }
 
 \usage{
-NDVI(rasterIn, NIR, VIS, fileName = tempfile())
+NDVI(rasterIn, NIR, VIS, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{The multi-layered raster to use.}
   \item{NIR}{the band of rasterIn that represents the near-infrared wavelength.}
   \item{VIS}{the band of rasterIn that represents the visible red wavelength.}
-  \item{fileName}{the name of the file to write out, defaults to a temporary file.}
+  \item{fileOut}{the name of the file to write out, defaults to a temporary file.}
+  \item{silent}{should the function work without progress reports?}
 }
 
 \value{A RasterLayer of NDVI values.}
