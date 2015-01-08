@@ -1,5 +1,5 @@
-KMeans <- function(rasterIn, nCentres = 10, itts = 1,
- fileOut = tempfile(pattern = "REORS"), breakCon = 0.05, standIn = FALSE,
+KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
+ fileOut = tempfile(pattern = "REORS"), breakCon = 0.01, standIn = FALSE,
  distM = "euc", silent = TRUE, interPlot = FALSE){
 #Standard k-means clustering algorithm.
 #Somewhat of a work in progress, data still needs to be standardised before
@@ -17,15 +17,18 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
 #   cleaning function first?
 #  nCentres: How many clusters should the data be split into? Empty clusters
 #   are deleted as the algorithm progresses - may change this later.
-#  itts: Maximum number of iterations to run the algorithm for.
+#  its: Maximum number of iterations to run the algorithm for.
+#  weight: The weights to apply to each layer (higher weight means an greater
+#   importance to clustering, can be integers or decimals. Must be a single
+#   values or have length equal to the number of input layers.
 #  fileOut: Name to write file to, defaults to temporary file.
 #  breakCon: How little variation between iterations will break the loop early
-#   not very well implemented yet - just sum of distances.
+#   calculated as an average per variable, assuming variables are between 0-1.
 #  standIn: Should the data be locked between 0 and 1 before classification?
 #  distM: Distance measure to calculate memberships:
-#    "euc" = euclidean distance
-#    "man" = Manhattan distance
-#    "eu2" = squared euclidean distance
+#    - "euc": euclidean distance
+#    - "man": Manhattan distance
+#    - "eu2": squared euclidean distance
 #  silent: Should details of the classification be output as it works?
 #  interPlot: Should the classification be plotted each iteration?
 #
@@ -34,7 +37,13 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
 
 #--Set up and build the initial centres---------------------------------------
   library("raster")
+  library("REORS")
+  
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+  
+  if(length(weight) != 1 & length(weight) != nlayers(rasterIn)){
+    stop("Weights must have values for each layer of input or a single value")
+  }
   
   if(silent){
     if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1))
@@ -45,9 +54,9 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
   if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
   blocks <- blockSize(rasterIn)
-  centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
   rasterTemp <- RasterShell(rasterIn, 1)
   
+  centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
   colnames(centres) <- sprintf("c%s", 1:nCentres)
   rownames(centres) <- sprintf("Layer %s", 1:nlayers(rasterIn))
   
@@ -74,9 +83,9 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
   } else stop("Invalid distance measure")
   
 #--Run the algorithm for each iteration---------------------------------------
-  for(i in 1:itts){
+  for(i in 1:its){
     
-    if(!silent) cat(sprintf("Beginning iteration %s of %s\n", i, itts))
+    if(!silent) cat(sprintf("Beginning iteration %s of %s\n", i, its))
     
     tempCentres <- centres * 0
     classCount <- rep(0, ncol(centres))
@@ -98,7 +107,7 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
       tempClass <- rep(NA, nrow(tempValue))
       
       for(k in 1:nrow(tempValue)){
-        temp <- distM(tempValue[k, ], centres)
+        temp <- distM(tempValue[k, ] * weight, centres)
         tempClass[k] <- sum(1:length(temp) * (temp == min(temp)))
       }
       
@@ -122,20 +131,20 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
     newCentres <- t(t(tempCentres) / classCount)
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
+    diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+      newCentres[, !is.nan(colSums(newCentres))])) / ncol(centres)
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
-     sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-      newCentres[, !is.nan(colSums(newCentres))])))
-    )
-    if(sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-     newCentres[, !is.nan(colSums(newCentres))]))
-     < breakCon) {
+     round(diffSince, 3)))
+    
+    if(diffSince < breakCon) {
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }
     
-  #Currently deleting empty cluster, could leave them as previous otherwise.
+    #Keeping centres with no changes as they are.
     #centres <- newCentres[, !is.nan(colSums(newCentres))]
-    centres[, !is.nan(colSums(newCentres))] <- newCentres[, !is.nan(colSums(newCentres))]
+    centres[, !is.nan(colSums(newCentres))] <- 
+     newCentres[, !is.nan(colSums(newCentres))]
     
     if(interPlot) plot(rasterTemp)
     
