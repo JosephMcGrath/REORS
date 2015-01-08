@@ -46,7 +46,7 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
   
   blocks <- blockSize(rasterIn)
   centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
-  rasterTemp <- raster(rasterIn)
+  rasterTemp <- RasterShell(rasterIn, 1)
   
   colnames(centres) <- sprintf("c%s", 1:nCentres)
   rownames(centres) <- sprintf("Layer %s", 1:nlayers(rasterIn))
@@ -95,16 +95,13 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
        nrow = blocks$nrow[j]
       )
       
-      tempClass <- apply(
-       X = tempValue,
-       MARGIN = 1,
-       FUN = function(x){
-         tmp <- distM(x, centres)
-         return(sum(1:ncol(centres) * 
-          (tmp == min(tmp))))
-       }
-      )
-    
+      tempClass <- rep(NA, nrow(tempValue))
+      
+      for(k in 1:nrow(tempValue)){
+        temp <- distM(tempValue[k, ], centres)
+        tempClass[k] <- sum(1:length(temp) * (temp == min(temp)))
+      }
+      
       rasterTemp <- writeValues(
        x = rasterTemp,
        v = tempClass,
@@ -137,8 +134,8 @@ KMeans <- function(rasterIn, nCentres = 10, itts = 1,
     }
     
   #Currently deleting empty cluster, could leave them as previous otherwise.
-    centres <- newCentres[, !is.nan(colSums(newCentres))]
-    #centres[, !is.nan(colSums(newCentres))] <- newCentres
+    #centres <- newCentres[, !is.nan(colSums(newCentres))]
+    centres[, !is.nan(colSums(newCentres))] <- newCentres[, !is.nan(colSums(newCentres))]
     
     if(interPlot) plot(rasterTemp)
     
