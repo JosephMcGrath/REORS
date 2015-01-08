@@ -20,6 +20,8 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
   if(!silent) cat("Calculating minimum and maximum values of input.\n")
   
   rasterIn <- RasterLoad(rasterIn, "stack")  
+  #Recalculating values as sometimes they're set wrong, sometimes a waste of
+   #time, but guarantees right answer.
   rasterIn <- setMinMax(rasterIn)
   
   mv <- list(minValue(rasterIn), maxValue(rasterIn),
@@ -43,14 +45,15 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
   
 #--Perform the calculations---------------------------------------------------
   if(!silent) cat("Calculating standardised values.\n")
-  for(j in 1:blocks$n){
-    if(!silent) cat(sprintf("Processing block %s of %s\n", j, blocks$n))
+  for(i in 1:blocks$n){
+    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+     i, blocks$n, round(i / blocks$n * 100)))
     
     #as.matrix to stop errors with a single layer.
     tempValues <- as.matrix(getValues(
      rasterIn,
-     row = blocks$row[j],
-     nrow = blocks$nrow[j]
+     row = blocks$row[i],
+     nrow = blocks$nrow[i]
     ))
     
     tempValues <- t((t(tempValues) - mv[[1]]) / mv[[3]]
@@ -60,7 +63,7 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
     ret <- writeValues(
      x = ret,
      v = tempValues,
-     start = blocks$row[j]
+     start = blocks$row[i]
     )
   }
   

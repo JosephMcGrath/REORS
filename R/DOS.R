@@ -16,6 +16,8 @@ DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
 #  A rasterLayer of the image after subtraction.
   
   library("raster")
+  library("REORS")
+  
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   blocks <- blockSize(rasterIn)

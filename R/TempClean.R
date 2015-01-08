@@ -9,6 +9,8 @@ TempClean <- function(tDir = tempdir()){
 #
 #Returns:
 #  None, deletes files from system.
+  
+  library("raster")
 
   file.remove(paste(tDir, list.files(tDir, "REORS.*tif"), sep = "\\"))
   removeTmpFiles(h = 0)

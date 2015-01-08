@@ -13,6 +13,8 @@ MulitBandRatio <- function(rasterIn, bands,
 #  A RasterBrick of the various ratios, in order.
   
   library("raster")
+  library("REORS")
+  
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   if(nlayers(rasterIn) < 2) stop("Input raster needs more than one layer.\n")

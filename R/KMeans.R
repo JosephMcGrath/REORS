@@ -57,7 +57,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
   rasterTemp <- RasterShell(rasterIn, 1)
   
   centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
-  colnames(centres) <- sprintf("c%s", 1:nCentres)
+  colnames(centres) <- sprintf("Clust %s", 1:nCentres)
   rownames(centres) <- sprintf("Layer %s", 1:nlayers(rasterIn))
   
   for(i in 1:nlayers(rasterIn)){
@@ -69,9 +69,12 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
   }
   
   if(!silent){
-    cat("Initial centres:\n")
+    cat("Initial centres (pre-weighting):\n")
     print(centres)
   }
+  
+  #Apply weights
+  centres <- centres * weight
   
 #--Set up distance measure of choice------------------------------------------
   if(distM == "euc"){
@@ -96,7 +99,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
     
 #--Calculate memberships and new centres--------------------------------------
     for(j in 1:blocks$n){
-      if(!silent) cat(sprintf("\tProcessing block %s of %s\n", j, blocks$n))
+      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+       j, blocks$n, round(j / blocks$n * 100)))
       
       tempValue <- getValues(
        rasterIn,
@@ -120,9 +124,9 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
       for(k in 1:ncol(centres)){
         classCount[k] <- classCount[k] + sum(tempClass == k, na.rm = TRUE)
         tempCentres[, k] <- tempCentres[, k] +
-         colSums(matrix(tempValue[k == tempClass, ], ncol = nrow(centres)),
-          na.rm = TRUE
-         )
+         colSums(matrix(tempValue[k == tempClass, ],
+          ncol = nrow(centres)), na.rm = TRUE
+         ) * weight
       }
       
     }
@@ -152,5 +156,5 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
   
 #--End of function------------------------------------------------------------
   
-  return(list("Raster" = rasterTemp, "Centers" = centres))
+  return(list("Raster" = rasterTemp, "Centers" = centres / weight))
 }

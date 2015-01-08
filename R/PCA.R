@@ -22,7 +22,7 @@ PCA <- function(rasterIn, npc = NULL, fileOut = tempfile(pattern = "REORS"),
 #   -Eigens: A matrix containing the eigenvectors, eigenvalues & standard devs
 
   library("raster")
-  #library("REORS")
+  library("REORS")
   
   cat("WARNING: PCA support is currently experimental, use with caution.\n")  #<--Remove once the process is checked (if successful)
   
@@ -84,7 +84,7 @@ PCA <- function(rasterIn, npc = NULL, fileOut = tempfile(pattern = "REORS"),
     }
   }
   
-  covMat <- covMat / (ncell(rasterIn) - 1)
+  covMat <- covMat / (ncell(rasterIn) - 1)                                    #<--This method is as a sample, may not be correct?
   
 #--Calculate eigenvalues & principal components-------------------------------
   eigens <- eigen(covMat)

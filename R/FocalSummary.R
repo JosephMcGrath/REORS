@@ -25,6 +25,9 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun,
 #Returns:
 #  A RasterLayer containing the summarised values.
   
+  library("raster")
+  library("REORS")
+  
   mUse <- WMat(kernelSize)
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   rasterIn <- raster(rasterIn, layer = 1)
