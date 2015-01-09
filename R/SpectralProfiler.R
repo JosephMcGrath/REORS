@@ -32,6 +32,7 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 
   library("raster")
   library("REORS")
+  
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   specProf <- matrix(nrow = nProfile, ncol = nlayers(rasterIn))
