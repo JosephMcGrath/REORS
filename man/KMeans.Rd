@@ -23,7 +23,7 @@ KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, fileOut = tempfile(pattern 
   \item{breakCon}{How little variation between iterations will break the loop early calculated as an average per variable, assuming variables are between 0-1.}
   \item{standIn}{Should the data be locked between 0 and 1 before classification?}
   \item{distM}{Distance measure to calculate memberships: "euc" = euclidean distance "man" = Manhattan distance "eu2" = squared euclidean distance}
-  \item(randRe){If a class is empty at the end of an iteration, should it be re-assigned at random? Can disrupt existing clusters, but makes it more likely that all clusters are populated. Higher "its" value recommended.}
+  \item{randRe}{If a class is empty at the end of an iteration, should it be re-assigned at random? Can disrupt existing clusters, but makes it more likely that all clusters are populated. Higher "its" value recommended.}
   \item{silent}{Should details of the classification be output as it works?}
   \item{interPlot}{Should the classification be plotted each iteration?}
 }
