@@ -70,7 +70,11 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   blocks <- blockSize(rasterIn)
   rasterTemp <- RasterShell(rasterIn, 1)
   
-  if(init == "lin"){
+  if(is.matrix(init)){
+    if(ncol(init) == ncol(centres) & nrow(init) == nrow(centres)){
+      centres <- init
+    } else stop("Invalid matrix of centres provided.\n")
+  } else if(init[1] == "lin"){
     for(i in 1:nlayers(rasterIn)){
       centres[i, ] <- seq(
        from = minValue(rasterIn)[i],
@@ -78,7 +82,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
        length.out = nCentres
       )
     }
-  } else if(init == "rand"){
+  } else if(init[1] == "rand"){
     for(i in 1:nlayers(rasterIn)){
       for(j in 1:nrow(centres)){
         centres[j, i] <- runif(
@@ -88,10 +92,6 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         )
       }
     }
- } else if(is.matrix(init)){
-   if(ncol(init) == ncol(centres) & nrow(init) == nrow(centres)){
-     centres <- init
-   } else stop("Invalid matrix of centres provided.\n")
  } else stop("Invalid initialisation method.\n")
   
   
