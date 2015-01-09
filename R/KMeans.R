@@ -1,16 +1,17 @@
-KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
+KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
  fileOut = tempfile(pattern = "REORS"), breakCon = 0.01, standIn = FALSE,
- distM = "euc", silent = TRUE, interPlot = FALSE){
+ distM = "euc", randRe = FALSE, silent = TRUE, interPlot = FALSE){
 #Standard k-means clustering algorithm.
-#Somewhat of a work in progress, data still needs to be standardised before
-# input to avoid artificial weighting and weighting of inputs still
-# needs to be added.
+#Weighing is currently handled as values are pulled in, probably less
+# efficient overall, but is simpler this way for now. Might also add some
+# flexibility on weighting, though that is somewhat tenuous.
 #
 #Requires: RasterLoad, RasterShell, Standardise
 #
 #ToDo:
 #Could probably be sped up by replacing apply with matrix algebra. Pretty big
-# overhaul though.
+# overhaul though. Not quite sure it's possible without the for loop.
+#Add option for pre-defined centres?
 #
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
@@ -21,6 +22,10 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
 #  weight: The weights to apply to each layer (higher weight means an greater
 #   importance to clustering, can be integers or decimals. Must be a single
 #   values or have length equal to the number of input layers.
+#  init: How should the clusters be initialised? Current methods are:
+#    - "lin": Linearly, from the minimum value in each layer, to the maximum.
+#    - "rand": Randomly within the minimum/maximum available values.
+#    - Matrix of centres, one column for each centre, one row for each layer.
 #  fileOut: Name to write file to, defaults to temporary file.
 #  breakCon: How little variation between iterations will break the loop early
 #   calculated as an average per variable, assuming variables are between 0-1.
@@ -29,11 +34,16 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
 #    - "euc": euclidean distance
 #    - "man": Manhattan distance
 #    - "eu2": squared euclidean distance
+#  randRe: If a class is empty at the end of an iteration, should it be
+#   re-assigned at random? Can disrupt existing clusters, but makes it more
+#   likely that all clusters are populated. Higher "its" value recommended.
 #  silent: Should details of the classification be output as it works?
 #  interPlot: Should the classification be plotted each iteration?
 #
 #Returns:
-#  Image (also written to disk) with classes represented by numerical values.
+#  List containing two items:
+#    -Raster:  The classified raster file.
+#    -Centres: The centres used to classify the raster file.
 
 #--Set up and build the initial centres---------------------------------------
   library("raster")
@@ -44,6 +54,10 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
   if(length(weight) != 1 & length(weight) != nlayers(rasterIn)){
     stop("Weights must have values for each layer of input or a single value")
   }
+  
+  centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
+  colnames(centres) <- sprintf("Clust %s", 1:ncol(centres))
+  rownames(centres) <- names(rasterIn)
   
   if(silent){
     if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1))
@@ -56,17 +70,30 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
   blocks <- blockSize(rasterIn)
   rasterTemp <- RasterShell(rasterIn, 1)
   
-  centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
-  colnames(centres) <- sprintf("Clust %s", 1:nCentres)
-  rownames(centres) <- sprintf("Layer %s", 1:nlayers(rasterIn))
+  if(init == "lin"){
+    for(i in 1:nlayers(rasterIn)){
+      centres[i, ] <- seq(
+       from = minValue(rasterIn)[i],
+       to = maxValue(rasterIn)[i],
+       length.out = nCentres
+      )
+    }
+  } else if(init == "rand"){
+    for(i in 1:nlayers(rasterIn)){
+      for(j in 1:nrow(centres)){
+        centres[j, i] <- runif(
+         1,
+         minValue(rasterIn)[i],
+         maxValue(rasterIn)[i]
+        )
+      }
+    }
+ } else if(is.matrix(init)){
+   if(ncol(init) == ncol(centres) & nrow(init) == nrow(centres)){
+     centres <- init
+   } else stop("Invalid matrix of centres provided.\n")
+ } else stop("Invalid initialisation method.\n")
   
-  for(i in 1:nlayers(rasterIn)){
-    centres[i, ] <- seq(
-     from = minValue(rasterIn)[i],
-     to = maxValue(rasterIn)[i],
-     length.out = nCentres
-    )
-  }
   
   if(!silent){
     cat("Initial centres (pre-weighting):\n")
@@ -136,7 +163,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
     diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-      newCentres[, !is.nan(colSums(newCentres))])) / ncol(centres)
+      newCentres[, !is.nan(colSums(newCentres))])) / 
+      (ncol(centres) * mean(weight))
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
@@ -150,11 +178,33 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1,
     centres[, !is.nan(colSums(newCentres))] <- 
      newCentres[, !is.nan(colSums(newCentres))]
     
-    if(interPlot) plot(rasterTemp)
+    if(randRe){
+      for(j in 1:ncol(centres)){
+        if(classCount[j] == 0){
+          for(k in 1:nrow(centres)){
+            centres[k, j] <- runif(
+             1,
+             minValue(rasterIn)[k],
+             maxValue(rasterIn)[k]
+            )
+          }
+        }
+      }
+    }
     
+    if(interPlot) plot(rasterTemp, col = rainbow(nCentres))
+    
+  }
+  
+#If any clusters are still empty, set them to NA to avoid implying they have
+ #data points attached to them.
+  for(i in 1:ncol(centres)){
+    if(classCount[i] == 0){
+      centres[, i] <- NA
+    }
   }
   
 #--End of function------------------------------------------------------------
   
-  return(list("Raster" = rasterTemp, "Centers" = centres / weight))
+  return(list("Raster" = rasterTemp, "Centres" = centres / weight))
 }
