@@ -30,8 +30,8 @@ KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, fileOut = tempfile(pattern 
 
 \value{
 List containing two items:
-  \item(Raster){The classified raster file.}
-  \item(Centres){The centres used to classify the raster file.}
+  \item{Raster}{The classified raster file.}
+  \item{Centres}{The centres used to classify the raster file.}
 }
 
 \author{Joseph McGrath}
