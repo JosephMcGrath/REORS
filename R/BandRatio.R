@@ -23,12 +23,13 @@ BandRatio <- function(rasterIn, band1, band2,
     stop("Bands must be specified as numeric values.\n")
   }
   
-  blocks <- blockSize(rasterIn)
   rasterTemp <- RasterShell(rasterIn, 1)
+  blocks <- blockSize(rasterIn)
+  
   rasterTemp <- writeStart(rasterTemp, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
-  if(!silent) cat("Calculating band ratio:")
+  if(!silent) cat("Calculating band ratio:\n")
   for(i in 1:blocks$n){
     if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
      i, blocks$n, round(i / blocks$n * 100)))

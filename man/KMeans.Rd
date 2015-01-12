@@ -15,7 +15,7 @@ KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, fileOut = tempfile(pattern 
 
 \arguments{
   \item{rasterIn}{Name of the image file to classify. Maybe run it through a cleaning function first?}
-  \item{nCentres}{How many clusters should the data be split into? Empty clusters are deleted as the algorithm progresses - may change this later.}
+  \item{nCentres}{How many clusters should the data be split into?}
   \item{its}{Maximum number of iterations to run the algorithm for.}
   \item{weight}{The weights to apply to each layer (higher weight means an greater importance to clustering, can be integers or decimals. Must be a single values or have length equal to the number of input layers.}
   \item{init}{How should the clusters be initialised? Current methods are: "lin": Linearly, from the minimum value in each layer, to the maximum. "rand": Randomly within the minimum/maximum available values. Matrix of centres, one column for each centre, one row for each layer.}

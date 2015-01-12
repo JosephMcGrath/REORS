@@ -16,8 +16,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
 #   cleaning function first?
-#  nCentres: How many clusters should the data be split into? Empty clusters
-#   are deleted as the algorithm progresses - may change this later.
+#  nCentres: How many clusters should the data be split into?
 #  its: Maximum number of iterations to run the algorithm for.
 #  weight: The weights to apply to each layer (higher weight means an greater
 #   importance to clustering, can be integers or decimals. Must be a single
