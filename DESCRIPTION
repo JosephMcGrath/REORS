@@ -1,5 +1,5 @@
 Package: REORS
-Version: 0.0-9
+Version: 0.0-10
 License: GPL (>=3)
 Description: A collection of functions to aid in Earth observation and
  remote sensing. Focus is on ease of use & functions relating to

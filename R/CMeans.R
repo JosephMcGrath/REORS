@@ -1,7 +1,9 @@
-KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
- fileOut = tempfile(pattern = "REORS"), breakCon = 0.01, standIn = FALSE,
- distM = "euc", randRe = FALSE, silent = TRUE, interPlot = FALSE){
-#Standard k-means clustering algorithm.
+CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
+ init = "lin", fileOut = tempfile(pattern = "REORS"), breakCon = 0.01,
+ standIn = FALSE, distM = "euc", randRe = FALSE, silent = TRUE,
+ interPlot = FALSE){
+#Fuzzy c-means clustering algorithm.
+#Heavily modelled off the REORS KMeans function
 #Weighing is currently handled as values are pulled in, probably less
 # efficient overall, but is simpler this way for now. Might also add some
 # flexibility on weighting, though that is somewhat tenuous.
@@ -11,7 +13,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
 #ToDo:
 #Could probably be sped up by replacing apply with matrix algebra. Pretty big
 # overhaul though. Not quite sure it's possible without the for loop.
-#Add option for pre-defined centres?
+#Poor optimisation at the moment.
 #
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
@@ -21,14 +23,17 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
 #  weight: The weights to apply to each layer (higher weight means an greater
 #   importance to clustering, can be integers or decimals. Must be a single
 #   values or have length equal to the number of input layers.
+#  fuzz: The fuzzification parameter (often called m), higher values means
+#   membership values are drawn from a more diverse range of pixels. Cannot be
+#   1 by definition, values below 1 will produces weird results.
 #  init: How should the clusters be initialised? Current methods are:
 #    - "lin": Linearly, from the minimum value in each layer, to the maximum.
 #    - "rand": Randomly within the minimum/maximum available values.
 #    - Matrix of centres, one column for each centre, one row for each layer.
 #  fileOut: Name to write file to, defaults to temporary file.
 #  breakCon: How little variation between iterations will break the loop early
-#   should be possible to linearly multiply out for larger ranges.
 #   calculated as an average per variable, assuming variables are between 0-1.
+#   should be possible to linearly multiply out for larger ranges.
 #  standIn: Should the data be locked between 0 and 1 before classification?
 #  distM: Distance measure to calculate memberships:
 #    - "euc": euclidean distance
@@ -68,7 +73,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
   blocks <- blockSize(rasterIn)
-  rasterTemp <- RasterShell(rasterIn, 1)
+  rasterTemp <- RasterShell(rasterIn, nCentres)
   
   if(is.matrix(init)){
     if(ncol(init) == ncol(centres) & nrow(init) == nrow(centres)){
@@ -118,6 +123,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     if(!silent) cat(sprintf("Beginning iteration %s of %s\n", i, its))
     
     tempCentres <- centres * 0
+    tempCentres2 <- centres * 0
     classCount <- rep(0, ncol(centres))
     
     rasterTemp <- writeStart(rasterTemp, filename = fileOut,
@@ -135,32 +141,46 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
        nrow = blocks$nrow[j]
       )
       
-      tempClass <- rep(NA, nrow(tempValue))
+      #Calculate membership values.
+      membTemp <- matrix(nrow = nrow(tempValue), ncol = ncol(centres))
       
-      for(k in 1:nrow(tempValue)){
-        temp <- distM(tempValue[k, ] * weight, centres)
-        tempClass[k] <- sum(1:length(temp) * (temp == min(temp)))
-        #tempClass[k] <- which(temp == min(temp))[[1]]
+      for(k in 1:nrow(membTemp)){
+        membTemp[k, ] <- distM(tempValue[k, ] * weight, centres)
+        
+        membTemp[k, ] <- 1 /
+        (colSums(matrix(rep(membTemp[k, ], length(membTemp[k, ])),
+        ncol = length(membTemp[k, ]), byrow = TRUE) / membTemp[k, ]) ^
+        (2 / (fuzz - 1)))
+        
+        if(any(is.nan(membTemp[k, ]))){ #May not need to be in an if statement, fix preceding code first
+          membTemp[k, is.nan(membTemp[k, ])] <- 1
+        }
       }
       
       rasterTemp <- writeValues(
        x = rasterTemp,
-       v = tempClass,
+       v = membTemp,
        start = blocks$row[j]
       )
       
-      for(k in 1:ncol(centres)){
-        classCount[k] <- classCount[k] + sum(tempClass == k, na.rm = TRUE)
-        tempCentres[, k] <- tempCentres[, k] +
-         colSums(matrix(tempValue[k == tempClass, ],
-          ncol = nrow(centres)), na.rm = TRUE
-         ) * weight
+#      for(k in 1:nrow(membTemp)){
+#        #Calculate new centres
+#        classCount <- classCount + membTemp[k, ] ^ fuzz
+#        for(l in 1:ncol(membTemp)){
+#          tempCentres[, l] <- tempCentres[, l] + (membTemp[k, l] ^ fuzz) * tempValue[k, ] * weight
+#        }
+#      }
+      for(k in 1:nrow(membTemp)){
+        classCount <- classCount + membTemp[k, ] ^ fuzz
+        
+        tempCentres2 <- tempCentres2 + (matrix(rep(membTemp[k, ] ^ fuzz,
+        length(tempValue[k, ])), ncol = length(membTemp[k, ]), byrow = TRUE) *
+        tempValue[k, ])
       }
-      
     }
     
     rasterTemp <- writeStop(rasterTemp)
-    newCentres <- t(t(tempCentres) / classCount)
+    newCentres <- t(t(tempCentres2) / classCount)
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
     diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
@@ -193,7 +213,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
       }
     }
     
-    if(interPlot) plot(rasterTemp, col = rainbow(nCentres))
+    if(interPlot) plot(rasterTemp)
+    #if(interPlot) plotRGB(rasterTemp, stretch = "lin")
     
   }
   
