@@ -1,7 +1,6 @@
 CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
  init = "lin", fileOut = tempfile(pattern = "REORS"), breakCon = 0.01,
- standIn = FALSE, distM = "euc", randRe = FALSE, silent = TRUE,
- interPlot = FALSE){
+ standIn = FALSE, distM = "euc", silent = TRUE, interPlot = FALSE){
 #Fuzzy c-means clustering algorithm.
 #Heavily modelled off the REORS KMeans function
 #Weighing is currently handled as values are pulled in, probably less
@@ -14,6 +13,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #Could probably be sped up by replacing apply with matrix algebra. Pretty big
 # overhaul though. Not quite sure it's possible without the for loop.
 #Poor optimisation at the moment.
+#Add crisp output option.
 #
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
@@ -39,9 +39,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #    - "euc": euclidean distance
 #    - "man": Manhattan distance
 #    - "eu2": squared euclidean distance
-#  randRe: If a class is empty at the end of an iteration, should it be
-#   re-assigned at random? Can disrupt existing clusters, but makes it more
-#   likely that all clusters are populated. Higher "its" value recommended.
 #  silent: Should details of the classification be output as it works?
 #  interPlot: Should the classification be plotted each iteration?
 #
@@ -89,8 +86,8 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     }
   } else if(init[1] == "rand"){
     for(i in 1:nlayers(rasterIn)){
-      for(j in 1:nrow(centres)){
-        centres[j, i] <- runif(
+      for(j in 1:ncol(centres)){
+        centres[i, j] <- runif(
          1,
          minValue(rasterIn)[i],
          maxValue(rasterIn)[i]
@@ -110,11 +107,11 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   
 #--Set up distance measure of choice------------------------------------------
   if(distM == "euc"){
-    distM <-  function(x, y) return(sqrt(colSums((x - y) ^ 2)))
+    distM <-  function(x, y) return(sqrt(rowSums((x - y) ^ 2)))
   } else if(distM == "man"){
-    distM <- function(x, y) return(colSums(abs(x - y)))
+    distM <- function(x, y) return(rowSums(abs(x - y)))
   } else if("eu2"){
-    distM <- function(x, y) return(colSums((x - y) ^ 2))
+    distM <- function(x, y) return(rowSums((x - y) ^ 2))
   } else stop("Invalid distance measure")
   
 #--Run the algorithm for each iteration---------------------------------------
@@ -144,18 +141,22 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
       #Calculate membership values.
       membTemp <- matrix(nrow = nrow(tempValue), ncol = ncol(centres))
       
-      for(k in 1:nrow(membTemp)){
-        membTemp[k, ] <- distM(tempValue[k, ] * weight, centres)
-        
-        membTemp[k, ] <- 1 /
-        (colSums(matrix(rep(membTemp[k, ], length(membTemp[k, ])),
-        ncol = length(membTemp[k, ]), byrow = TRUE) / membTemp[k, ]) ^
-        (2 / (fuzz - 1)))
-        
-        if(any(is.nan(membTemp[k, ]))){ #May not need to be in an if statement, fix preceding code first
-          membTemp[k, is.nan(membTemp[k, ])] <- 1
-        }
+      for(k in 1:ncol(membTemp)){
+        membTemp[, k] <- distM(tempValue * weight, matrix(centres[, k],
+         ncol = length(centres[, k]), nrow = nrow(tempValue), byrow = TRUE))
       }
+      
+      #Use a temporary copy, so it doesn't use the new values in later columns
+      membTemp2 <- membTemp
+      
+      fP <- (2 / (fuzz - 1))
+      for(k in 1:ncol(membTemp)){
+        membTemp2[, k] <- 1 / rowSums(membTemp[, k] / membTemp) ^ fP
+      }
+      
+      membTemp <- membTemp2
+      
+      membTemp[is.nan(membTemp)] <- 1
       
       rasterTemp <- writeValues(
        x = rasterTemp,
@@ -163,20 +164,14 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
        start = blocks$row[j]
       )
       
-#      for(k in 1:nrow(membTemp)){
-#        #Calculate new centres
-#        classCount <- classCount + membTemp[k, ] ^ fuzz
-#        for(l in 1:ncol(membTemp)){
-#          tempCentres[, l] <- tempCentres[, l] + (membTemp[k, l] ^ fuzz) * tempValue[k, ] * weight
-#        }
-#      }
-      for(k in 1:nrow(membTemp)){
-        classCount <- classCount + membTemp[k, ] ^ fuzz
+      for(k in 1:ncol(membTemp)){
+        classCount[k] <- classCount[k] + sum(membTemp[!is.na(membTemp[, k]),
+         k] ^ fuzz)
         
-        tempCentres2 <- tempCentres2 + (matrix(rep(membTemp[k, ] ^ fuzz,
-        length(tempValue[k, ])), ncol = length(membTemp[k, ]), byrow = TRUE) *
-        tempValue[k, ])
+        tempCentres2[, k] <- tempCentres2[, k] + colSums((membTemp[, k] ^ fuzz
+         ) * tempValue, na.rm = TRUE)
       }
+      
     }
     
     rasterTemp <- writeStop(rasterTemp)
@@ -198,20 +193,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     #centres <- newCentres[, !is.nan(colSums(newCentres))]
     centres[, !is.nan(colSums(newCentres))] <- 
      newCentres[, !is.nan(colSums(newCentres))]
-    
-    if(randRe){
-      for(j in 1:ncol(centres)){
-        if(classCount[j] == 0){
-          for(k in 1:nrow(centres)){
-            centres[k, j] <- runif(
-             1,
-             minValue(rasterIn)[k],
-             maxValue(rasterIn)[k]
-            )
-          }
-        }
-      }
-    }
     
     if(interPlot) plot(rasterTemp)
     #if(interPlot) plotRGB(rasterTemp, stretch = "lin")

@@ -84,8 +84,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     }
   } else if(init[1] == "rand"){
     for(i in 1:nlayers(rasterIn)){
-      for(j in 1:nrow(centres)){
-        centres[j, i] <- runif(
+      for(j in 1:col(centres)){
+        centres[i, j] <- runif(
          1,
          minValue(rasterIn)[i],
          maxValue(rasterIn)[i]
