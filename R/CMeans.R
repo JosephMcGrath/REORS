@@ -9,12 +9,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #
 #Requires: RasterLoad, RasterShell, Standardise
 #
-#ToDo:
-#Could probably be sped up by replacing apply with matrix algebra. Pretty big
-# overhaul though. Not quite sure it's possible without the for loop.
-#Poor optimisation at the moment.
-#Add crisp output option.
-#
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
 #   cleaning function first?
@@ -199,8 +193,10 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     
   }
   
-#If any clusters are still empty, set them to NA to avoid implying they have
- #data points attached to them.
+#--End of iterations----------------------------------------------------------
+  
+#If any clusters are still empty, set them to NA to avoid
+ #implying they have data points attached to them.
   for(i in 1:ncol(centres)){
     if(classCount[i] == 0){
       centres[, i] <- NA
