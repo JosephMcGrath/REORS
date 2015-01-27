@@ -7,7 +7,7 @@ Description: A collection of functions to aid in Earth observation and
 Title: R scripts for Earth observation and remote sensing
 Author: Joseph McGrath
 Maintainer: Joseph McGrath <joseph.mcgrath@outlook.com>
-Date: 2015.01.22
+Date: 2015.01.27
 Depends: R (>= 3.1.0), raster
 Suggests: maptools
 URL: https://github.com/JosephMcGrath/REORS

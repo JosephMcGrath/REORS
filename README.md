@@ -1,7 +1,7 @@
 REORS
 =====
 
-A collection of scripts to work with raster remotely sensed data. Currently in early stages of development, the scripts in the "master" branch should work, work in progress is generally isolated in its own branch/fork.
+A collection of scripts to work with raster remotely sensed data. Currently in early stages of development, the scripts in the "master" branch should function, any work in progress is generally isolated in its own branch/fork.
 
 Further notes will be made in the wiki.
 

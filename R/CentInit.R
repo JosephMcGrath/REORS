@@ -38,21 +38,84 @@ CentInit <- function(rasterIn, nCentres, meth = "rand", silent = TRUE){
   colnames(ret) <- sprintf("Clust %s", 1:nCentres)
   rownames(ret) <- names(rasterIn)
   
+#--Random generation----------------------------------------------------------
   if(meth == "rand"){
     for(i in 1:nrow(ret)){
       ret[i, ] <- runif(nCentres, min = minValue(rasterIn)[i],
        max = maxValue(rasterIn)[i])
     }
   }
+  
+#--Linear generation----------------------------------------------------------
   if(meth == "lin"){
     for(i in 1:nrow(ret)){
       ret[i, ] <- seq(from = minValue(rasterIn)[i],
        to = maxValue(rasterIn)[i], length.out = nCentres)
     }
   }
+  
+#--Linear principal components------------------------------------------------
   if(meth == "prin"){
-    stop("NTI")
+    stop("Not yet implemented.\n")                                            #<-- May be simpler to do something with covariance?
+    
+    #Uses the same method as PCA
+    blocks <- blockSize(rasterIn)
+    #Calculate mean values
+    if(!silent) cat("Calculating mean values. (Step 1/3)\n")
+    mVals <- rep(0, nlayers(rasterIn))
+    for(i in 1:blocks$n){
+      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+       i, blocks$n, round(i / blocks$n * 100)))
+      
+      tempValues <- getValues(
+       rasterIn,
+       row = blocks$row[i],
+       nrow = blocks$nrow[i]
+      )
+      
+      mVals <- mVals + colSums(tempValues, na.rm = TRUE)
+      
+    }
+    
+    mVals <- mVals / ncell(rasterIn)
+    covMat <- matrix(0, ncol = nlayers(rasterIn), nrow = nlayers(rasterIn))
+    
+    #Calculate covariance matrix
+    if(!silent) cat("Calculating covariance matrix. (Step 2/3)\n")
+    for(i in 1:blocks$n){
+      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+       i, blocks$n, round(i / blocks$n * 100)))
+      
+      tempValues <- getValues(
+      rasterIn,
+      row = blocks$row[i],
+       nrow = blocks$nrow[i]
+      )
+      
+      tempValues <- t(t(tempValues) - mVals)
+      
+      for(j in 1:nlayers(rasterIn)){
+        for(k in 1:nlayers(rasterIn)){
+          if(j <= k){
+            temp <- sum(tempValues[, j] * tempValues[, k], na.rm = TRUE)
+            covMat[j, k] <- covMat[j, k] + temp
+            covMat[k, j] <- covMat[j, k]
+          }
+        }
+      }
+    }
+    
+    covMat <- covMat / (ncell(rasterIn) - 1)                                  #<--This method is as a sample, may not be correct?
+    
+    #Calculate eigenvalues
+    eigens <- eigen(covMat)
+    
+    #Might be necessary to calculate first component?                         #<-- This needs finishing
+    #Then calculate the linear path from min to max
+    #And transfer back to actual feature-space.
   }
+  
+#--Random, weighted by data distribution--------------------------------------
   if(meth == "dist"){
     if(!silent) cat("Calculating density of input.\n")
     den <- density(rasterIn, plot = FALSE)
@@ -61,6 +124,12 @@ CentInit <- function(rasterIn, nCentres, meth = "rand", silent = TRUE){
       ret[i, ] <- sample(den[[i]]$x, nCentres,
        prob = den[[i]]$y, replace = TRUE) + runif(1, 0, den[[i]]$bw)
     }
+  }
+  
+#--Print and return output----------------------------------------------------
+  if(!silent){
+    cat("Initial centroids:\n")
+    print(ret)
   }
   
   return(ret)

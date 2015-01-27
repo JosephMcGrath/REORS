@@ -10,7 +10,7 @@ Several methods of generating initial centres for a centroid-based clustering al
 }
 
 \usage{
-CentInit(rasterIn, nCentres, meth = "rand", silent = TRUE){
+CentInit(rasterIn, nCentres, meth = "rand", silent = TRUE)
 }
 
 \arguments{
