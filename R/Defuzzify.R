@@ -34,7 +34,7 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
   if(!silent) cat("Defuzzifying raster.\n")
   
 #--Take whichever membership value is highest---------------------------------
-  if(meth = "max"){
+  if(meth == "max"){
     for(i in 1:blocks$n){
       if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
        i, blocks$n, round(i / blocks$n * 100)))
@@ -60,7 +60,7 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
   }
   
 #--Require membership values to be above a threshold--------------------------
-  if(meth = "th"){
+  if(meth == "th"){
      unDet <- nlayers(rasterIn) + 1
      if(is.null(opt)){
        rasterOut <- writeStop(rasterOut)
