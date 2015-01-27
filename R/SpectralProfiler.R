@@ -1,7 +1,7 @@
-SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
- plotL = 1, stand = FALSE, silent = TRUE, shapeIn = NULL, csvOut = NULL){
+SpectralProfiler <- function(rasterIn, type = "points", nProfile = 1,
+ plotL = NA, stand = FALSE, silent = TRUE, shapeIn = NULL, csvOut = NULL){
 #Calculates the spectral profile of a set zone.
-#For lines and polygoins, calculates the mean values.
+#For polygoins, calculates the mean values.
 #
 #To-do notes:
 #-All options should output a spatial* object, currently points only gives
@@ -12,13 +12,13 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 #
 #Args:
 #  rasterIn: Raster* object to extract values from.
-#  nProfile: Number of profiles to take (ignored for "lines" & "shape")
 #  type: What type of input should be used?
 #   -points: Profiles for each point.
-#   -lines: Profiles of changing spectral values along a line.
+#   -line: Profiles of changing spectral values along a line.
 #   -poly : Profiles of mean values over polygons.
 #   -shape: Profiles using a pre-defined shapefile, not yet implemented.
-#  plotL: Which layer should be used to plot when selecting areas?
+#  nProfile: Number of profiles to take (ignored for "line" & "shape")
+#  plotL: Layer to plot, NA for not plotting.
 #  stand: Should the data be standardised before plotting?
 #  silent: Should progress be printed to the console?
 #  shapeIn: If type is "shape", this is where the shapefile is given.
@@ -42,7 +42,7 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
   if(type == "polygon") type <- "poly"
   if(type == "polygons") type <- "poly"
   if(type == "polys") type <- "poly"
-  if(type == "line") type <- "lines"
+  if(type == "lines") type <- "line"
   
 #--Calculation using shape-files----------------------------------------------
   if(type == "shape"){
@@ -68,7 +68,7 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
 #--Calculation using polygons-------------------------------------------------
   if(type == "poly"){
     AOI <- list()
-    plot(rasterIn, plotL)
+    if(!is.na(plotL)) plot(rasterIn, plotL)
     
     if(!silent) cat("Click on the plot window to mark on areas to test\n")
     
@@ -83,7 +83,7 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
   
 #--Calculation using points---------------------------------------------------
   if(type == "points"){
-    plot(rasterIn, plotL)
+    if(!is.na(plotL)) plot(rasterIn, plotL)
     AOI <- locator(n = nProfile)
     AOI <- cbind(AOI$x, AOI$y)
     specProf <- rasterIn[cellFromXY(rasterIn, AOI)]
@@ -91,7 +91,7 @@ SpectralProfiler <- function(rasterIn, nProfile = 1, type = "points",
   
 #--Calculation using lines----------------------------------------------------
   if(type == "line"){
-    plot(rasterIn, 1)
+    if(!is.na(plotL)) plot(rasterIn, plotL)
     
     if(!silent) cat("Click on the plot window to mark on areas to test\n")
     

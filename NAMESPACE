@@ -1,5 +1,8 @@
 export(BandRatio)
+export(CentDist)
+export(CentInit)
 export(CMat)
+export(CMeans)
 export(DOS)
 export(ExportKML)
 export(ExportRGB)
