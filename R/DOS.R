@@ -21,8 +21,8 @@ DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
   blocks <- blockSize(rasterIn)
-  rasterTemp <- brick(rasterIn, values = FALSE)
-  rasterTemp <- writeStart(rasterTemp, filename = fileOut, format = "GTiff",
+  rasterOut <- brick(rasterIn, values = FALSE)
+  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   minV <- minValue(rasterIn)
   
@@ -31,6 +31,7 @@ DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
   for(i in 1:blocks$n){
     if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
      i, blocks$n, round(i / blocks$n * 100)))
+     
     tempValues <- getValues(
      rasterIn,
      row = blocks$row[i],
@@ -39,15 +40,15 @@ DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
     
     tempValues <- t(t(tempValues) - minV)
     
-    rasterTemp <- writeValues(
-     x = rasterTemp,
+    rasterOut <- writeValues(
+     x = rasterOut,
      v = tempValues,
      start = blocks$row[i]
     )
     
   }
     
-  rasterTemp <- writeStop(rasterTemp)
+  rasterOut <- writeStop(rasterOut)
 
-  return(rasterTemp)
+  return(rasterOut)
 }

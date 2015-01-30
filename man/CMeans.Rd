@@ -1,5 +1,5 @@
-\name{KMeans}
-\alias{KMeans}
+\name{CMeans}
+\alias{CMeans}
 
 \title{
 Applies fuzzy c-means classification to an input Raster* object.
