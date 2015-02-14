@@ -27,7 +27,7 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
   blocks <- blockSize(rasterIn)
   rasterOut <- RasterShell(rasterIn, 1)
   
-  rasterTemp <- writeStart(rasterOut, filename = fileOut,
+  rasterOut <- writeStart(rasterOut, filename = fileOut,
    format = "GTiff", overwrite = TRUE
   )
   
@@ -48,10 +48,12 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
       crispMemb <- rep(NA, nrow(tempValue))
       
       for(j in 1:nrow(tempValue)){
-        crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
+        if(all(is.na(tempValue[j, ]))){
+          crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
+        }
       }
       
-      rasterTemp <- writeValues(
+      rasterOut <- writeValues(
        x = rasterOut,
        v = crispMemb,
        start = blocks$row[i]
@@ -80,13 +82,15 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
       crispMemb <- rep(NA, nrow(tempValue))
       
       for(j in 1:nrow(tempValue)){
-        crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
-        if(tempValue[j, crispMemb[j]] < opt){
-          crispMemb[j] <- unDet
+        if(all(is.na(tempValue[j, ]))){
+          crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
+          if(tempValue[j, crispMemb[j]] < opt){
+            crispMemb[j] <- unDet
+          }
         }
       }
       
-      rasterTemp <- writeValues(
+      rasterOut <- writeValues(
        x = rasterOut,
        v = crispMemb,
        start = blocks$row[i]

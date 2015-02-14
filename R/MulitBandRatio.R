@@ -28,8 +28,8 @@ MulitBandRatio <- function(rasterIn, bands,
   }
   
   blocks <- blockSize(rasterIn)
-  rasterTemp <- RasterShell(rasterIn, length(bands))
-  rasterTemp <- writeStart(rasterTemp, filename = fileOut, format = "GTiff",
+  rasterOut <- RasterShell(rasterIn, length(bands))
+  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
   if(!silent) cat("Calculating band ratios.\n")
@@ -48,15 +48,15 @@ MulitBandRatio <- function(rasterIn, bands,
       temp <- cbind(temp, tempValues[, bands[[j]][1]] / tempValues[, bands[[j]][2]])
     }
     
-    rasterTemp <- writeValues(
-     x = rasterTemp,
+    rasterOut <- writeValues(
+     x = rasterOut,
      v = temp,
      start = blocks$row[i]
     )
     
   }
     
-  rasterTemp <- writeStop(rasterTemp)
+  rasterOut <- writeStop(rasterOut)
 
-  return(rasterTemp)
+  return(rasterOut)
 }

@@ -10,7 +10,7 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun,
 # analysis. Geological Society of America Bulletin, 82, 1079-1084
 #
 #Args:
-#  rasterIn: The raster file to use in calculation, passed through RasterLoad,
+#  rasterIn: The raster file to use in calculation, passed through RasterLoad
 #   though only the first layer is taken at the present time.
 #  kernelSize: The size of kernel to use
 #  sumFun: A function used to summarise the kernel e.g. min, of max.
@@ -52,7 +52,7 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun,
     } else stop("Invalid input")
   }
   
-  ret <- focal(
+  rasterOut <- focal(
    x = rasterIn,
    w = mUse,
    fun = function(x){
@@ -65,5 +65,5 @@ FocalSummary <- function(rasterIn, kernelSize, sumFun,
    overwrite = TRUE
   )
   
-  return(ret)
+  return(rasterOut)
 }

@@ -68,7 +68,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
   blocks <- blockSize(rasterIn)
-  rasterTemp <- RasterShell(rasterIn, 1)
+  rasterOut <- RasterShell(rasterIn, 1)
   
   if(is.matrix(init)){
     if(ncol(init) == ncol(centres) & nrow(init) == nrow(centres)){
@@ -120,7 +120,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     tempCentres <- centres * 0
     classCount <- rep(0, ncol(centres))
     
-    rasterTemp <- writeStart(rasterTemp, filename = fileOut,
+    rasterOut <- writeStart(rasterOut, filename = fileOut,
      format = "GTiff", overwrite = TRUE
     )
     
@@ -143,8 +143,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         #tempClass[k] <- which(temp == min(temp))[[1]]
       }
       
-      rasterTemp <- writeValues(
-       x = rasterTemp,
+      rasterOut <- writeValues(
+       x = rasterOut,
        v = tempClass,
        start = blocks$row[j]
       )
@@ -159,7 +159,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
       
     }
     
-    rasterTemp <- writeStop(rasterTemp)
+    rasterOut <- writeStop(rasterOut)
     newCentres <- t(t(tempCentres) / classCount)
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
@@ -169,7 +169,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
-    if(diffSince < breakCon) {
+    if(diffSince <= breakCon) {
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }
@@ -193,7 +193,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
       }
     }
     
-    if(interPlot) plot(rasterTemp, col = rainbow(nCentres))
+    if(interPlot) plot(rasterOut, col = rainbow(nCentres))
     
   }
   
@@ -207,5 +207,5 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   
 #--End of function------------------------------------------------------------
   
-  return(list("Raster" = rasterTemp, "Centres" = centres / weight))
+  return(list("Raster" = rasterOut, "Centres" = centres / weight))
 }

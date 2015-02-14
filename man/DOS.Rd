@@ -12,11 +12,12 @@ Probably better than nothing for further calculations however.
 }
 
 \usage{
-DOS(rasterIn, fileName = tempfile(pattern = "REORS"), silent = TRUE)
+DOS(rasterIn, recalc = FALSE, fileName = tempfile(pattern = "REORS"), silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{the raster to correct, passed through RasterLoad}
+  \item{recalc}{should the minimum values be recalculated before running? Results may be inaccurate if not used, but takes extra time.}
   \item{fileOut}{the name of the file to write out, defaults to a temporary file.}
   \item{silent}{should the function work without progress reports?}
 }

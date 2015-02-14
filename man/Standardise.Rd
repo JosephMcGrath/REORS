@@ -11,13 +11,14 @@ Useful to compare images with different maximum and minimum values. In many case
 }
 
 \usage{
-Standardise(rasterIn, minMax = c(0, 1), intLock = FALSE, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
+Standardise(rasterIn, minMax = c(0, 1), intLock = FALSE, recalc = TRUE, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{The raster file to be normalised.}
   \item{minMax}{The minimum/maximum values to stretch to as a vector.}
   \item{intLock}{Boolean; should it round to the nearest whole number?}
+  \item{recalc}{should the minimum values be recalculated before running? Results may be inaccurate if not used, but takes extra time.}
   \item{fileOut}{The location to save the result, defaults to a temporary file.}
   \item{silent}{Should information about progress be returned?}
 }

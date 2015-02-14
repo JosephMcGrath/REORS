@@ -1,15 +1,17 @@
-DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
- silent = TRUE){
+DOS <- function(rasterIn, recalc = FALSE,
+ fileOut = tempfile(pattern = "REORS"), silent = TRUE){
 #Applies simple dark object subtraction to an image.
 #No benefit for the purpose of visualisation in most cases,
 # as it's often applied when rendering.
 #Probably better than nothing for further calculations however.
 #Works by subtracting minimum values from each band.
 #
-#Requires: RasterLoad
+#Requires: RasterLoad, RasterShell
 #
 #Args:
 #  rasterIn: the raster to correct, passed through RasterLoad.
+#  recalc: should the minimum values be recalculated before running? Results
+#   may be inaccurate if not used, but takes extra time.
 #  fileOut: the name of the file to write out, defaults to a temporary file.
 #  silent: should the function work without progress reports?
 #Returns:
@@ -20,8 +22,14 @@ DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
   
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
+  if(recalc){
+    if(!silent) cat("Calculating minimum and maximum values of input.\n")
+    rasterIn <- setMinMax(rasterIn)
+  }
+  
   blocks <- blockSize(rasterIn)
-  rasterOut <- brick(rasterIn, values = FALSE)
+  rasterOut <- RasterShell(rasterIn)
+  
   rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   minV <- minValue(rasterIn)
@@ -38,11 +46,9 @@ DOS <- function(rasterIn, fileOut = tempfile(pattern = "REORS"),
      nrow = blocks$nrow[i]
     )
     
-    tempValues <- t(t(tempValues) - minV)
-    
     rasterOut <- writeValues(
      x = rasterOut,
-     v = tempValues,
+     v = t(t(tempValues) - minV),
      start = blocks$row[i]
     )
     

@@ -24,6 +24,7 @@ RasterLoad <- function(dataIn, retForm = "list",
   retForm <- tolower(retForm)
   
 #--Convert inputs into a list-------------------------------------------------
+#Defined as a function to unpack nested lists
   RasterLoadRec <- function(x){
     if(!is.list(x)) x <- list(x)
     ret <- list()

@@ -37,7 +37,7 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
    opt = "slope"
   )
   
-  ret <- stack(
+  rasterOut <- stack(
     hillShade(
      slope = slp, aspect = asp, normalize = TRUE,
      angle = angles[1],
@@ -56,7 +56,7 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
   )
   if(!is.null(fileOut)) {
     brick(
-      ret,
+      rasterOut,
       filename = fileOut,
       format = "GTiff",
       dataType = "INT1U",
@@ -64,7 +64,7 @@ Multishade <- function(rasterIn, fileOut = NULL, angles = c(15, 20, 15),
     )
   }
   
-  if(autoPlot) plotRGB(ret, stretch = "lin")
+  if(autoPlot) plotRGB(rasterOut, stretch = "lin")
   
-  return(ret)
+  return(rasterOut)
 }

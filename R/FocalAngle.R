@@ -40,7 +40,7 @@ FocalAngle <- function(rasterIn, kernelSize,
   
 #--Calculate values-----------------------------------------------------------
   
-  ret <- focal(
+  rasterOut <- focal(
    x = rasterIn,
    w = mUse,
    fun = function(x){
@@ -53,5 +53,5 @@ FocalAngle <- function(rasterIn, kernelSize,
    overwrite = TRUE
   )
   
-  return(ret)
+  return(rasterOut)
 }

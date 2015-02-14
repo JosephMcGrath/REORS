@@ -14,8 +14,8 @@ CentDist <- function(centres1, centres2){
   
   library("raster")
   
-  if(!all(dim(centres1) == dim(centres2))){
-    stop("Centres must have the same dimensions.\n")
+  if(any(dim(centres1) != dim(centres2))){
+    stop("Centre matrices must have the same dimensions.\n")
   }
   
   ret <- sum(abs((centres2 - centres1) / centres2) /

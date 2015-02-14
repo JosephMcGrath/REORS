@@ -71,43 +71,37 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
  #largest "confirmed" classes.
 
 #Outputs which true class is highest for each classified
-    large <- c()
-    for (i in 1:dim(temp)[1]){
-      large <- append(large,
-       max((max(temp[i,])==temp[i,])* 1:dim(temp)[2]))
-    #Use of max is to deal with occasions where several are tied
-    #If this is changed needs to be mirrored below
+    large <- rep(NA, nrow(temp))
+    for (i in 1:nrow(temp)){
+      #Simplest to only take one item when tied - taking the first one.
+      #This is mirrored below, changes need to be copied down.
+      large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
     }
   
 #Make a copy of the confusion matrix to work with
    sMat <- temp
   
-  #While all aren't unique
-   #Set the lowest "max" value to -1 to remove it from consideration.
-   #(-1 as that is lower than values may start out)
-    for (donotuse in 1:length(sMat)){ #not a while to give it a definite end
+  #Remove smallest items from temp matrix until best pairs remain
+    for (donotuse in 1:length(sMat)){
      if (length(unique(large)) == length(large)) break
-    #There's probably a better way to check for uniqueness
     
-#Set an appropriate value to 0
       for (i in 1:length(large)){
-        if (sum(large==i) > 1){
-          sMat[sMat == min(
-           sMat[(1:dim(temp)[1])[large==i],i])]  <- 0
+        #If more than one class is assigned to a specific reference,
+         #delete the smaller one
+        if (sum(large == i) > 1){
+#          sMat[sMat == min(sMat[(1:dim(temp)[1])[large==i],i])]  <- 0
+          sMat[sMat == min(sMat[which(large == i), i])]  <- -1
         }
       }
     
-#Then recalculate the list of largest class
-      large <- c()
-      for (i in 1:dim(sMat)[1]){
-        large <- append(large,
-         max((max(sMat[i,])== sMat[i,])* 1:dim(sMat)[2]))
+      large <- rep(NA, nrow(temp))
+      for (i in 1:nrow(temp)){
+        large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
       }
-      if (length(unique(large)) == length(large)) break
     }
   
 #Move the relevant items
-    if (max(summary(as.factor(large))) == 1){
+    if (length(unique(large)) == length(large)){
       for (i in 1:dim(temp)[1]){
         sMat[i,] <- temp[(1:length(large))*(large==i),]
       }
@@ -126,24 +120,20 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   }
 	
 #--Calculate accuracy measures------------------------------------------------
+  tObs <- sum(sMat)
   
 #Overall Accuracy
-  tObs <- sum(sMat)
-  oAcc <- 0
-  for (i in 1:dim(sMat)[1]){
-    oAcc <- oAcc + sMat[i,i]
-  }
-  oAcc <- oAcc / tObs
+  oAcc <- sum(diag(sMat)) / tObs
   
 #Producers accuracy
-  pAcc <- c()
-  for (i in 1:dim(sMat)[1]){
+  pAcc <- rep(NA, nrow(sMat))
+  for (i in 1:nrow(sMat)){
     pAcc[i] <- sMat[i,i] / sum(sMat[,i])
   }
   
 #Users accuracy
-  uAcc <- c()
-  for (i in 1:dim(sMat)[1]){
+  uAcc <- rep(NA, nrow(sMat))
+  for (i in 1:nrow(sMat)){
     uAcc[i] <- sMat[i,i] / sum(sMat[i,])
   }
   
@@ -151,36 +141,32 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   tPos <- 0
   mTot <- 0
   
-  for (i in 1:dim(sMat)[1]){
+  for (i in 1:nrow(sMat)){
     tPos <- tPos + sMat[i,i]
-  }
-  for (i in 1:dim(sMat)[1]){
     mTot <- mTot + sum(sMat[i,]) * sum(sMat[,i])
   }
-  
-  kppa <- (tObs * (tPos) - (mTot)) / ( tObs ^ 2 - (mTot))
+  kppa <- (tObs * tPos - mTot) / (tObs ^ 2 - mTot)
 
 #Quantity disagreement
   #Per class
-  qDiss <- c()
-  for(i in 1:ncol(sMat)){
-    qDiss <- append(qDiss, sum(sMat[, i]) - sum(sMat[i, ]))
+  qDiss <- rep(NA, nrow(sMat))
+  for(i in 1:nrow(sMat)){
+    qDiss[i] <- sum(sMat[, i]) - sum(sMat[i, ])
   }
-  #qg = sum(sum(sMat
   #Overall
   qDissSum <- sum(qDiss) / 2
 
 #Allocation disagreement
   #Per class
-  aDiss <- c()
-  for(i in 1:ncol(sMat)){
-    aDiss <- append(aDiss, 2 * min(sum(sMat[, i]) - sMat[i, i],
-     sum(sMat[i, ]) - sMat[i, i]))
+  qDiss <- rep(NA, nrow(sMat))
+  for(i in 1:nrow(sMat)){
+    aDiss[i] <- 2 * min(
+     sum(sMat[, i]) - sMat[i, i],
+     sum(sMat[i, ]) - sMat[i, i]
+    )
   }
-  
   #Overall
   aDissSum <- sum(aDiss) / 2
-  
 
 #Overall disagreement
   tDiss <- qDissSum + aDissSum

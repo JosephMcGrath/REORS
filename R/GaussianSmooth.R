@@ -47,7 +47,7 @@ GaussianSmooth <- function(rasterIn, kernelSize,
   ret <- ret / sum(ret)
   ret <- ret * WMat(kernelSize, type = type)
   
-  ret <- focal(
+  rasterOut <- focal(
    x = rasterIn,
    w = ret,
    fun = function(x){
@@ -60,5 +60,5 @@ GaussianSmooth <- function(rasterIn, kernelSize,
    overwrite = TRUE
   )
   
-  return(ret)
+  return(rasterOut)
 }

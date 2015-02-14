@@ -22,11 +22,14 @@ BandRatio <- function(rasterIn, band1, band2,
   if(!is.numeric(band1) | !is.numeric(band2)){
     stop("Bands must be specified as numeric values.\n")
   }
+  if(nlayers(rasterIn) < max(band1, band2)){
+    stop("Not enough bands for specified ratio.\n")
+  }
   
-  rasterTemp <- RasterShell(rasterIn, 1)
+  rasterOut <- RasterShell(rasterIn, 1)
   blocks <- blockSize(rasterIn)
   
-  rasterTemp <- writeStart(rasterTemp, filename = fileOut, format = "GTiff",
+  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
   if(!silent) cat("Calculating band ratio:\n")
@@ -40,17 +43,15 @@ BandRatio <- function(rasterIn, band1, band2,
      nrow = blocks$nrow[i]
     )
     
-    tempValues <- tempValues[, band1] / tempValues[, band2]
-    
-    rasterTemp <- writeValues(
-     x = rasterTemp,
-     v = tempValues,
+    rasterOut <- writeValues(
+     x = rasterOut,
+     v = tempValues[, band1] / tempValues[, band2],
      start = blocks$row[i]
     )
     
   }
     
-  rasterTemp <- writeStop(rasterTemp)
+  rasterOut <- writeStop(rasterOut)
 
-  return(rasterTemp)
+  return(rasterOut)
 }

@@ -19,8 +19,8 @@ NDVI <- function(rasterIn, NIR, VIS, fileOut = tempfile(pattern = "REORS"),
  #rasterIn <- RasterLoad(rasterIn, retForm = "stack")
 
   blocks <- blockSize(rasterIn)
-  rasterTemp <- RasterShell(rasterIn, 1)
-  rasterTemp <- writeStart(rasterTemp, filename = fileOut, format = "GTiff",
+  rasterOut <- RasterShell(rasterIn, 1)
+  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE
   )
   
@@ -38,15 +38,15 @@ NDVI <- function(rasterIn, NIR, VIS, fileOut = tempfile(pattern = "REORS"),
     tempValues <- (tempValues[, NIR] - tempValues[, VIS]) /
     (tempValues[, NIR] + tempValues[, VIS])
     
-    rasterTemp <- writeValues(
-     x = rasterTemp,
+    rasterOut <- writeValues(
+     x = rasterOut,
      v = tempValues,
      start = blocks$row[i]
     )
     
   }
     
-  rasterTemp <- writeStop(rasterTemp)
+  rasterOut <- writeStop(rasterOut)
 
-  return(rasterTemp)
+  return(rasterOut)
 }

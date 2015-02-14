@@ -1,5 +1,5 @@
 Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
- fileOut = tempfile(pattern = "REORS"), silent = TRUE){
+ recalc = TRUE, fileOut = tempfile(pattern = "REORS"), silent = TRUE){
 #Takes all values in a given raster and scales them to be between a set
 # minimum and maximum.
 #
@@ -7,6 +7,8 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
 #  rasterIn: The raster file to be normalised.
 #  minMax: The minimum/maximum values to stretch to as a vector.
 #  intLock: Boolean; should it round to the nearest whole number?
+#  recalc: should the minimum values be recalculated before running? Results
+#   may be inaccurate if not used, but takes extra time.
 #  fileOut: The location to save the result, defaults to a temporary file.
 #  silent: Should information about progress be returned?
 #
@@ -17,12 +19,13 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
   library("REORS")
 
 #--Set up and detect data type to use-----------------------------------------
-  if(!silent) cat("Calculating minimum and maximum values of input.\n")
   
   rasterIn <- RasterLoad(rasterIn, "stack")  
-  #Recalculating values as sometimes they're set wrong, sometimes a waste of
-   #time, but guarantees right answer.
-  rasterIn <- setMinMax(rasterIn)
+  
+  if(recalc){
+    if(!silent) cat("Calculating minimum and maximum values of input.\n")
+    rasterIn <- setMinMax(rasterIn)
+  }
   
   mv <- list(minValue(rasterIn), maxValue(rasterIn),
    maxValue(rasterIn) - minValue(rasterIn)

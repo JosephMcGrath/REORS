@@ -19,7 +19,7 @@ LandsatProcessing <- function(filePath, LsType = NA,
 #  LsType: The number of the landsat sattelite being processed, main
 #   importance is fixing the band order of LS8 due to autosorting issues.
 #  crsUse: Optional input for coordinate reference system to project the
-#   output into, if omitted, no projection is used.
+#   output into, if omitted, projection is not changed..
 #  silent: should the function work without progress reports?
 #
 #Returns:
@@ -31,7 +31,7 @@ LandsatProcessing <- function(filePath, LsType = NA,
   #Assigns a number to each output, to make it clearer what came from what
   outputNo <- 1
 
-#--Load all of the raster files into memory-----------------------------------
+#--Pull in all of the .tif files----------------------------------------------
   toUse <- list.files(
    path = sprintf("./%s", filePath),
    pattern = "TIF",
@@ -102,7 +102,7 @@ LandsatProcessing <- function(filePath, LsType = NA,
     rastersIn <- projectRaster(
      from = rastersIn,
      crs = crsUse,
-     filename = sprintf("%s %s projected", filePath, outputNo),
+     filename = sprintf("%s %s reprojected", filePath, outputNo),
      format = "GTiff",
      overwrite = TRUE,
      datatype = sprintf("INT%sU", ceiling(round(log(max(maxValue(rastersIn))

@@ -9,6 +9,10 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #
 #Requires: RasterLoad, RasterShell, Standardise
 #
+#To do:
+# Add a calculation of the objective function as a measure of quality?
+# Split main iteration and final write? Could save more time.
+#
 #Args:
 #  rasterIn: Name of the image file to classify. Maybe run it through a
 #   cleaning function first?
@@ -55,11 +59,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   colnames(centres) <- sprintf("Clust %s", 1:ncol(centres))
   rownames(centres) <- names(rasterIn)
   
-  if(silent){
-    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1))
-  } else {
-    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = FALSE)
-  }
+  if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = silent)
   
   if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
@@ -178,7 +178,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
-    if(diffSince < breakCon) {
+    if(diffSince <= breakCon) {
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }
