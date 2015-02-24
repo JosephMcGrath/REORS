@@ -1,7 +1,9 @@
 CentInit <- function(rasterIn, nCentres, meth = "rand", silent = TRUE){
 #Several methods of generating initial centres for a centroid-based clustering
 # algorithm. A few are also implemented as part of the algorithms, but the
-# more time-intenisve ones are isolated here.
+# more time-intensive ones are isolated here.
+#
+#Requires: RasterLoad
 #
 #Args:
 #  rasterIn: The Raster* object to use, passed through RasterLoad.
@@ -11,7 +13,7 @@ CentInit <- function(rasterIn, nCentres, meth = "rand", silent = TRUE){
 #    values per layer.
 #   -"lin"  : Distributed linearly between the minimum and maximum values
 #    per layer.
-#   -"prin" : (NYI) Linear distribution along the first prinicpal component.
+#   -"prin" : (NYI) Linear distribution along the first principal component.
 #   -"dist" : Distributed randomly, but with probability based on data in.
 #  silent: Should the function work without progress reports?
 #
@@ -55,6 +57,8 @@ CentInit <- function(rasterIn, nCentres, meth = "rand", silent = TRUE){
   }
   
 #--Linear principal components------------------------------------------------
+  #Distributing initial centroids along the principal component may give
+  # better representation of data rather than between min/max values.
   if(meth == "prin"){
     stop("Not yet implemented.\n")                                            #<-- May be simpler to do something with covariance?
     

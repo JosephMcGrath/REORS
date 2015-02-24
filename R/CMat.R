@@ -1,5 +1,6 @@
-CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
-#Function to calculate the confusion matrix between two raster layers.
+CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
+ stand = TRUE){
+#Calculates the confusion matrix between two classified raster layers.
 #Calculates a wide variety of accuracy measures.
 #Added functionality with unsupervised classifications to link up best
 # combinations of classes.
@@ -7,6 +8,8 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 #To do notes:
 #  Get all measures working properly
 #  Add support for cases where validation isn't available for each cell.
+#  Option to take an equal sample from each class to avoid biases when
+#   reorganising.
 #
 #Source:
 #  Congalton R.G. 1991 
@@ -19,7 +22,7 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 #
 #Args:
 #  classed: RasterLayer, or name of raster containing hard clustered values.
-#  refernce: RasterLayer or name of raster containing reference values.
+#  reference: RasterLayer or name of raster containing reference values.
 #  retT: One of several methods of data to return:
 #   "brief" will return kappa and accuracy values only.
 #   "order" will return the sequence the classes were reorganised into.
@@ -51,18 +54,22 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   library("raster")
 
   if(class(classed) == "character") classed <- raster(classed)
-  if(class(refernce) == "character") refernce <- raster(refernce)
+  if(class(reference) == "character") reference <- raster(reference)
   
-  if(class(classed)[1] != "RasterLayer") stop("Classified layer not loaded")
-  if(class(refernce)[1] != "RasterLayer") stop("Reference layer not loaded")
-  
-  original <- crosstab(classed, refernce)
-  
-  temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))
-  for(i in 1:sqrt(nrow(original))){
-    temp[seq(1,sqrt(nrow(original))), i] <- original[
-     seq(i * sqrt(nrow(original)) - 4, i * sqrt(nrow(original))), 3]
+  if(class(classed)[1] != "RasterLayer"){
+    stop("Classified layer must be a RasterLayer.\n")
   }
+  if(class(reference)[1] != "RasterLayer"){
+   stop("Reference layer must be a RasterLayer.\n")
+  }
+  
+  original <- crosstab(classed, reference)
+  
+  temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))  #<-- This bit is broken.
+  for(i in 1:sqrt(nrow(original))){
+    temp[, i] <- original[seq((i - 1) * nrow(temp) + 1, i * nrow(temp)), 3]
+  }
+  #Drop the rows and columns relating to NA values.
   temp <- temp[seq(1, nrow(temp) - 1), seq(1, ncol(temp) - 1)]
   
 #--Re-organise classes to best fit--------------------------------------------
@@ -82,7 +89,7 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
    sMat <- temp
   
   #Remove smallest items from temp matrix until best pairs remain
-    for (donotuse in 1:length(sMat)){
+    for (doNotUse in 1:length(sMat)){
      if (length(unique(large)) == length(large)) break
     
       for (i in 1:length(large)){
@@ -106,7 +113,7 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
         sMat[i,] <- temp[(1:length(large))*(large==i),]
       }
     } else {
-      warning("Error - this may be due to empty classes")
+      stop("Error - this may be due to empty classes")
       sMat <- temp
     }
   } else {
@@ -158,7 +165,7 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 
 #Allocation disagreement
   #Per class
-  qDiss <- rep(NA, nrow(sMat))
+  aDiss <- rep(NA, nrow(sMat))
   for(i in 1:nrow(sMat)){
     aDiss[i] <- 2 * min(
      sum(sMat[, i]) - sMat[i, i],
@@ -187,11 +194,11 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
      usersAccuracy = uAcc,
      overallAccuracy = as.vector(oAcc),
 #Need to add overall u&p accuracies and fix disagreement measures
-     #quantityDisagreement = qDiss,
-     #allocationDisagreement = aDiss,
-     #totalQuantityDisagreement = qDissSum,
-     #totalAllocationDisagreement = aDissSum,
-     #totalDisagreement = tDiss,
+     quantityDisagreement = qDiss,
+     allocationDisagreement = aDiss,
+     totalQuantityDisagreement = qDissSum,
+     totalAllocationDisagreement = aDissSum,
+     totalDisagreement = tDiss,
      reorganising = large,
      unadjusted = temp
     )

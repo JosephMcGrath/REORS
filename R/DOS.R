@@ -1,19 +1,16 @@
 DOS <- function(rasterIn, recalc = FALSE,
- fileOut = tempfile(pattern = "REORS"), silent = TRUE){
-#Applies simple dark object subtraction to an image.
-#No benefit for the purpose of visualisation in most cases,
-# as it's often applied when rendering.
-#Probably better than nothing for further calculations however.
-#Works by subtracting minimum values from each band.
+ fileOut = tempfile(pattern = "REORS - "), silent = TRUE){
+#Simple dark object subtraction for atmospheric correction of spectral images.
+#Intended to improve calculations rather than visualisation.
 #
 #Requires: RasterLoad, RasterShell
 #
 #Args:
-#  rasterIn: the raster to correct, passed through RasterLoad.
-#  recalc: should the minimum values be recalculated before running? Results
+#  rasterIn: The raster to correct, passed through RasterLoad.
+#  recalc: Should the minimum values be recalculated before running? Results
 #   may be inaccurate if not used, but takes extra time.
-#  fileOut: the name of the file to write out, defaults to a temporary file.
-#  silent: should the function work without progress reports?
+#  fileOut: The name of the file to write out, defaults to a temporary file.
+#  silent: Should the function work without progress reports?
 #Returns:
 #  A rasterLayer of the image after subtraction.
   
@@ -34,7 +31,7 @@ DOS <- function(rasterIn, recalc = FALSE,
    overwrite = TRUE)
   minV <- minValue(rasterIn)
   
-  if(!silent) cat("Applying simple dark object subtraction:\n")
+  if(!silent) cat("Applying simple dark object subtraction:\nWriting to %s\n")
   
   for(i in 1:blocks$n){
     if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",

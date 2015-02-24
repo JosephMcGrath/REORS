@@ -3,6 +3,11 @@ CentDist <- function(centres1, centres2){
 #Currently only uses cluster centre proximity index (CCPI).
 # more planned in the future.
 #
+#Source for cluster centre proximity index.
+#  Capitaine H.L., Frelicot C. (2011)
+#  A fast fuzzy c-means algorithm for color image segmentation
+#  Proceedings of European Society for Fuzzy Logic and Technology (EUSFLAT'2011) 1074-1081.
+#
 #Args:
 #  centres1: The first set of cluster centres, with columns for centres and
 #   rows for input layers.

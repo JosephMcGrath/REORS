@@ -1,6 +1,6 @@
 BandRatio <- function(rasterIn, band1, band2,
- fileOut = tempfile(pattern = "REORS"), silent = TRUE){
-#Calculates band ratios of a multi-layer raster. 
+ fileOut = tempfile(pattern = "REORS - "), silent = TRUE){
+#Calculates a band ratio from a multi-layer raster. 
 #
 #Requires: RasterLoad, RasterShell
 #
@@ -22,8 +22,8 @@ BandRatio <- function(rasterIn, band1, band2,
   if(!is.numeric(band1) | !is.numeric(band2)){
     stop("Bands must be specified as numeric values.\n")
   }
-  if(nlayers(rasterIn) < max(band1, band2)){
-    stop("Not enough bands for specified ratio.\n")
+  if(nlayers(rasterIn) < max(band1, band2) | min(band1, band2) <= 0){
+    stop("Band(s) specified do not exist.\n")
   }
   
   rasterOut <- RasterShell(rasterIn, 1)
@@ -32,7 +32,7 @@ BandRatio <- function(rasterIn, band1, band2,
   rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
-  if(!silent) cat("Calculating band ratio:\n")
+  if(!silent) cat("Calculating band ratio:\nWriting to %s\n")
   for(i in 1:blocks$n){
     if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
      i, blocks$n, round(i / blocks$n * 100)))

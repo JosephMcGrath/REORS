@@ -1,34 +1,32 @@
 KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
- fileOut = tempfile(pattern = "REORS"), breakCon = 0.01, standIn = FALSE,
- distM = "euc", randRe = FALSE, silent = TRUE, interPlot = FALSE){
-#Standard k-means clustering algorithm.
+ breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE,
+ fileOut = tempfile(pattern = "REORS - "), silent = TRUE, interPlot = FALSE){
+#Uses the fuzzy c-means algorithm to attempt to classify the input image,
+# with some additional customisation available. Iteratively re-assigns pixels
+# to classes in an attempt to optimise the divisions between pixels.
+# The algorithm is heavily influenced by the initial cluster centres.
+#
 #Weighing is currently handled as values are pulled in, probably less
 # efficient overall, but is simpler this way for now. Might also add some
 # flexibility on weighting, though that is somewhat tenuous.
 #
 #Requires: RasterLoad, RasterShell, Standardise
 #
-#ToDo:
-#Could probably be sped up by replacing apply with matrix algebra. Pretty big
-# overhaul though. Not quite sure it's possible without the for loop.
-#Add option for pre-defined centres?
-#
 #Args:
-#  rasterIn: Name of the image file to classify. Maybe run it through a
-#   cleaning function first?
-#  nCentres: How many clusters should the data be split into?
+#  rasterIn: Raster objects to be classified. Ran through RasterLoad.
+#  nCentres: Number of clusters to split the data into. Ignored if "init" is
+#   uses pre-set centres.
 #  its: Maximum number of iterations to run the algorithm for.
 #  weight: The weights to apply to each layer (higher weight means an greater
 #   importance to clustering, can be integers or decimals. Must be a single
-#   values or have length equal to the number of input layers.
+#   value or have length equal to the number of input layers.
 #  init: How should the clusters be initialised? Current methods are:
 #    - "lin": Linearly, from the minimum value in each layer, to the maximum.
 #    - "rand": Randomly within the minimum/maximum available values.
 #    - Matrix of centres, one column for each centre, one row for each layer.
-#  fileOut: Name to write file to, defaults to temporary file.
 #  breakCon: How little variation between iterations will break the loop early
 #   should be possible to linearly multiply out for larger ranges.
-#   calculated as an average per variable, assuming variables are between 0-1.
+#   calculated as an average per variable, Default assumes inputs between 0-1.
 #  standIn: Should the data be locked between 0 and 1 before classification?
 #  distM: Distance measure to calculate memberships:
 #    - "euc": euclidean distance
@@ -37,6 +35,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
 #  randRe: If a class is empty at the end of an iteration, should it be
 #   re-assigned at random? Can disrupt existing clusters, but makes it more
 #   likely that all clusters are populated. Higher "its" value recommended.
+#  fileOut: Name to write file to, defaults to temporary file.
 #  silent: Should details of the classification be output as it works?
 #  interPlot: Should the classification be plotted each iteration?
 #
@@ -59,11 +58,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   colnames(centres) <- sprintf("Clust %s", 1:ncol(centres))
   rownames(centres) <- names(rasterIn)
   
-  if(silent){
-    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1))
-  } else {
-    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = FALSE)
-  }
+  if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = silent)
   
   if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
@@ -92,8 +87,11 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         )
       }
     }
- } else stop("Invalid initialisation method.\n")
+  } else stop("Invalid initialisation method.\n")
   
+  if(!silent){
+    cat("Beginning crisp k-means clustering:\nWriting to %s\n")
+  }
   
   if(!silent){
     cat("Initial centres (pre-weighting):\n")
