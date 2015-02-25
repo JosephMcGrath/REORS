@@ -16,7 +16,10 @@ CentInit(rasterIn, nCentres, meth = "rand", silent = TRUE)
 \arguments{
   \item{rasterIn}{The Raster* object to use, passed through RasterLoad.}
   \item{nCentres}{How many clusters should the data be split into?}
-  \item{meth}{The method used to initialise centres, one of: "rand" : A simple random distribution between the minimum and maximum values per layer. "lin"  : Distributed linearly between the minimum and maximum values per layer. "dist" : Distributed randomly, but with probability based on data in.}
+  \item{meth}{The method used to initialise centres, one of:\cr
+   "rand" : A simple random distribution between the minimum and maximum values per layer.\cr
+   "lin"  : Distributed linearly between the minimum and maximum values per layer.\cr
+   "dist" : Distributed randomly, but with probability based on data in.}
   \item{silent}{Should the function work without progress reports?}
 }
 

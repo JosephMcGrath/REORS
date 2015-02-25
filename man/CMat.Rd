@@ -17,7 +17,10 @@ CMat(classed, reference, retT = "", reOrg = FALSE, stand = TRUE)
 \arguments{
   \item{classed}{RasterLayer, or name of raster containing hard clustered values.}
   \item{reference}{RasterLayer or name of raster containing reference values.}
-  \item{retT}{One of several methods of data to return: "brief" will return kappa and accuracy values only. "order" will return the sequence the classes were reorganised into. All other values will return the full set of data.}
+  \item{retT}{One of several methods of data to return:\cr
+   "brief" will return kappa and accuracy values only.\cr
+   "order" will return the sequence the classes were reorganised into.\cr
+   All other values will return the full set of data.}
   \item{reOrg}{If the values should be reorganised based on how well the classes fit the reference values. Mainly useful for unsupervised classifications  where classes are assigned in a random/meaningless order.}
   \item{stand}{If the confusion matrix should be standardised (locked between 0 and 1). Makes it more comparable between classifications with different numbers of pixels.}
 }
@@ -37,6 +40,7 @@ A list of values that describes the accuracy of the classification, depending on
 Congalton R.G. 1991 
  A review of assessing the accuracy of classifications of remotely sensed
  data. Remote sensing of environment. Volume 37, p35-46.
+
 Pontius R.G. Millones M. 2011
  Death to Kappa: birth of quantity disagreement and allocation disagreement
  for accuracy assessment. International Journal of Remote Sensing.

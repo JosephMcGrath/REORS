@@ -11,17 +11,17 @@ With a line, the change in each band is given as the line goes on.
 }
 
 \usage{
-SpectralProfiler(rasterIn, nProfile = 1, type = "points", plotL = 1, stand = FALSE, silent = TRUE, shapeIn = NULL, csvOut = NULL)
+SpectralProfiler(rasterIn, type = "points", nProfile = 1, plotL = NA, stand = FALSE, silent = TRUE, shapeIn = NULL, csvOut = NULL)
 }
 
 \arguments{
   \item{rasterIn}{Raster* object to extract values from.}
+  \item{type}{Type of input to use:\cr
+  "points": Profiles for each point.\cr
+  "lines": Profiles of changing spectral values along a line.\cr
+  "poly" : Profiles of mean values over polygons.\cr
+  "shape": Profiles using a pre-defined shapefile, (not yet implemented).}
   \item{nProfile}{Number of profiles to take (ignored for "lines" & "shape")}
-  \item{type}{What type of input should be used?
-  -points: Profiles for each point.
-  -lines: Profiles of changing spectral values along a line.
-  -poly : Profiles of mean values over polygons.
-  -shape: Profiles using a pre-defined shapefile, not yet implemented.}
   \item{plotL}{Which layer should be used to plot when selecting areas?}
   \item{stand}{Should the data be standardised before plotting?}
   \item{silent}{Should progress be printed to the console?}

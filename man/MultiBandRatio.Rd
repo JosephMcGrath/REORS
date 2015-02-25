@@ -6,7 +6,7 @@ Calculates several band ratios simultaneously.
 }
 
 \description{
-Calculates many band ratios in one pass, useful for cases where there are a large number of ratios per image.
+Calculates multiple band ratios in one pass, useful for cases where there are a large number of ratios per image.
 }
 
 \usage{

@@ -15,8 +15,12 @@ Defuzzify(rasterIn, meth = "max", opt = NULL, fileOut = tempfile(pattern = "REOR
 
 \arguments{
   \item{rasterIn}{The raster* object containing fuzzy membership values, should have one layer for each class. May also be the list of membership values and centroids from the CMeans function.}
-  \item{meth}{The method used for defuzzification, current options are: -"max": The class with the maximum membership. -"th" : The class with the maximum membership, so long as it's above a threshold (set with opt). Otherwise put into "undetermined" class.}
-  \item{opt}{Options for the method chosen, for each meth argument: -"max": No options, argument is ignored. -"th" : The minimum membership value allowed.}
+  \item{meth}{The method used for defuzzification, current options are:\cr
+   "max": The class with the maximum membership.\cr
+   "th" : The class with the maximum membership, so long as it's above a threshold (set with opt). Otherwise put into "undetermined" class.}
+  \item{opt}{Options for the method chosen, for each meth argument:\cr
+   "max": No options, argument is ignored.\cr
+   "th" : The minimum membership value allowed.}
   \item{fileOut}{the name of the file to write out, defaults to a temporary file.}
   \item{silent}{should the function work without progress reports?}
 }
