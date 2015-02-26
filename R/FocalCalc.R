@@ -12,7 +12,13 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
 # Pike,R.J., Wilson,S.E. (1971). 
 # Elevation-relief ratio, hypsometric integral, and geomorphic area-altitude
 # analysis. Geological Society of America Bulletin, 82, 1079-1084
-
+#
+#Topographic openness source:
+# Yokoyama R., Shirasawa M., Pike R.J. (2002)
+# Visualizing Topography by Openness: A New Application of Image Processing to
+# Digital Elevation Models. Photogrammetric Engineering & Remote Sensing.
+# 68, 257-265
+#
 #Args:
 #  rasterIn: The raster file to use in calculation, passed through RasterLoad
 #  sumFum: The function used to summarise the focal values. Should return a
@@ -26,6 +32,10 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
 #    elevation in the kernel.
 #   -"bmax": The difference between the centre of the kernel and the maximum
 #    elevation in the kernel.
+#   -"topoOpennessP": The positive topographic openness. Assumes the input is
+#    a DEM and that horizontal and vertical units are the same.
+#   -"topoOpennessN": The negative topographic openness. Assumes the input is
+#    a DEM and that horizontal and vertical units are the same.
 #  kernelSize: The size of the kernel to be used. May be either a single
 #   number (for a square matrix), a pair of numbers (for uneven height &
 #   width). Alternatively a pre-set matrix can be given (in which case
@@ -55,21 +65,6 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
   
   if(kernelSize %% 2 != 1){
     stop("Kernel must have odd number of cells per side.\n")
-  }
-  
-#--Predefined functions-------------------------------------------------------
-  if(class(sumFun) == "character"){
-    if(sumFun == "hyps"){
-      sumFun <- function(x) return((mean(x) - min(x)) / (max(x) - min(x)))
-    } else if(sumFun == "range"){
-      sumFun <- function(x) return(max(x) - min(x))
-    } else if(sumFun == "wmean"){
-      sumFun <- function(x) return(sum(x) / sum(kernelUse))
-    } else if(sumFun == "amin"){
-      sumFun <- function(x) return(x[ceiling(length(x) / 2)] - min(x))
-    } else if(sumFun == "bmax"){
-      sumFun <- function(x) return(max(x) - x[ceiling(length(x) / 2)])
-    } else stop("Invalid summary function defined.\n")
   }
   
 #--Set up the weighting matrix-------------------------------------------------
@@ -113,7 +108,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
       }
     }
   }
-  
+    
   if(!silent){
     cat("Kernel used:\n")
     print(kernelUse)
@@ -123,10 +118,76 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
   ngbSize <- c(nrow(kernelUse), ncol(kernelUse))
   kernelUse <- c(kernelUse)
   
+#--Predefined functions-------------------------------------------------------
+  if(sumFun == "topoOpennessN" | sumFun == "topoOpennessP"){
+      kernelDist <- matrix(NA, ngbSize[1], ngbSize[2])
+      cent <- ceiling(ngbSize / 2)
+      for(i in 1:nrow(kernelDist)){
+        for(j in 1:nrow(kernelDist)){
+          kernelDist[i, j] <- sqrt(((i - cent[1]) * res(rasterIn)[1]) ^ 2 +
+           ((j - cent[2]) * res(rasterIn)[2]) ^ 2)
+        }
+      }
+      kernelDist[cent[1], cent[2]] <- NA
+      
+      mid <- ceiling(length(kernelDist) / 2)
+      diam <- floor(nrow(kernelDist) / 2)
+      pulls <- list(
+       seq(1, mid, nrow(kernelDist) + 1),
+       seq(mid, nrow(kernelDist), -1 * nrow(kernelDist) + 1),
+       seq(mid, length(kernelDist), nrow(kernelDist) + 1),
+       seq(mid, length(kernelDist) - nrow(kernelDist) + 1, nrow(kernelDist) - 1),
+       seq(ceiling(nrow(kernelDist) / 2), mid, nrow(kernelDist)),
+       seq(mid, length(kernelDist) - diam, nrow(kernelDist)),
+       seq(mid - diam, mid),
+       seq(mid, mid + diam)
+      )
+      
+      kernelDist <- kernelDist[!is.na(kernelUse)]
+      for(i in 1:length(pulls)){
+        pulls[[i]] <- pulls[[i]][!(pulls[[i]] %in% which(is.na(kernelUse)))]
+      }
+    }
+  
+  if(class(sumFun) == "character"){
+    if(sumFun == "hyps"){
+      sumFun <- function(x) return((mean(x) - min(x)) / (max(x) - min(x)))
+    } else if(sumFun == "range"){
+      sumFun <- function(x) return(max(x) - min(x))
+    } else if(sumFun == "wmean"){
+      sumFun <- function(x) return(sum(x) / sum(kernelUse))
+    } else if(sumFun == "amin"){
+      sumFun <- function(x) return(x[ceiling(length(x) / 2)] - min(x))
+    } else if(sumFun == "bmax"){
+      sumFun <- function(x) return(max(x) - x[ceiling(length(x) / 2)])
+    } else if(sumFun == "topoOpennessP"){
+      sumFun <- function(x){
+        x <- atan((x - x[mid]) / kernelDist) / (2 * pi) * 360
+        return(mean(
+         max(x[pulls[[1]]], na.rm = TRUE), max(x[pulls[[2]]], na.rm = TRUE),
+         max(x[pulls[[3]]], na.rm = TRUE), max(x[pulls[[4]]], na.rm = TRUE),
+         max(x[pulls[[5]]], na.rm = TRUE), max(x[pulls[[6]]], na.rm = TRUE),
+         max(x[pulls[[7]]], na.rm = TRUE), max(x[pulls[[8]]], na.rm = TRUE)
+        ))
+      }
+    } else if(sumFun == "topoOpennessN"){
+      sumFun <- function(x){
+        x <- atan((x - x[mid]) / kernelDist) / (2 * pi) * 360
+        return(mean(
+         min(x[pulls[[1]]], na.rm = TRUE), min(x[pulls[[2]]], na.rm = TRUE),
+         min(x[pulls[[3]]], na.rm = TRUE), min(x[pulls[[4]]], na.rm = TRUE),
+         min(x[pulls[[5]]], na.rm = TRUE), min(x[pulls[[6]]], na.rm = TRUE),
+         min(x[pulls[[7]]], na.rm = TRUE), min(x[pulls[[8]]], na.rm = TRUE)
+        ))
+      }
+    } else stop("Invalid summary function defined.\n")
+  }
+  
 #--Apply the filter to the data-----------------------------------------------
   #Using conservatively small blocks to keep things manageable.
   #Results in more read/write cycles.
-  blocks <- blockSize(rasterIn, n = length(kernelUse)) #n = kernel * nlayers?
+  #n = kernel * nlayers? For Raster*'s with many layers.
+  blocks <- blockSize(rasterIn, n = length(kernelUse))
   rasterOut <- RasterShell(rasterIn)
   
   rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
@@ -151,8 +212,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
       writeV <- rep(NA, nrow(tempValues))
       tempValues <- t(t(tempValues) * kernelUse)
       for(j in 1:nrow(tempValues)){ #Using "j" for easy conversion below
-        #if(sum(is.na(tempValues[j, ])) == sum(is.na(kernelUse)) | na.rm){       #Better options exist for excluding is.na values. Check positioning.
-        if(!any(is.na(tempValues[j, !is.na(kernelUse)])) | na.rm){                        #Experimental.
+        if(!any(is.na(tempValues[j, !is.na(kernelUse)])) | na.rm){
           writeV[j] <- sumFun(tempValues[j, ][!is.na(tempValues[j, ])])[[1]]
         }
       }
@@ -165,8 +225,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
       for(k in 1:length(tempValues)){
         tempValues[[k]] <- t(t(tempValues[[k]]) * kernelUse)
         for(j in 1:nrow(tempValues[[k]])){
-          #if(sum(is.na(tempValues[[k]][j, ])) == sum(is.na(kernelUse)) |
-          if(!any(is.na(tempValues[[k]][j, !is.na(kernelUse)])) |        #Experimental
+          if(!any(is.na(tempValues[[k]][j, !is.na(kernelUse)])) |
            na.rm){
             writeV[j, k] <- sumFun(tempValues[[k]][j, ][!is.na(
              tempValues[[k]][j, ])])[[1]]

@@ -22,7 +22,9 @@ FocalCalc(rasterIn, sumFun, kernelSize, kernelShape = "circle", na.rm = FALSE, f
    "range": The difference between the maximum and minimum values in the kernel.\cr
    "wmean": Weighted mean, for when kernel values aren't equal.\cr
    "amin": The difference between the centre of the kernel and the minimum elevation in the kernel.\cr
-   "bmax": The difference between the centre of the kernel and the maximum elevation in the kernel.
+   "bmax": The difference between the centre of the kernel and the maximum elevation in the kernel.\cr
+   "topoOpennessP": The positive topographic openness. Assumes the input is a DEM and that horizontal and vertical units are the same.\cr
+   "topoOpennessN": The negative topographic openness. Assumes the input is a DEM and that horizontal and vertical units are the same.
   }
   \item{kernelSize}{The size of the kernel to be used. May be either a single number (for a square matrix), a pair of numbers (for uneven height & width). Alternatively a pre-set matrix can be given (in which case kernelShape will be ignored), NA values can be given for pixels to be ignored. Note: kernel MUST have odd dimensions, can use NA values to simulate even sides.}
   \item{kernelShape}{The weighting/shape to give the kernel. The values in the kernel are multiplied by these - so take this into account when using non NA/1 values. The following options are available:\cr
@@ -37,6 +39,10 @@ FocalCalc(rasterIn, sumFun, kernelSize, kernelShape = "circle", na.rm = FALSE, f
 
 \value{
   A Raster* object with the same number of layers as input containing the calculated values.
+}
+
+\note{
+Topographic openness produces the best results with larger kernel sizes (at least on the order of hundreds of metres). Additionally, as horizontal distance is a factor in its calculation, the resolution of the raster must be in the same units as the elevation values.
 }
 
 \references{
