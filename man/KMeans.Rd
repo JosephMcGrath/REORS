@@ -10,7 +10,7 @@ Uses the fuzzy c-means algorithm to attempt to classify the input image, with so
 }
 
 \usage{
-KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE, fileOut = tempfile(pattern = "REORS - "), silent = TRUE, interPlot = FALSE)
+KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE, fileOut = REORStemp(), silent = TRUE, interPlot = FALSE)
 }
 
 \arguments{

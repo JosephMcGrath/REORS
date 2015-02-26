@@ -8,7 +8,7 @@ Calculates or estimates principal components for an input image.
 }
 
 \usage{
-function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
+function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE, fileOut = REORStemp(), silent = TRUE)
 }
 
 \arguments{

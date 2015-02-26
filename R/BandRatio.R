@@ -1,5 +1,5 @@
 BandRatio <- function(rasterIn, band1, band2,
- fileOut = tempfile(pattern = "REORS - "), silent = TRUE){
+ fileOut = REORStemp(), silent = TRUE){
 #Calculates a band ratio from a multi-layer raster. 
 #
 #Requires: RasterLoad, RasterShell

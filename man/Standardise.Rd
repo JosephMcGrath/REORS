@@ -11,7 +11,7 @@ Useful to compare images with different maximum and minimum values. In many case
 }
 
 \usage{
-Standardise(rasterIn, minMax = c(0, 1), intLock = FALSE, recalc = TRUE, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
+Standardise(rasterIn, minMax = c(0, 1), intLock = FALSE, recalc = TRUE, fileOut = REORStemp(), silent = TRUE)
 }
 
 \arguments{

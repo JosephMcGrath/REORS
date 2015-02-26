@@ -10,7 +10,7 @@ Converts fuzzy memberships RasterBrick into single-layer crisp memberships. Two 
 }
 
 \usage{
-Defuzzify(rasterIn, meth = "max", opt = NULL, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
+Defuzzify(rasterIn, meth = "max", opt = NULL, fileOut = REORStemp(), silent = TRUE)
 }
 
 \arguments{

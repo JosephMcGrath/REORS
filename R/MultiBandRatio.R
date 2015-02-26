@@ -1,5 +1,5 @@
 MultiBandRatio <- function(rasterIn, bands,
- fileOut = tempfile(pattern = "REORS - "), silent = TRUE){
+ fileOut = REORStemp(), silent = TRUE){
 #Calculates many band ratios in one pass, useful for cases where there are a
 # large number of ratios per image.
 #

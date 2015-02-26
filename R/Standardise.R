@@ -1,5 +1,5 @@
 Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
- recalc = TRUE, fileOut = tempfile(pattern = "REORS"), silent = TRUE){
+ recalc = TRUE, fileOut = REORStemp(), silent = TRUE){
 #Takes all values in a given raster and scales them to be between a set
 # minimum and maximum.
 #

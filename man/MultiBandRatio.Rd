@@ -10,7 +10,7 @@ Calculates multiple band ratios in one pass, useful for cases where there are a 
 }
 
 \usage{
-MultiBandRatio(rasterIn, bands, fileOut = tempfile(pattern = "REORS - "), silent = TRUE)
+MultiBandRatio(rasterIn, bands, fileOut = REORStemp(), silent = TRUE)
 }
 
 \arguments{

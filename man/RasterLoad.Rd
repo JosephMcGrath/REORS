@@ -13,8 +13,8 @@ RasterBrowse is a wrapper function, allowing for smoother loading of files, defa
 }
 
 \usage{
-RasterLoad(dataIn, retForm = "list", fileOut = tempfile(pattern = "REORS"))
-RasterBrowse(retForm = "stack", fileOut = tempfile(pattern = "REORS"))
+RasterLoad(dataIn, retForm = "list", fileOut = REORStemp())
+RasterBrowse(retForm = "stack", fileOut = REORStemp())
 }
 
 \arguments{

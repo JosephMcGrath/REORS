@@ -1,5 +1,5 @@
 PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
-fileOut = tempfile(pattern = "REORS"), silent = TRUE){
+fileOut = REORStemp(), silent = TRUE){
 #Calculates or estimates principal components for an input image.
 #
 #Currently not able to check if it works as intended. Would need commercial
