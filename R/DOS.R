@@ -1,5 +1,5 @@
 DOS <- function(rasterIn, recalc = FALSE,
- fileOut = REORStemp(), silent = TRUE){
+ fileOut = TempRasterName(), silent = TRUE){
 #Simple dark object subtraction for atmospheric correction of spectral images.
 #Intended to improve calculations rather than visualisation.
 #

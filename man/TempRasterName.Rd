@@ -10,7 +10,7 @@ Generates temporary file names using tempfile. Intended for use inside other fun
 }
 
 \usage{
-REORStemp()
+TempRasterName()
 }
 
 \value{Temporary file location.}
@@ -21,6 +21,6 @@ REORStemp()
 r <- raster(ncol = 50, nrow = 50)
 values(r) <- sample(1:2500, 2500, TRUE)
 r
-r <- DOS(r, fileOut = REORStemp)
+r <- DOS(r, fileOut = TempRasterName())
 r
 }

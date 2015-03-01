@@ -1,6 +1,6 @@
 KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
  breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE,
- fileOut = REORStemp(), silent = TRUE, interPlot = FALSE){
+ fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE){
 #Uses the fuzzy c-means algorithm to attempt to classify the input image,
 # with some additional customisation available. Iteratively re-assigns pixels
 # to classes in an attempt to optimise the divisions between pixels.

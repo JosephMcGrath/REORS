@@ -10,7 +10,7 @@ Uses the fuzzy c-means algorithm to attempt to classify the input image, with so
 }
 
 \usage{CMeans(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2, init = "lin",, breakCon = 0.01, standIn = FALSE, distM = "euc",
- fileOut = REORStemp(), silent = TRUE, interPlot = FALSE)
+ fileOut = TempRasterName() silent = TRUE, interPlot = FALSE)
 }
 
 \arguments{

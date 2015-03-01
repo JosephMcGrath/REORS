@@ -11,7 +11,7 @@ Intended to improve calculations rather than visualisation.
 }
 
 \usage{
-DOS(rasterIn, recalc = FALSE, fileName = REORStemp(), silent = TRUE)
+DOS(rasterIn, recalc = FALSE, fileName = TempRasterName(), silent = TRUE)
 }
 
 \arguments{

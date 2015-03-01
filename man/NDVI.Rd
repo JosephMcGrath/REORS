@@ -10,7 +10,7 @@ A specialised form of band maths, intended to detect/highlight vegetation.
 }
 
 \usage{
-NDVI(rasterIn, NIR, VIS, fileOut = REORStemp(), silent = TRUE)
+NDVI(rasterIn, NIR, VIS, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{

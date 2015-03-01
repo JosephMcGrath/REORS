@@ -10,7 +10,7 @@ Divides one band by the other, giving the ratio, commonly used to isolate specif
 }
 
 \usage{
-BandRatio(rasterIn, band1, band2, fileOut = REORStemp(), silent = TRUE)
+BandRatio(rasterIn, band1, band2, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{

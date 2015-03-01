@@ -12,7 +12,7 @@ This function adds support for multi-layered Raster* objects, which at the time 
 }
 
 \usage{
-FocalCalc(rasterIn, sumFun, kernelSize, kernelShape = "circle", na.rm = FALSE, fileOut = REORStemp(), silent = TRUE)
+FocalCalc(rasterIn, sumFun, kernelSize, kernelShape = "circle", na.rm = FALSE, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{

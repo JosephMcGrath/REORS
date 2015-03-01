@@ -1,6 +1,6 @@
 CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
  init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc",
- fileOut = REORStemp(), silent = TRUE, interPlot = FALSE){
+ fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE){
 #Uses the fuzzy c-means algorithm, with some additional customisation
 # available in terms of behaviour. Iteratively assigns fuzzy membership values
 # to pixels in an attempt to produce the best classification.

@@ -1,5 +1,4 @@
-RasterLoad <- function(dataIn, retForm = "list",
- fileOut = REORStemp()){
+RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
 #Loads data from multiple, potentially different sources into a single object.
 #Designed to be inserted into other functions for simplicity.
 #

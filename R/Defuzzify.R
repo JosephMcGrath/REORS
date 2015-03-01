@@ -1,5 +1,5 @@
 Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
- fileOut = REORStemp(), silent = TRUE){
+ fileOut = TempRasterName(), silent = TRUE){
 #Converts fuzzy memberships RasterBrick into single-layer crisp memberships.
 #Two current options are to assign the pixel to it's highest membership or to
 # assign the pixel to it's highest membership unless it's below a user-set
