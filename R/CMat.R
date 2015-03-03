@@ -65,7 +65,7 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
   
   original <- crosstab(classed, reference)
   
-  temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))  #<-- This bit is broken.
+  temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))
   for(i in 1:sqrt(nrow(original))){
     temp[, i] <- original[seq((i - 1) * nrow(temp) + 1, i * nrow(temp)), 3]
   }
@@ -85,36 +85,37 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
       large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
     }
   
-#Make a copy of the confusion matrix to work with
-   sMat <- temp
-  
+#temp is kept as a record of the original. Using proportions of reference
+ #classes, to reduce effects from different sizes for each class.
+    sMat <- temp / rowSums(temp)
+    
   #Remove smallest items from temp matrix until best pairs remain
     for (doNotUse in 1:length(sMat)){
-     if (length(unique(large)) == length(large)) break
-    
-      for (i in 1:length(large)){
-        #If more than one class is assigned to a specific reference,
-         #delete the smaller one
+      if (length(unique(large)) == length(large)) break
+      
+      for (i in unique(large)){
         if (sum(large == i) > 1){
-#          sMat[sMat == min(sMat[(1:dim(temp)[1])[large==i],i])]  <- 0
-          sMat[sMat == min(sMat[which(large == i), i])]  <- -1
+          use <- which(large == i) + (i - 1) * nrow(sMat)
+          
+          #min() is somewhat arbitrary here
+          sMat[min(use[sMat[use] == min(sMat[use])])] <- NA
         }
       }
-    
-      large <- rep(NA, nrow(temp))
-      for (i in 1:nrow(temp)){
-        large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
+      
+      large <- rep(NA, nrow(sMat))
+      for (i in 1:nrow(sMat)){
+        large[i] <- which(max(sMat[i, ], na.rm = TRUE) == sMat[i, ])[1]
       }
     }
   
 #Move the relevant items
     if (length(unique(large)) == length(large)){
-      for (i in 1:dim(temp)[1]){
-        sMat[i,] <- temp[(1:length(large))*(large==i),]
+      for (i in 1:nrow(temp)){
+    #    sMat[i,] <- temp[(1:length(large)) * (large == i), ]
+        sMat[i,] <- temp[(large == i), ]
       }
     } else {
       stop("Error - this may be due to empty classes")
-      sMat <- temp
     }
   } else {
     large <- seq(1, ncol(temp))
@@ -123,7 +124,7 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
   
 #--Standardise the table between 0 and 1--------------------------------------
   if(stand){
-    sMat <- (sMat - min(sMat)) / (max(sMat) - min(sMat))
+    sMat <- sMat / max(sMat)
   }
 	
 #--Calculate accuracy measures------------------------------------------------
@@ -153,12 +154,24 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
     mTot <- mTot + sum(sMat[i,]) * sum(sMat[,i])
   }
   kppa <- (tObs * tPos - mTot) / (tObs ^ 2 - mTot)
+  
+#Set up for disagreement measures
+  #refered to as "unbiased population matrix" in Pontius & Millones
+  #May be worth investigating further. Maybe investigate for more use.
+  pMat <- sMat 
+  
+  for(i in 1:nrow(pMat)){
+    for(j in 1:ncol(pMat)){
+      pMat[i, j] <- sMat[i, j] / sum(sMat[i, ]) * sum(sMat[j, ]) / sum(sMat)
+    }
+  }
+  print(pMat)
 
 #Quantity disagreement
   #Per class
   qDiss <- rep(NA, nrow(sMat))
   for(i in 1:nrow(sMat)){
-    qDiss[i] <- sum(sMat[, i]) - sum(sMat[i, ])
+    qDiss[i] <- abs(sum(pMat[, i]) - sum(pMat[i, ]))
   }
   #Overall
   qDissSum <- sum(qDiss) / 2
@@ -168,8 +181,8 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
   aDiss <- rep(NA, nrow(sMat))
   for(i in 1:nrow(sMat)){
     aDiss[i] <- 2 * min(
-     sum(sMat[, i]) - sMat[i, i],
-     sum(sMat[i, ]) - sMat[i, i]
+     sum(pMat[, i]) - pMat[i, i],
+     sum(pMat[i, ]) - pMat[i, i]
     )
   }
   #Overall
@@ -179,6 +192,7 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
   tDiss <- qDissSum + aDissSum
 
   #Check proportion correct = accuracy
+  #print(tDiss - (1 - sum(diag(pMat))))
   
 #--Return requested statistics------------------------------------------------
 
@@ -193,13 +207,13 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
      producersAccuracy = pAcc,
      usersAccuracy = uAcc,
      overallAccuracy = as.vector(oAcc),
-#Need to add overall u&p accuracies and fix disagreement measures
      quantityDisagreement = qDiss,
      allocationDisagreement = aDiss,
      totalQuantityDisagreement = qDissSum,
      totalAllocationDisagreement = aDissSum,
      totalDisagreement = tDiss,
      reorganising = large,
+     #UnbiasedPopulation = pMat,
      unadjusted = temp
     )
   }
