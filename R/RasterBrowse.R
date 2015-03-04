@@ -1,5 +1,4 @@
-RasterBrowse <- function(retForm = "stack",
- fileOut = tempfile(pattern = "REORS")){
+RasterBrowse <- function(retForm = "stack", fileOut = TempRasterName()){
 #Wrapper for RasterLoad, to open a browsing window. 
 #
 #Requires: RasterLoad

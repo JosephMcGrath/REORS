@@ -10,6 +10,9 @@ SpectralProfiler <- function(rasterIn, type = "points", nProfile = 1,
 #
 #Requires: RasterLoad
 #
+#To do:
+#   Merge "type" and "shapeIn" arguments to automatically detect shapefiles
+#
 #Args:
 #  rasterIn: Raster* object to extract values from.
 #  type: What type of input should be used?

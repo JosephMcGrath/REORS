@@ -1,5 +1,4 @@
-RasterLoad <- function(dataIn, retForm = "list",
- fileOut = tempfile(pattern = "REORS")){
+RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
 #Loads data from multiple, potentially different sources into a single object.
 #Designed to be inserted into other functions for simplicity.
 #
@@ -24,6 +23,7 @@ RasterLoad <- function(dataIn, retForm = "list",
   retForm <- tolower(retForm)
   
 #--Convert inputs into a list-------------------------------------------------
+#Defined as a function to unpack nested lists
   RasterLoadRec <- function(x){
     if(!is.list(x)) x <- list(x)
     ret <- list()

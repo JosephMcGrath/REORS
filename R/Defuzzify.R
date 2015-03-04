@@ -1,12 +1,16 @@
 Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
- fileOut = tempfile(pattern = "REORS"), silent = TRUE){
-#Converts fuzzy memberships into crisp memberships
+ fileOut = TempRasterName(), silent = TRUE){
+#Converts fuzzy memberships RasterBrick into single-layer crisp memberships.
+#Two current options are to assign the pixel to it's highest membership or to
+# assign the pixel to it's highest membership unless it's below a user-set
+# threshold, in which case it is assigned to an "undecided" class.
 #
 #Requires: RasterShell
 #
 #Args:
 #  rasterIn: The raster* object containing fuzzy membership values, should
-#   have one layer for each class.
+#   have one layer for each class. May also be the list of membership values
+#   and centroids from the CMeans function.
 #  meth: The method used for defuzzification, current options are:
 #   -"max": The class with the maximum membership.
 #   -"th" : The class with the maximum membership, so long as it's above a
@@ -23,15 +27,22 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
   library("raster")
   library("REORS")
   
+  if(class(rasterIn) == "list" & class(rasterIn[[1]])[1] == "RasterBrick"){
+    rasterIn <- rasterIn[[1]]
+  }
+  
+  if(meth == "th" & !is.null(opt)){
+    stop("Minimum threshold must be set with \"opt\".\n")
+  }
   
   blocks <- blockSize(rasterIn)
   rasterOut <- RasterShell(rasterIn, 1)
   
-  rasterTemp <- writeStart(rasterOut, filename = fileOut,
+  rasterOut <- writeStart(rasterOut, filename = fileOut,
    format = "GTiff", overwrite = TRUE
   )
   
-  if(!silent) cat("Defuzzifying raster.\n")
+  if(!silent) cat("Defuzzifying raster.\nWriting to %s\n")
   
 #--Take whichever membership value is highest---------------------------------
   if(meth == "max"){
@@ -48,10 +59,12 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
       crispMemb <- rep(NA, nrow(tempValue))
       
       for(j in 1:nrow(tempValue)){
-        crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
+        if(all(!is.na(tempValue[j, ]))){
+          crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
+        }
       }
       
-      rasterTemp <- writeValues(
+      rasterOut <- writeValues(
        x = rasterOut,
        v = crispMemb,
        start = blocks$row[i]
@@ -62,10 +75,6 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
 #--Require membership values to be above a threshold--------------------------
   if(meth == "th"){
      unDet <- nlayers(rasterIn) + 1
-     if(is.null(opt)){
-       rasterOut <- writeStop(rasterOut)
-       stop("Minimum thresold must be set with \"opt\".\n")
-     }
      
      for(i in 1:blocks$n){
       if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
@@ -80,13 +89,15 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
       crispMemb <- rep(NA, nrow(tempValue))
       
       for(j in 1:nrow(tempValue)){
-        crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
-        if(tempValue[j, crispMemb[j]] < opt){
-          crispMemb[j] <- unDet
+        if(all(!is.na(tempValue[j, ]))){
+          crispMemb[j] <- order(tempValue[j, ], decreasing = TRUE)[1]
+          if(max(tempValue[j, ]) < opt){
+            crispMemb[j] <- unDet
+          }
         }
       }
       
-      rasterTemp <- writeValues(
+      rasterOut <- writeValues(
        x = rasterOut,
        v = crispMemb,
        start = blocks$row[i]

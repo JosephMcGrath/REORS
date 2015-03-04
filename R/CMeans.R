@@ -1,18 +1,25 @@
 CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
- init = "lin", fileOut = tempfile(pattern = "REORS"), breakCon = 0.01,
- standIn = FALSE, distM = "euc", silent = TRUE, interPlot = FALSE){
-#Fuzzy c-means clustering algorithm.
-#Heavily modelled off the REORS KMeans function
+ init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc",
+ fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE){
+#Uses the fuzzy c-means algorithm, with some additional customisation
+# available in terms of behaviour. Iteratively assigns fuzzy membership values
+# to pixels in an attempt to produce the best classification.
+#
+#Heavily modelled off the KMeans function
 #Weighing is currently handled as values are pulled in, probably less
 # efficient overall, but is simpler this way for now. Might also add some
 # flexibility on weighting, though that is somewhat tenuous.
 #
 #Requires: RasterLoad, RasterShell, Standardise
 #
+#To do:
+# Add a calculation of the objective function as a measure of quality?
+# Split main iteration and final write? Could save more time.
+#
 #Args:
-#  rasterIn: Name of the image file to classify. Maybe run it through a
-#   cleaning function first?
-#  nCentres: How many clusters should the data be split into?
+#  rasterIn: Raster objects to be classified. Ran through RasterLoad.
+#  nCentres: Number of clusters to split the data into. Ignored if "init" is
+#   uses pre-set centres.
 #  its: Maximum number of iterations to run the algorithm for.
 #  weight: The weights to apply to each layer (higher weight means an greater
 #   importance to clustering, can be integers or decimals. Must be a single
@@ -24,7 +31,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #    - "lin": Linearly, from the minimum value in each layer, to the maximum.
 #    - "rand": Randomly within the minimum/maximum available values.
 #    - Matrix of centres, one column for each centre, one row for each layer.
-#  fileOut: Name to write file to, defaults to temporary file.
 #  breakCon: How little variation between iterations will break the loop early
 #   calculated as an average per variable, assuming variables are between 0-1.
 #   should be possible to linearly multiply out for larger ranges.
@@ -33,6 +39,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #    - "euc": euclidean distance
 #    - "man": Manhattan distance
 #    - "eu2": squared euclidean distance
+#  fileOut: Name to write file to, defaults to temporary file.
 #  silent: Should details of the classification be output as it works?
 #  interPlot: Should the classification be plotted each iteration?
 #
@@ -50,16 +57,13 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   if(length(weight) != 1 & length(weight) != nlayers(rasterIn)){
     stop("Weights must have values for each layer of input or a single value")
   }
+  if(fuzz == 1) stop("Fuzzification parameter may not be 1.")
   
   centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
   colnames(centres) <- sprintf("Clust %s", 1:ncol(centres))
   rownames(centres) <- names(rasterIn)
   
-  if(silent){
-    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1))
-  } else {
-    if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = FALSE)
-  }
+  if(standIn) rasterIn <- Standardise(rasterIn, c(0, 1), silent = silent)
   
   if(is.na(max(maxValue(rasterIn)))) rasterIn <- setMinMax(rasterIn)
   
@@ -178,7 +182,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
-    if(diffSince < breakCon) {
+    if(diffSince <= breakCon) {
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }

@@ -1,5 +1,6 @@
-CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
-#Function to calculate the confusion matrix between two raster layers.
+CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
+ stand = TRUE){
+#Calculates the confusion matrix between two classified raster layers.
 #Calculates a wide variety of accuracy measures.
 #Added functionality with unsupervised classifications to link up best
 # combinations of classes.
@@ -7,6 +8,8 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 #To do notes:
 #  Get all measures working properly
 #  Add support for cases where validation isn't available for each cell.
+#  Option to take an equal sample from each class to avoid biases when
+#   reorganising.
 #
 #Source:
 #  Congalton R.G. 1991 
@@ -19,7 +22,7 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
 #
 #Args:
 #  classed: RasterLayer, or name of raster containing hard clustered values.
-#  refernce: RasterLayer or name of raster containing reference values.
+#  reference: RasterLayer or name of raster containing reference values.
 #  retT: One of several methods of data to return:
 #   "brief" will return kappa and accuracy values only.
 #   "order" will return the sequence the classes were reorganised into.
@@ -51,18 +54,22 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   library("raster")
 
   if(class(classed) == "character") classed <- raster(classed)
-  if(class(refernce) == "character") refernce <- raster(refernce)
+  if(class(reference) == "character") reference <- raster(reference)
   
-  if(class(classed)[1] != "RasterLayer") stop("Classified layer not loaded")
-  if(class(refernce)[1] != "RasterLayer") stop("Reference layer not loaded")
+  if(class(classed)[1] != "RasterLayer"){
+    stop("Classified layer must be a RasterLayer.\n")
+  }
+  if(class(reference)[1] != "RasterLayer"){
+   stop("Reference layer must be a RasterLayer.\n")
+  }
   
-  original <- crosstab(classed, refernce)
+  original <- crosstab(classed, reference)
   
   temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))
   for(i in 1:sqrt(nrow(original))){
-    temp[seq(1,sqrt(nrow(original))), i] <- original[
-     seq(i * sqrt(nrow(original)) - 4, i * sqrt(nrow(original))), 3]
+    temp[, i] <- original[seq((i - 1) * nrow(temp) + 1, i * nrow(temp)), 3]
   }
+  #Drop the rows and columns relating to NA values.
   temp <- temp[seq(1, nrow(temp) - 1), seq(1, ncol(temp) - 1)]
   
 #--Re-organise classes to best fit--------------------------------------------
@@ -71,49 +78,44 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
  #largest "confirmed" classes.
 
 #Outputs which true class is highest for each classified
-    large <- c()
-    for (i in 1:dim(temp)[1]){
-      large <- append(large,
-       max((max(temp[i,])==temp[i,])* 1:dim(temp)[2]))
-    #Use of max is to deal with occasions where several are tied
-    #If this is changed needs to be mirrored below
+    large <- rep(NA, nrow(temp))
+    for (i in 1:nrow(temp)){
+      #Simplest to only take one item when tied - taking the first one.
+      #This is mirrored below, changes need to be copied down.
+      large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
     }
   
-#Make a copy of the confusion matrix to work with
-   sMat <- temp
-  
-  #While all aren't unique
-   #Set the lowest "max" value to -1 to remove it from consideration.
-   #(-1 as that is lower than values may start out)
-    for (donotuse in 1:length(sMat)){ #not a while to give it a definite end
-     if (length(unique(large)) == length(large)) break
-    #There's probably a better way to check for uniqueness
+#temp is kept as a record of the original. Using proportions of reference
+ #classes, to reduce effects from different sizes for each class.
+    sMat <- temp / rowSums(temp)
     
-#Set an appropriate value to 0
-      for (i in 1:length(large)){
-        if (sum(large==i) > 1){
-          sMat[sMat == min(
-           sMat[(1:dim(temp)[1])[large==i],i])]  <- 0
+  #Remove smallest items from temp matrix until best pairs remain
+    for (doNotUse in 1:length(sMat)){
+      if (length(unique(large)) == length(large)) break
+      
+      for (i in unique(large)){
+        if (sum(large == i) > 1){
+          use <- which(large == i) + (i - 1) * nrow(sMat)
+          
+          #min() is somewhat arbitrary here
+          sMat[min(use[sMat[use] == min(sMat[use])])] <- NA
         }
       }
-    
-#Then recalculate the list of largest class
-      large <- c()
-      for (i in 1:dim(sMat)[1]){
-        large <- append(large,
-         max((max(sMat[i,])== sMat[i,])* 1:dim(sMat)[2]))
+      
+      large <- rep(NA, nrow(sMat))
+      for (i in 1:nrow(sMat)){
+        large[i] <- which(max(sMat[i, ], na.rm = TRUE) == sMat[i, ])[1]
       }
-      if (length(unique(large)) == length(large)) break
     }
   
 #Move the relevant items
-    if (max(summary(as.factor(large))) == 1){
-      for (i in 1:dim(temp)[1]){
-        sMat[i,] <- temp[(1:length(large))*(large==i),]
+    if (length(unique(large)) == length(large)){
+      for (i in 1:nrow(temp)){
+    #    sMat[i,] <- temp[(1:length(large)) * (large == i), ]
+        sMat[i,] <- temp[(large == i), ]
       }
     } else {
-      warning("Error - this may be due to empty classes")
-      sMat <- temp
+      stop("Error - this may be due to empty classes")
     }
   } else {
     large <- seq(1, ncol(temp))
@@ -122,28 +124,24 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   
 #--Standardise the table between 0 and 1--------------------------------------
   if(stand){
-    sMat <- (sMat - min(sMat)) / (max(sMat) - min(sMat))
+    sMat <- sMat / max(sMat)
   }
 	
 #--Calculate accuracy measures------------------------------------------------
+  tObs <- sum(sMat)
   
 #Overall Accuracy
-  tObs <- sum(sMat)
-  oAcc <- 0
-  for (i in 1:dim(sMat)[1]){
-    oAcc <- oAcc + sMat[i,i]
-  }
-  oAcc <- oAcc / tObs
+  oAcc <- sum(diag(sMat)) / tObs
   
 #Producers accuracy
-  pAcc <- c()
-  for (i in 1:dim(sMat)[1]){
+  pAcc <- rep(NA, nrow(sMat))
+  for (i in 1:nrow(sMat)){
     pAcc[i] <- sMat[i,i] / sum(sMat[,i])
   }
   
 #Users accuracy
-  uAcc <- c()
-  for (i in 1:dim(sMat)[1]){
+  uAcc <- rep(NA, nrow(sMat))
+  for (i in 1:nrow(sMat)){
     uAcc[i] <- sMat[i,i] / sum(sMat[i,])
   }
   
@@ -151,41 +149,50 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
   tPos <- 0
   mTot <- 0
   
-  for (i in 1:dim(sMat)[1]){
+  for (i in 1:nrow(sMat)){
     tPos <- tPos + sMat[i,i]
-  }
-  for (i in 1:dim(sMat)[1]){
     mTot <- mTot + sum(sMat[i,]) * sum(sMat[,i])
   }
+  kppa <- (tObs * tPos - mTot) / (tObs ^ 2 - mTot)
   
-  kppa <- (tObs * (tPos) - (mTot)) / ( tObs ^ 2 - (mTot))
+#Set up for disagreement measures
+  #refered to as "unbiased population matrix" in Pontius & Millones
+  #May be worth investigating further. Maybe investigate for more use.
+  pMat <- sMat 
+  
+  for(i in 1:nrow(pMat)){
+    for(j in 1:ncol(pMat)){
+      pMat[i, j] <- sMat[i, j] / sum(sMat[i, ]) * sum(sMat[j, ]) / sum(sMat)
+    }
+  }
+  print(pMat)
 
 #Quantity disagreement
   #Per class
-  qDiss <- c()
-  for(i in 1:ncol(sMat)){
-    qDiss <- append(qDiss, sum(sMat[, i]) - sum(sMat[i, ]))
+  qDiss <- rep(NA, nrow(sMat))
+  for(i in 1:nrow(sMat)){
+    qDiss[i] <- abs(sum(pMat[, i]) - sum(pMat[i, ]))
   }
-  #qg = sum(sum(sMat
   #Overall
   qDissSum <- sum(qDiss) / 2
 
 #Allocation disagreement
   #Per class
-  aDiss <- c()
-  for(i in 1:ncol(sMat)){
-    aDiss <- append(aDiss, 2 * min(sum(sMat[, i]) - sMat[i, i],
-     sum(sMat[i, ]) - sMat[i, i]))
+  aDiss <- rep(NA, nrow(sMat))
+  for(i in 1:nrow(sMat)){
+    aDiss[i] <- 2 * min(
+     sum(pMat[, i]) - pMat[i, i],
+     sum(pMat[i, ]) - pMat[i, i]
+    )
   }
-  
   #Overall
   aDissSum <- sum(aDiss) / 2
-  
 
 #Overall disagreement
   tDiss <- qDissSum + aDissSum
 
   #Check proportion correct = accuracy
+  #print(tDiss - (1 - sum(diag(pMat))))
   
 #--Return requested statistics------------------------------------------------
 
@@ -200,13 +207,13 @@ CMat <- function(classed, refernce, retT = "", reOrg = FALSE, stand = TRUE){
      producersAccuracy = pAcc,
      usersAccuracy = uAcc,
      overallAccuracy = as.vector(oAcc),
-#Need to add overall u&p accuracies and fix disagreement measures
-     #quantityDisagreement = qDiss,
-     #allocationDisagreement = aDiss,
-     #totalQuantityDisagreement = qDissSum,
-     #totalAllocationDisagreement = aDissSum,
-     #totalDisagreement = tDiss,
+     quantityDisagreement = qDiss,
+     allocationDisagreement = aDiss,
+     totalQuantityDisagreement = qDissSum,
+     totalAllocationDisagreement = aDissSum,
+     totalDisagreement = tDiss,
      reorganising = large,
+     #UnbiasedPopulation = pMat,
      unadjusted = temp
     )
   }

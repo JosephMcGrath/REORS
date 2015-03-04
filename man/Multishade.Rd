@@ -11,7 +11,7 @@ The default inputs for angles are fairly closely spaced, wide spacings often fiv
 }
 
 \usage{
-Multishade(rasterIn, fileOut = NULL, angles = c(15, 20, 15), directions = c(100, 125, 150), autoPlot = TRUE)
+Multishade(rasterIn,  angles = c(15, 20, 15), directions = c(100, 125, 150), autoPlot = TRUE, fileOut = TempRasterName())
 }
 
 \arguments{

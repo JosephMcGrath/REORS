@@ -2,15 +2,15 @@
 \alias{BandRatio}
 
 \title{
-Calculates band ratios of a multi-layer raster by dividing one band from another.
+Calculates a band ratio from a multi-layer raster.
 }
 
 \description{
-Divides one band by the other, giving the ratio, commonly used to isolate specific properties in a spectral image.
+Divides one band by the other, giving the ratio, commonly used to isolate specific properties in a spectral image. Largely superseded by MltiBandRatio where multiple band ratios are taken as that is much faster.
 }
 
 \usage{
-BandRatio(rasterIn, band1, band2, fileOut = tempfile(pattern = "REORS"), silent = TRUE)
+BandRatio(rasterIn, band1, band2, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{

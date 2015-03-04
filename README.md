@@ -7,7 +7,7 @@ Further notes will be made in the wiki.
 
 ##Required libraries
 
-REORS requires the "raster" package for all functions. The "maptools" package is currently suggested for vector files and at a later date may become required.
+REORS requires the "raster" package for all functions.
 
 ##Instalation
 To install the package, copy the following text into the R console:
@@ -20,7 +20,7 @@ The devtools package may suggest that RTools needs to be installed for packages 
 For any later sessions use:
 
     library("REORS")
-To load the library (also loads the raster package and all its dependancies).  
+To load the library (also loads the raster package and all its dependencies).  
 To update the package:
 
     library("devtools")

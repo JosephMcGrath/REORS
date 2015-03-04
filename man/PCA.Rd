@@ -8,15 +8,16 @@ Calculates or estimates principal components for an input image.
 }
 
 \usage{
-function(rasterIn, npc = nlayers(rasterIn), sampleSize = NULL, fileOut = tempfile(pattern = "REORS"), standOut = FALSE, silent = TRUE)
+function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{The raster file to perform principal component analysis on.}
   \item{npc}{The number of components to return. Defaults to the number of layers of rasterIn.}
+  \item{standOut}{should the end result be 8 bit integer? (using the Standardise function).}
+  \item{eigens}{Previously calculated eigenvalues to use instead of whole image. Not very transferable between images, but potentially useful to apply eigenvector from a subset of the whole image to the wider area.}
   \item{fileOut}{Name of file to save to, defaults to a temporary file.}
-  \item{standOut}{Should the end result be standardised between 0 and 1 (using the Standardise function).}
-  \item{silent}{should the function work without progress reports?}
+  \item{silent}{Should the function work without progress reports?}
 }
 
 \details{
