@@ -92,8 +92,12 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
         )
       }
     }
- } else stop("Invalid initialisation method.\n")
+  } else stop("Invalid initialisation method.\n")
   
+  if(!silent){
+    cat(sprintf("Beginning fuzzy c-means clustering:\nWriting to %s\n",
+     fileOut))
+  }
   
   if(!silent){
     cat("Initial centres (pre-weighting):\n")

@@ -79,7 +79,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     }
   } else if(init[1] == "rand"){
     for(i in 1:nlayers(rasterIn)){
-      for(j in 1:col(centres)){
+      for(j in 1:ncol(centres)){
         centres[i, j] <- runif(
          1,
          minValue(rasterIn)[i],
@@ -90,7 +90,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   } else stop("Invalid initialisation method.\n")
   
   if(!silent){
-    cat("Beginning crisp k-means clustering:\nWriting to %s\n")
+    cat(sprintf("Beginning crisp k-means clustering:\nWriting to %s\n",
+     fileOut))
   }
   
   if(!silent){
