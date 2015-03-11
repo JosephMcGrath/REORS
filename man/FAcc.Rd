@@ -6,9 +6,9 @@ Fuzzy accuracy measure.
 }
 
 \description{
-Calculates accuracy of a fuzzy classification compared to crisp reference    <-- This section is poorly worded. values.
-The accuracy are calculated depending on membership values - if the fuzzy membership values relate to the reference class then accuracy should increase with membership values.
-May also be used alongside Defuzzify to plot how the membership values change within each class.
+Visualises the relationship between membership values and reference classes. \cr
+Takes fuzzy membership values from a classification, along with reference classes to compare to. Using this, the accuracy is calculated at a range of membership values (assuming a pixel is assigned to the class it has the highest membership to.\cr
+Where memberships correspond well to a reference class, the accuracy should increase with membership.
 }
 
 \usage{

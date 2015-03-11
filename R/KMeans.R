@@ -89,10 +89,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     }
   } else stop("Invalid initialisation method.\n")
   
-  if(!silent){
-    cat(sprintf("Beginning crisp k-means clustering:\nWriting to %s\n",
-     fileOut))
-  }
+  if(!silent) cat("Beginning crisp k-means clustering:\n")
   
   if(!silent){
     cat("Initial centres (pre-weighting):\n")
@@ -104,11 +101,11 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   
 #--Set up distance measure of choice------------------------------------------
   if(distM == "euc"){
-    distM <-  function(x, y) return(sqrt(colSums((x - y) ^ 2)))
+    distM <-  function(x, y) return(sqrt(rowSums((x - y) ^ 2)))
   } else if(distM == "man"){
-    distM <- function(x, y) return(colSums(abs(x - y)))
-  } else if("eu2"){
-    distM <- function(x, y) return(colSums((x - y) ^ 2))
+    distM <- function(x, y) return(rowSums(abs(x - y)))
+  } else if(distM == "eu2"){
+    distM <- function(x, y) return(rowSums((x - y) ^ 2))
   } else stop("Invalid distance measure")
   
 #--Run the algorithm for each iteration---------------------------------------
@@ -155,13 +152,18 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     newCentres <- t(t(tempCentres) / classCount)
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
-    diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-      newCentres[, !is.nan(colSums(newCentres))])) / 
-      (ncol(centres) * mean(weight))
+    diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+     newCentres[, !is.nan(colSums(newCentres))])) / 
+     (ncol(centres) * mean(weight))) /
+     #Divide by the maximum distance in populated feature-space.
+     sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
+    
     if(diffSince <= breakCon) {
+      #Breaking before re-assigning centres to avoid adding another iteration
+      # when writing converged output.
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }
@@ -190,7 +192,10 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   }
   
 #--Writing iteration----------------------------------------------------------
-
+  if(!silent){
+    cat(sprintf("Writing final result to %s\n", fileOut))
+  }
+  
   tempCentres <- centres * 0
   classCount <- rep(0, ncol(centres))
   
@@ -237,22 +242,16 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   newCentres <- t(t(tempCentres) / classCount)
   
   #is.nan() used to compensate for clusters with 0 pixels in the cluster
-  diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-    newCentres[, !is.nan(colSums(newCentres))])) / 
-    (ncol(centres) * mean(weight))
-  if(!silent) cat(sprintf("%s difference since last iteration.\n",
-   round(diffSince, 3)))
-  
-  if(diffSince <= breakCon) {
-    if(!silent) cat("Converged, breaking loop.\n")
-    break
-  }
-  
+  diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+   newCentres[, !is.nan(colSums(newCentres))])) / 
+   (ncol(centres) * mean(weight))) /
+   #Divide by the maximum distance in populated feature-space.
+   sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
+ 
   #Keeping centres with no changes as they are.
   #centres <- newCentres[, !is.nan(colSums(newCentres))]
   centres[, !is.nan(colSums(newCentres))] <- 
    newCentres[, !is.nan(colSums(newCentres))]
-  
   
 #If any clusters are still empty, set them to NA to avoid implying they have
  #data points attached to them.
@@ -263,6 +262,6 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   }
   
 #--End of function------------------------------------------------------------
-  
+  if(!silent) cat("\n")  
   return(list("Raster" = rasterOut, "Centres" = centres / weight))
 }

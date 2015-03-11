@@ -1,5 +1,5 @@
-\name{REORStemp}
-\alias{REORStemp}
+\name{TempRasterName}
+\alias{TempRasterName}
 
 \title{
 Temporary file assignments.

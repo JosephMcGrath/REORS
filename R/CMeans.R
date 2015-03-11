@@ -94,10 +94,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     }
   } else stop("Invalid initialisation method.\n")
   
-  if(!silent){
-    cat(sprintf("Beginning fuzzy c-means clustering:\nWriting to %s\n",
-     fileOut))
-  }
+  if(!silent) cat("Beginning fuzzy c-means clustering:\n")
   
   if(!silent){
     cat("Initial centres (pre-weighting):\n")
@@ -112,7 +109,7 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     distM <-  function(x, y) return(sqrt(rowSums((x - y) ^ 2)))
   } else if(distM == "man"){
     distM <- function(x, y) return(rowSums(abs(x - y)))
-  } else if("eu2"){
+  } else if(distM == "eu2"){
     distM <- function(x, y) return(rowSums((x - y) ^ 2))
   } else stop("Invalid distance measure")
   
@@ -173,13 +170,18 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     newCentres <- t(t(tempCentres2) / classCount)
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
-    diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-      newCentres[, !is.nan(colSums(newCentres))])) / 
-      (ncol(centres) * mean(weight))
+    diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+     newCentres[, !is.nan(colSums(newCentres))])) / 
+     (ncol(centres) * mean(weight))) /
+     #Divide by the maximum distance in populated feature-space.
+     sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
+    
     if(diffSince <= breakCon) {
+      #Breaking before re-assigning centres to avoid adding another iteration
+      # when writing converged output.
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }
@@ -195,7 +197,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   }
   
 #--Writing iteration----------------------------------------------------------
-  
   if(!silent){
     cat(sprintf("Writing final result to %s\n", fileOut))
   }
@@ -260,11 +261,11 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   newCentres <- t(t(tempCentres2) / classCount)
     
   #is.nan() used to compensate for clusters with 0 pixels in the cluster
-  diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-    newCentres[, !is.nan(colSums(newCentres))])) / 
-    (ncol(centres) * mean(weight))
-  if(!silent) cat(sprintf("%s difference since last iteration.\n",
-   round(diffSince, 3)))
+  diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+   newCentres[, !is.nan(colSums(newCentres))])) / 
+   (ncol(centres) * mean(weight))) /
+   #Divide by the maximum distance in populated feature-space.
+   sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
   
   #Keeping centres with no changes as they are.
   #centres <- newCentres[, !is.nan(colSums(newCentres))]
@@ -280,6 +281,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   }
   
 #--End of function------------------------------------------------------------
-  
+  if(!silent) cat("\n")
   return(list("Raster" = rasterTemp, "Centres" = centres / weight))
 }

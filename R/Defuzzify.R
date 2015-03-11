@@ -42,7 +42,7 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
    format = "GTiff", overwrite = TRUE
   )
   
-  if(!silent) cat("Defuzzifying raster.\nWriting to %s\n")
+  if(!silent) cat(sprintf("Defuzzifying raster:\nWriting to %s\n", fileOut))
   
 #--Take whichever membership value is highest---------------------------------
   if(meth == "max"){

@@ -28,7 +28,7 @@ Uses the fuzzy c-means algorithm to attempt to classify the input image, with so
   \item{distM}{Distance measure to calculate memberships:\cr
    "euc" = euclidean distance.\cr
    "man" = Manhattan distance.\cr
-   "eu2" = squared euclidean distance}
+   "eu2" = squared euclidean distance.}
   \item{fileOut}{Name to write file to, defaults to temporary file.}
   \item{silent}{Should details of the classification be output as it works?}
   \item{interPlot}{Should the classification be plotted each iteration?}

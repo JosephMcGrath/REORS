@@ -1,12 +1,12 @@
 FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
  silent = TRUE){
-#Calculates accuracy of a fuzzy classification compared to crisp reference    <-- This section is poorly worded.
-# values.
-#The accuracy are calculated depending on membership values - if the fuzzy
-# membership values relate to the reference class then accuracy should
-# increase with membership values.
-#May also be used alongside Defuzzify to plot how the membership values change<-- Could just use binCount?
-# within each class.
+#Visualises the relationship between membership values and reference classes.
+#Takes fuzzy membership values from a classification, along with reference
+# classes to compare to. Using this, the accuracy is calculated at a range of
+# membership values (assuming a pixel is assigned to the class it has the
+# highest membership to.
+#Where memberships correspond well to a reference class, the accuracy should
+# increase with membership.
 #
 #Args:
 #  classed: The fuzzy membership values of the classification to be assessed.
@@ -54,21 +54,23 @@ FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
      nrow = blocks$nrow[i]
     )
     
-    #Sort these for NA values ect                                             #<-- Fix for NA values
-   # if(any(classedValues > 1)) stop("Fuzzy memberships cannot be above 1.")
-   # if(any(classedValues < 0)) stop("Fuzzy memberships cannot be below 0.")
+    #Remove NA cells
+    classedValues <- classedValues[!is.na(referenceValues), ]
+    referenceValues <- referenceValues[!is.na(referenceValues)]
+       
+    if(any(classedValues > 1)) stop("Fuzzy memberships cannot be above 1.")
+    if(any(classedValues < 0)) stop("Fuzzy memberships cannot be below 0.")
     
     #Round to nearest bin
     classedValues <- round(classedValues * bins) / bins
     
     for(j in 1:nrow(classedValues)){
-      temp <- which.max(classedValues[j, ])[[1]]
-      if(temp == referenceValues[j]){
-        accM[temp, ][classedValues[j, temp] == binsV] <-
-         accM[temp, ][classedValues[j, temp] == binsV] + 1
+      tempRow <- which.max(classedValues[j, ])[[1]]
+      tempCol <- classedValues[j, tempRow] == binsV
+      if(tempRow == referenceValues[j]){
+        accM[tempRow, tempCol] <- accM[tempRow, tempCol] + 1
       }
-      binCount[temp, ][classedValues[j, temp] == binsV] <-
-       binCount[temp, ][classedValues[j, temp] == binsV] + 1
+      binCount[tempRow, tempCol] <- binCount[tempRow, tempCol] + 1
     }
   }
   
