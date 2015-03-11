@@ -79,7 +79,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     }
   } else if(init[1] == "rand"){
     for(i in 1:nlayers(rasterIn)){
-      for(j in 1:col(centres)){
+      for(j in 1:ncol(centres)){
         centres[i, j] <- runif(
          1,
          minValue(rasterIn)[i],
@@ -89,9 +89,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     }
   } else stop("Invalid initialisation method.\n")
   
-  if(!silent){
-    cat("Beginning crisp k-means clustering:\nWriting to %s\n")
-  }
+  if(!silent) cat("Beginning crisp k-means clustering:\n")
   
   if(!silent){
     cat("Initial centres (pre-weighting):\n")
@@ -103,24 +101,24 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   
 #--Set up distance measure of choice------------------------------------------
   if(distM == "euc"){
-    distM <-  function(x, y) return(sqrt(colSums((x - y) ^ 2)))
+    distM <-  function(x, y) return(sqrt(rowSums((x - y) ^ 2)))
   } else if(distM == "man"){
-    distM <- function(x, y) return(colSums(abs(x - y)))
-  } else if("eu2"){
-    distM <- function(x, y) return(colSums((x - y) ^ 2))
+    distM <- function(x, y) return(rowSums(abs(x - y)))
+  } else if(distM == "eu2"){
+    distM <- function(x, y) return(rowSums((x - y) ^ 2))
   } else stop("Invalid distance measure")
   
 #--Run the algorithm for each iteration---------------------------------------
   for(i in 1:its){
     
+    #Break to write on the last iteration.
+    #This method also catches single iteration runs
+    if(i >= its) break
+    
     if(!silent) cat(sprintf("Beginning iteration %s of %s\n", i, its))
     
     tempCentres <- centres * 0
     classCount <- rep(0, ncol(centres))
-    
-    rasterOut <- writeStart(rasterOut, filename = fileOut,
-     format = "GTiff", overwrite = TRUE
-    )
     
 #--Calculate memberships and new centres--------------------------------------
     for(j in 1:blocks$n){
@@ -141,12 +139,6 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         #tempClass[k] <- which(temp == min(temp))[[1]]
       }
       
-      rasterOut <- writeValues(
-       x = rasterOut,
-       v = tempClass,
-       start = blocks$row[j]
-      )
-      
       for(k in 1:ncol(centres)){
         classCount[k] <- classCount[k] + sum(tempClass == k, na.rm = TRUE)
         tempCentres[, k] <- tempCentres[, k] +
@@ -157,17 +149,21 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
       
     }
     
-    rasterOut <- writeStop(rasterOut)
     newCentres <- t(t(tempCentres) / classCount)
     
     #is.nan() used to compensate for clusters with 0 pixels in the cluster
-    diffSince <- sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-      newCentres[, !is.nan(colSums(newCentres))])) / 
-      (ncol(centres) * mean(weight))
+    diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+     newCentres[, !is.nan(colSums(newCentres))])) / 
+     (ncol(centres) * mean(weight))) /
+     #Divide by the maximum distance in populated feature-space.
+     sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
     if(!silent) cat(sprintf("%s difference since last iteration.\n",
      round(diffSince, 3)))
     
+    
     if(diffSince <= breakCon) {
+      #Breaking before re-assigning centres to avoid adding another iteration
+      # when writing converged output.
       if(!silent) cat("Converged, breaking loop.\n")
       break
     }
@@ -195,6 +191,68 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     
   }
   
+#--Writing iteration----------------------------------------------------------
+  if(!silent){
+    cat(sprintf("Writing final result to %s\n", fileOut))
+  }
+  
+  tempCentres <- centres * 0
+  classCount <- rep(0, ncol(centres))
+  
+  rasterOut <- writeStart(rasterOut, filename = fileOut,
+   format = "GTiff", overwrite = TRUE
+  )
+  
+  for(j in 1:blocks$n){
+    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+     j, blocks$n, round(j / blocks$n * 100)))
+    
+    tempValue <- getValues(
+     rasterIn,
+     row = blocks$row[j],
+     nrow = blocks$nrow[j]
+    )
+    
+    tempClass <- rep(NA, nrow(tempValue))
+    
+    for(k in 1:nrow(tempValue)){
+      temp <- distM(tempValue[k, ] * weight, centres)
+      tempClass[k] <- sum(1:length(temp) * (temp == min(temp)))
+      #tempClass[k] <- which(temp == min(temp))[[1]]
+    }
+    
+    rasterOut <- writeValues(
+     x = rasterOut,
+     v = tempClass,
+     start = blocks$row[j]
+    )
+    
+    for(k in 1:ncol(centres)){
+      classCount[k] <- classCount[k] + sum(tempClass == k, na.rm = TRUE)
+      tempCentres[, k] <- tempCentres[, k] +
+       colSums(matrix(tempValue[k == tempClass, ],
+        ncol = nrow(centres)), na.rm = TRUE
+       ) * weight
+    }
+    
+  }
+  
+  rasterOut <- writeStop(rasterOut)
+  
+  newCentres <- t(t(tempCentres) / classCount)
+  
+  #is.nan() used to compensate for clusters with 0 pixels in the cluster
+  diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
+   newCentres[, !is.nan(colSums(newCentres))])) / 
+   (ncol(centres) * mean(weight))) /
+   #Divide by the maximum distance in populated feature-space.
+   sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
+ 
+  #Keeping centres with no changes as they are.
+  #centres <- newCentres[, !is.nan(colSums(newCentres))]
+  centres[, !is.nan(colSums(newCentres))] <- 
+   newCentres[, !is.nan(colSums(newCentres))]
+  
 #If any clusters are still empty, set them to NA to avoid implying they have
  #data points attached to them.
   for(i in 1:ncol(centres)){
@@ -204,6 +262,6 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   }
   
 #--End of function------------------------------------------------------------
-  
+  if(!silent) cat("\n")  
   return(list("Raster" = rasterOut, "Centres" = centres / weight))
 }
