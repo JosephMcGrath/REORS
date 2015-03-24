@@ -26,7 +26,7 @@ FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
   #Not checking nlayers(classed) to allow for testing a single class.
   if(nlayers(reference) != 1) stop("\"reference\" input must have one layer,")
   
-#--Set-up for processing------------------------------------------------------
+#--Set up bins for fuzzy accuracy measure-------------------------------------
   blocks <- blockSize(classed, n = nlayers(classed) + 1)
   accM <- matrix(0, nlayers(classed), bins + 1)
   colnames(accM) <- seq(0, 1, length.out = bins + 1)

@@ -1,5 +1,5 @@
-\name{Facc}
-\alias{Facc}
+\name{FAcc}
+\alias{FAcc}
 
 \title{
 Fuzzy accuracy measure.

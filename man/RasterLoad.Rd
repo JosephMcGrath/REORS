@@ -20,9 +20,10 @@ RasterBrowse(retForm = "stack", fileOut = TempRasterName())
 \arguments{
   \item{dataIn}{dataIn: A list of the different files to be conglomerated. Accepted formats used: RasterLayer, RasterBrick RasterStack, Character vector, containing the names of files to be loaded, List, containing any of the above, or another nested list.}
   \item{retForm}{retForm: Format to return data in, may be:\cr
-   "stack" for a RasterStack.\cr
-   "brick" for a RasterBrick. May take a LONG time to process.\cr
-   "list"  for a list of objects. Mainly for different extents ect (default)}
+   -"list": individual Raster* objects in a list. Mainly intended for rasters that wouldn't be able to stack (different extents ect.). Default option.\cr
+   If a single object is returned in it's standard format. Otherwise:\cr
+   -"stack": returns all files as a RasterStack.\cr
+   -"brick": returns all files as a RasterBrick. Can take a LONG time.}
   \item{fileOut}{The location to save the output, if it is a RasterBrick.}
 }
 

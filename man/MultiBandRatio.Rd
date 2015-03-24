@@ -1,5 +1,5 @@
-\name{MulitBandRatio}
-\alias{MulitBandRatio}
+\name{MultiBandRatio}
+\alias{MultiBandRatio}
 
 \title{
 Calculates several band ratios simultaneously.
@@ -28,6 +28,6 @@ MultiBandRatio(rasterIn, bands, fileOut = TempRasterName(), silent = TRUE)
 r <- brick(ncol = 50, nrow = 50, nl = 3)
 values(r) <- sample(1:2500, 7500, TRUE)
 r
-r <- MulitBandRatio(r, list(c(1,2), c(3,1), c(2,3)))
+r <- MultiBandRatio(r, list(c(1,2), c(3,1), c(2,3)))
 r
 }
