@@ -12,7 +12,6 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
 #  retForm: Format to return data in, may be:
 #   -"list": individual Raster* objects in a list. Mainly intended for rasters
 #    that wouldn't be able to stack (different extents ect.). Default option.
-#   If a single object is returned in it's standard format. Otherwise:
 #   -"stack": returns all files as a RasterStack.
 #   -"brick": returns all files as a RasterBrick. Can take a LONG time.
 #  fileOut: The location to save the output, if it is a RasterBrick.
@@ -65,10 +64,8 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
   
   if(!allSame & retForm != "list") stop("Files do not share metadata.")
   
-  if(length(dataIn) == 1){
-    ret <- dataIn[[1]]
   #Stacking is very fast, writing a brick is much slower.
-  }else if(allSame & retForm != "list"){
+  if(allSame & retForm != "list"){
     ret <- stack()
     for(i in dataIn){
       ret <- stack(ret, i)
