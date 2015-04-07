@@ -27,7 +27,7 @@ MultiBandRatio <- function(rasterIn, bands,
     if(!is.numeric(bands[[i]])){
       stop("Bands must be specified as numeric values.\n")
     }
-    if(max(bands[[i]]) > nlayers(rasterIn) | min(bands[[i]]) <= 1){
+    if(max(bands[[i]]) > nlayers(rasterIn) | min(bands[[i]]) < 1){
       stop("Ratios given reference bands that don't exist.\n")
     }
   }

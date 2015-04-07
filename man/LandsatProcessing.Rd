@@ -6,7 +6,7 @@ Semi-automated processing of Landsat imagery.
 }
 
 \description{
-Pulls in Landsat bands from single layers and stacks them together. The function assumes that the files are the only files in the set folder. Also assumes default naming scheme.
+Pulls in Landsat bands from single layers and stacks them together. The function assumes that the files are in the default format downloaded from the USGS (based on the format used by the EarthExplorer website at the start of 2015). Also strongly suggested that no additional files are in the folder - though they will not be included unless they share the same properties (extent, resolution ect).
 }
 
 \usage{
