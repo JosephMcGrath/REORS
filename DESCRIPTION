@@ -1,5 +1,5 @@
 Package: REORS
-Version: 0.1-4
+Version: 0.1-5
 License: GPL (>=3)
 Description: A collection of functions to aid in Earth observation and
  remote sensing. Focus is on ease of use & functions relating to
@@ -7,7 +7,7 @@ Description: A collection of functions to aid in Earth observation and
 Title: R scripts for Earth observation and remote sensing
 Author: Joseph McGrath
 Maintainer: Joseph McGrath <joseph.mcgrath@outlook.com>
-Date: 2015.03.24
+Date: 2015.04.14
 Depends: R (>= 3.1.0), raster
 Suggests: maptools
 URL: https://github.com/JosephMcGrath/REORS
