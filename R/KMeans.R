@@ -122,7 +122,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     
 #--Calculate memberships and new centres--------------------------------------
     for(j in 1:blocks$n){
-      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
        j, blocks$n, round(j / blocks$n * 100)))
       
       tempValue <- getValues(
@@ -130,6 +130,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
        row = blocks$row[j],
        nrow = blocks$nrow[j]
       )
+      if(!silent) cat(".")
       
       tempClass <- rep(NA, nrow(tempValue))
       
@@ -146,6 +147,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
           ncol = nrow(centres)), na.rm = TRUE
          ) * weight
       }
+      if(!silent) cat(".\n")
       
     }
     
@@ -204,7 +206,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   )
   
   for(j in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
      j, blocks$n, round(j / blocks$n * 100)))
     
     tempValue <- getValues(
@@ -212,6 +214,7 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
      row = blocks$row[j],
      nrow = blocks$nrow[j]
     )
+    if(!silent) cat(".")
     
     tempClass <- rep(NA, nrow(tempValue))
     
@@ -220,12 +223,14 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
       tempClass[k] <- sum(1:length(temp) * (temp == min(temp)))
       #tempClass[k] <- which(temp == min(temp))[[1]]
     }
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
      v = tempClass,
      start = blocks$row[j]
     )
+    if(!silent) cat(".\n")
     
     for(k in 1:ncol(centres)){
       classCount[k] <- classCount[k] + sum(tempClass == k, na.rm = TRUE)

@@ -27,12 +27,13 @@ fileOut = TempRasterName(), silent = TRUE){
   library("raster")
   library("REORS")
   
+  cat("Calculating principal components:\n")
   cat("WARNING: PCA support is currently experimental, use with caution.\n")  #<--Remove once the process is checked (if successful)
   
   rasterIn <- RasterLoad(rasterIn, "stack")
   
   if(nlayers(rasterIn) < 2){
-    stop("Input raster needs to have more than one layer.")
+    stop("Input raster needs to have more than one layer.\n")
   }
   if(is.null(npc)) npc <- nlayers(rasterIn)
   if(npc > nlayers(rasterIn)){
@@ -44,10 +45,10 @@ fileOut = TempRasterName(), silent = TRUE){
   
   if(is.null(eigens)){
 #--Calculate mean values------------------------------------------------------
-    if(!silent) cat("Calculating mean values. (Step 1/3)\n")
+    if(!silent) cat("\tCalculating mean values. (Step 1/3)\n")
     mVals <- rep(0, nlayers(rasterIn))
     for(i in 1:blocks$n){
-      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+      if(!silent) cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
        i, blocks$n, round(i / blocks$n * 100)))
       
       tempValues <- getValues(
@@ -55,8 +56,10 @@ fileOut = TempRasterName(), silent = TRUE){
        row = blocks$row[i],
        nrow = blocks$nrow[i]
       )
+      if(!silent) cat(".")
       
       mVals <- mVals + colSums(tempValues, na.rm = TRUE)
+      if(!silent) cat(".\n")
       
     }
     
@@ -64,9 +67,9 @@ fileOut = TempRasterName(), silent = TRUE){
     covMat <- matrix(0, ncol = nlayers(rasterIn), nrow = nlayers(rasterIn))
     
 #--Calculate covariance matrix------------------------------------------------
-    if(!silent) cat("Calculating covariance matrix. (Step 2/3)\n")
+    if(!silent) cat("\tCalculating covariance matrix. (Step 2/3)\n")
     for(i in 1:blocks$n){
-      if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+      if(!silent) cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
        i, blocks$n, round(i / blocks$n * 100)))
       
       tempValues <- getValues(
@@ -74,6 +77,7 @@ fileOut = TempRasterName(), silent = TRUE){
        row = blocks$row[i],
        nrow = blocks$nrow[i]
       )
+      if(!silent) cat(".")
       
       tempValues <- t(t(tempValues) - mVals)
       
@@ -86,6 +90,7 @@ fileOut = TempRasterName(), silent = TRUE){
           }
         }
       }
+      if(!silent) cat(".\n")
     }
     
     covMat <- covMat / (ncell(rasterIn))
@@ -94,7 +99,7 @@ fileOut = TempRasterName(), silent = TRUE){
     eigens <- eigen(covMat)
   } else {
     if(nrow(eigens) - 3 == npc){
-      if(!silent) cat("Reading eigenvectors. (Steps 1 & 2/3)\n")
+      if(!silent) cat("\tReading eigenvectors. (Steps 1 & 2/3)\n")
       eigens <- list(
        eigens[nlayers(rasterIn) + 1, ],
        head(eigens, nlayers(rasterIn))
@@ -108,9 +113,13 @@ fileOut = TempRasterName(), silent = TRUE){
   rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
-  if(!silent) cat("Calculating PCA. (Step 3/3)\n")
+  if(!silent){
+    cat("\tCalculating PCA. (Step 3/3)\n")
+    cat(sprintf("\tCalculating PCA. (Step 3/3)\n\tWriting to %s.tif\n",
+     fileOut))
+  }
   for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+    if(!silent) cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)\n",
      i, blocks$n, round(i / blocks$n * 100)))
     
     tempValues <- getValues(
@@ -118,9 +127,11 @@ fileOut = TempRasterName(), silent = TRUE){
     row = blocks$row[i],
      nrow = blocks$nrow[i]
     )
+    if(!silent) cat(".")
     
     #tempValues <- tempValues %*% eigens[[2]]
     tempValues <- tempValues %*% eigens[[2]][, 1:npc]
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
@@ -128,6 +139,7 @@ fileOut = TempRasterName(), silent = TRUE){
      v = tempValues,
      start = blocks$row[i]
     )
+    if(!silent) cat(".\n")
   }
   
   rasterOut <- writeStop(rasterOut)

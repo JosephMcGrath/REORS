@@ -66,14 +66,15 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
   if(kernelSize %% 2 != 1){
     stop("Kernel must have odd number of cells per side.\n")
   }
-  
+
 #--Set up the weighting matrix-------------------------------------------------
   #Generate the initial values
   noMod <- FALSE
   if(class(kernelSize) == "matrix"){
     kernelUse <- kernelSize
     noMod <- TRUE
-  } else if(class(kernelSize) == "numeric"){
+  } else if(class(kernelSize) == "numeric" |
+   class(kernelSize) == "integer"){
     if(length(kernelSize) == 2){
       kernelUse <- matrix(1, ncol = kernelSize[1], nrow = kernelSize[2])
     } else if(length(kernelSize) == 1){
@@ -194,11 +195,11 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
   rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
-  if(!silent) cat(sprintf("Applying focal operation:\nWriting to %s\n",
+  if(!silent) cat(sprintf("Applying focal operation:\nWriting to %s.tif\n",
    fileOut))
   
   for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
      i, blocks$n, round(i / blocks$n * 100)))
      
     tempValues <- getValuesFocal(
@@ -208,7 +209,9 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
      ngb = ngbSize,
      padValue = NA
     )
+    if(!silent) cat(".")
     
+    #These want vectorising, massively inefficient here.
     if(nlayers(rasterIn) == 1){
       writeV <- rep(NA, nrow(tempValues))
       tempValues <- t(t(tempValues) * kernelUse)
@@ -234,12 +237,14 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
         }
       }
     }
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
      v = writeV,
      start = blocks$row[i]
     )
+    if(!silent) cat(".\n")
     
   }
   

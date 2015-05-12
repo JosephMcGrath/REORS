@@ -42,6 +42,9 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
   if(nlayers(panIn) > 1) stop("Panchromatic input can only have one band.\n")
   
   multiIn <- RasterLoad(multiIn, retForm = "stack")
+  if(any(!bands %in% 1:nlayers(multiIn))){
+    stop("Multispectral input doesn't contain those bands.\n")
+  }
   rasterIn <- stack()
   for(i in 1:length(bands)){
     rasterIn <- stack(rasterIn, raster(multiIn, bands[i]))
@@ -77,21 +80,21 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
      row = blocks$row[i],
      nrow = blocks$nrow[i]
     ))
-    cat(".")
+    if(!silent) cat(".")
     
     if(meth == "brovey"){
       tempValues2 <- (tempValues * tempPan) / rowSums(tempValues)
     } else {
       stop("No valid method defined.\n")
     }
-    cat(".")
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
      v = tempValues2,
      start = blocks$row[i]
     )
-    cat(".\n")
+    if(!silent) cat(".\n")
   }
     
   rasterOut <- writeStop(rasterOut)
