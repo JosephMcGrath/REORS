@@ -69,6 +69,8 @@ SpectralProfiler <- function(rasterIn, type = "points", nProfile = 1,
   }
   
 #--Calculation using polygons-------------------------------------------------
+#spRbind(temp1, spChFIDs(temp2, "2"))
+#crs
   if(type == "poly"){
     AOI <- list()
     if(!is.na(plotL)) plot(rasterIn, plotL)
@@ -85,6 +87,8 @@ SpectralProfiler <- function(rasterIn, type = "points", nProfile = 1,
   }
   
 #--Calculation using points---------------------------------------------------
+#spRbind(temp1, spChFIDs(temp2, "2"))
+#crs
   if(type == "points"){
     if(!is.na(plotL)) plot(rasterIn, plotL)
     AOI <- locator(n = nProfile)
@@ -93,6 +97,8 @@ SpectralProfiler <- function(rasterIn, type = "points", nProfile = 1,
   }
   
 #--Calculation using lines----------------------------------------------------
+#spRbind(temp1, spChFIDs(temp2, "2"))
+#crs
   if(type == "line"){
     if(!is.na(plotL)) plot(rasterIn, plotL)
     
