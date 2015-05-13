@@ -46,12 +46,12 @@ Topographic openness produces the best results with larger kernel sizes (at leas
 }
 
 \references{
-Kuhni & Pfiffner (2001)
-  The relief of the Swiss Alps and adjacent areas and its relation to lithology and structure: topographic analysis from a 250-m DEM.
-  Geomorphology, 41, 285-307.
-
-Pike & Wilson (1971)
-  Elevation-relief ratio, hypsometric integral, and geomorphic area-altitude analysis.
+Kuhni & Pfiffner (2001)\cr
+  The relief of the Swiss Alps and adjacent areas and its relation to lithology and structure: topographic analysis from a 250-m DEM.\cr
+  Geomorphology, 41, 285-307.\cr
+\cr
+Pike & Wilson (1971)\cr
+  Elevation-relief ratio, hypsometric integral, and geomorphic area-altitude analysis.\cr
   Geological Society of America Bulletin, 82, 1079-1084
 }
 

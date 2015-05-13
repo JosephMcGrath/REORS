@@ -37,9 +37,9 @@ MultiBandRatio <- function(rasterIn, bands,
   rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
    overwrite = TRUE)
   
-  if(!silent) cat("Calculating band ratios.\nWriting to %s\n")
+  if(!silent) cat("Calculating band ratios.\nWriting to %s.tif\n")
   for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
      i, blocks$n, round(i / blocks$n * 100)))
     
     tempValues <- getValues(
@@ -47,18 +47,21 @@ MultiBandRatio <- function(rasterIn, bands,
      row = blocks$row[i],
      nrow = blocks$nrow[i]
     )
+    if(!silent) cat(".")
     
     temp <- c()
     for(j in 1:length(bands)){
       temp <- cbind(temp, tempValues[, bands[[j]][1]] /
        tempValues[, bands[[j]][2]])
     }
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
      v = temp,
      start = blocks$row[i]
     )
+    if(!silent) cat(".\n")
     
   }
     

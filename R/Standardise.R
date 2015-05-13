@@ -22,8 +22,14 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
   
   rasterIn <- RasterLoad(rasterIn, "stack")  
   
+  if(!silent) cat(sprintf(
+   "Standardising input between %s and %s. %socking to whole numbers\n", 
+   minMax[1], minMax[2], if(intLock) "L" else "Not l"
+  ))
+  
+  #May be best to do this manually?
   if(recalc){
-    if(!silent) cat("Calculating minimum and maximum values of input.\n")
+    if(!silent) cat("\tCalculating minimum and maximum values of input.\n")
     rasterIn <- setMinMax(rasterIn)
   }
   
@@ -47,9 +53,13 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
   )
   
 #--Perform the calculations---------------------------------------------------
-  if(!silent) cat("Calculating standardised values.\n")
+  if(!silent){
+    cat(
+     sprintf("\tCalculating standardised values.:\n\t\tWriting to %s.tif\n",
+      fileOut))
+  }
   for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+    if(!silent) cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
      i, blocks$n, round(i / blocks$n * 100)))
     
     #as.matrix to stop errors with a single layer.
@@ -58,16 +68,19 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
      row = blocks$row[i],
      nrow = blocks$nrow[i]
     ))
+    if(!silent) cat(".")
     
     tempValues <- t((t(tempValues) - mv[[1]]) / mv[[3]]
      * (minMax[2] - minMax[1]) + minMax[1])
     if(intLock) tempValues <- round(tempValues)
+    if(!silent) cat(".")
     
     ret <- writeValues(
      x = ret,
      v = tempValues,
      start = blocks$row[i]
     )
+    if(!silent) cat(".\n")
   }
   
   ret <- writeStop(ret)

@@ -26,7 +26,7 @@ NDVI <- function(rasterIn, NIR, VIS, fileOut = TempRasterName(),
   
   if(!silent) cat("Calculating NDVI.\n")
   for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
+    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
      i, blocks$n, round(i / blocks$n * 100)))
     
     tempValues <- getValues(
@@ -34,15 +34,18 @@ NDVI <- function(rasterIn, NIR, VIS, fileOut = TempRasterName(),
      row = blocks$row[i],
      nrow = blocks$nrow[i]
     )
+    if(!silent) cat(".")
 
     tempValues <- (tempValues[, NIR] - tempValues[, VIS]) /
     (tempValues[, NIR] + tempValues[, VIS])
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
      v = tempValues,
      start = blocks$row[i]
     )
+    if(!silent) cat(".\n")
     
   }
     
