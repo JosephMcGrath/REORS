@@ -2,37 +2,30 @@
 \alias{SpectralProfiler}
 
 \title{
-Calculates the spectral profile of a set zone.
+Extracts data from a raster, 
 }
 
 \description{
-Calculates the spectral profile of a set zone. For lines and polygoins, calculates the mean values.
-With a line, the change in each band is given as the line goes on.
+Calculates the spectral properties of a set of shapes. For points, the profile for each point is given. For lines, the profile along the line is given. For polygons, the average value for pixels under the polygon.
 }
 
 \usage{
-SpectralProfiler(rasterIn, type = "points", nProfile = 1, plotL = NA, stand = FALSE, silent = TRUE, shapeIn = NULL, csvOut = NULL)
+SpectralProfiler(rasterIn, shapeIn = "point", nProfile = 1, returnSpatial = FALSE, plotOut = TRUE, silent = TRUE)
 }
 
 \arguments{
   \item{rasterIn}{Raster* object to extract values from.}
-  \item{type}{Type of input to use:\cr
-  "points": Profiles for each point.\cr
-  "lines": Profiles of changing spectral values along a line.\cr
-  "poly" : Profiles of mean values over polygons.\cr
-  "shape": Profiles using a pre-defined shapefile, (not yet implemented).}
-  \item{nProfile}{Number of profiles to take (ignored for "lines" & "shape")}
-  \item{plotL}{Which layer should be used to plot when selecting areas?}
-  \item{stand}{Should the data be standardised before plotting?}
+  \item{shapeIn}{Either a Spatial* object, or one of the following strings::\cr
+  "point": To draw points on the plot window.\cr
+  "line": To draw lines on the plot window.\cr
+  "poly": To draw polygons on the plot window.}
+  \item{nProfile}{If creating points or polygons, how many should be created.}
+  \item{returnSpatial}{If the spectral profiles should be returned as a SpatialDataFrame rather than a matrix.}
   \item{silent}{Should progress be printed to the console?}
-  \item{shapeIn}{If type is "shape", this is where the shapefile is given.}
-  \item{csvOut}{A string of the file name to write the profile to. If omitted, the file is not written.}
 }
 
 \value{
-A list of two items:
-\item{Profile}{Matrix of DN values.}
-\item{Area used}{Coordinates/shapefile that was used to create them.}
+Either a matrix of digital numbers for each point/line/polygon provided or a Spatial* object with the digital numbers attached. For points, values are collected per-pixel. For lines, each pixel along each line is returned in order (as a list of matrices). Due to the many-one relationship of values to lines, spatial results are returned as a list of shapes and values. For polygons, the average value for each polygon is returned.
 }
 
 \author{Joseph McGrath}
