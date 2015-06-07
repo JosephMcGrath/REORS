@@ -38,33 +38,48 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
   rasterIn <- RasterLoad(rasterIn, retForm = "stack")
   
 #--If creating Spatial* object from scratch, handle it here-------------------
-  if(is.character(shapeIn)){                                                  #Print numbers onto plotted shapes.
+  if(is.character(shapeIn)){
     if(length(shapeIn == 1)){
       if(shapeIn == "point"){
+        if(!silent) cat("Click on map to plot points.\n")
         #Doing this in a more-complex manner so that this section behaves the
          #same as lines and polygons (plotting along the way).
         shapeIn <- locator(n = 1)
         shapeIn <- cbind(shapeIn$x, shapeIn$y)
         shapeIn <- SpatialPoints(shapeIn)
         plot(shapeIn[1, ], col = rainbow(nProfile)[1], add = TRUE)
+        text(extent(shapeIn)[2], extent(shapeIn)[3], 1,
+         col = rainbow(nProfile)[1], pos = 1)
         if(nProfile > 1) for(i in 2:nProfile){
           temp <- locator(n = 1)
           temp <- cbind(temp$x, temp$y)
           temp <- SpatialPoints(temp)
+          text(extent(temp)[2], extent(temp)[3], i,
+           col = rainbow(nProfile)[i], pos = 1)
           shapeIn <- rbind(shapeIn, temp)
           plot(shapeIn[i, ], col = rainbow(nProfile)[i], add = TRUE)
         }
       } else if(shapeIn == "line"){
+        if(!silent) cat("Click on map to plot lines.\n")
         shapeIn <- drawLine(col = rainbow(nProfile)[1])
+        text(extent(shapeIn)[2], extent(shapeIn)[3], 1,
+         col = rainbow(nProfile)[1], pos = 1)
         if(nProfile > 1) for(i in 2:nProfile){
           temp <- drawLine(col = rainbow(nProfile)[i])
+          text(extent(temp)[2], extent(temp)[3], i,
+           col = rainbow(nProfile)[i], pos = 1)
           temp <- spChFIDs(temp, as.character(length(shapeIn) + 1))
           shapeIn <- rbind(shapeIn, temp)
         }
       } else if(shapeIn == "poly"){
+        if(!silent) cat("Click on map to plot lines.\n")
         shapeIn <- drawPoly(col = rainbow(nProfile)[1])
+        text(extent(shapeIn)[2], extent(shapeIn)[3], 1,
+         col = rainbow(nProfile)[1], pos = 1)
         if(nProfile > 1) for(i in 2:nProfile){
           temp <- drawPoly(col = rainbow(nProfile)[i])
+          text(extent(temp)[2], extent(temp)[3], i,
+           col = rainbow(nProfile)[i], pos = 1)
           temp <- spChFIDs(temp, as.character(length(shapeIn) + 1))
           shapeIn <- rbind(shapeIn, temp)
         }
@@ -79,24 +94,30 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
   }
   
 #--Extract the data from the raster-------------------------------------------
-#Desired format is a matrix with cols for bands and rows for observations
+  if(!silent) cat("Extracting values from raster, this may take some time.\n")
   extractType <- class(shapeIn)[[1]]
-  if(length(grep("SpatialPolygons", extractType)) > 0){
+  if(any(c("SpatialPolygonsDataFrame", "SpatialPolygons") %in% extractType)){
     dataOut <- extract(rasterIn, shapeIn, fun = mean)
-  } else if(length(grep("SpatialLines", extractType)) > 0){
+  } else if(any(c("SpatialLinesDataFrame", "SpatialLines") %in% extractType)){
     temp <- extract(rasterIn, shapeIn, along = TRUE)
     for(i in 1:length(temp)){
+      temp[[i]] <- as.matrix(temp[[i]])
       rownames(temp[[i]]) <- sprintf("L%sP%s", i, 1:nrow(temp[[i]]))
     }
     dataOut <- temp[[1]]
     if(length(temp) > 1) for(i in 2:length(temp)){
       dataOut <- rbind(dataOut, temp[[i]])
     }
-  } else if(length(grep("SpatialPoints", extractType)) > 0){
+    if(is.null(colnames(dataOut))){
+      colnames(dataOut) <- names(rasterIn)
+    }
+  } else if(any(c("SpatialPointsDataFrame", "SpatialPoints") %in%
+   extractType)){
     dataOut <- extract(rasterIn, shapeIn)
   } else {
     stop("Unable to recognise Spatial* object.")
   }
+  if("!silent") cat("Data extracted successfully.\n")
   
 #--Plot the data if requested-------------------------------------------------
 #Currently have issues with non-standard plot windows, e.g. plotRGB
@@ -124,13 +145,16 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
   
 #--Output extracted data------------------------------------------------------
   if(returnSpatial){
-    if(length(grep("SpatialLines", extractType)) == 0){
+    if(!silent) cat("Converting to spatial object.\n")
+    if(any(c("SpatialLinesDataFrame", "SpatialLines") %in% extractType)){
       rownames(dataOut) <- names(shapeIn)
       dataOut <- data.frame(dataOut)
     }
-    if(length(grep("SpatialPolygons", extractType)) > 0){
+    if(any(c("SpatialPolygonsDataFrame", "SpatialPolygons") %in%
+     extractType)){
       dataOut <- SpatialPolygonsDataFrame(shapeIn, dataOut)
-    } else if(length(grep("SpatialLines", extractType)) > 0){
+    } else if(any(c("SpatialLinesDataFrame", "SpatialLines") %in%
+     extractType)){
       dataOut <- list(shapeIn, dataOut)
       
       #Return pixels along the line as points in this case
@@ -140,8 +164,11 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
       #  temp[[i]] <- cellFromXY(rasterIn, temp[[i]])
       #}
       
-    } else if(length(grep("SpatialPoints", extractType)) > 0){
+    } else if(any(c("SpatialPointsDataFrame", "SpatialPoints") %in%
+     extractType)){
       dataOut <- SpatialPointsDataFrame(shapeIn, dataOut)
+    } else {
+      stop("Unable to recognise Spatial* object.")
     }
   }
   return(dataOut)
