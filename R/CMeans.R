@@ -1,6 +1,6 @@
 CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
  init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc",
- fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE){
+ fileOut = TempRasterName(), silent = TRUE, retCent = FALSE){
 #Uses the fuzzy c-means algorithm, with some additional customisation
 # available in terms of behaviour. Iteratively assigns fuzzy membership values
 # to pixels in an attempt to produce the best classification.
@@ -41,12 +41,14 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
 #    - "eu2": squared euclidean distance
 #  fileOut: Name to write file to, defaults to temporary file.
 #  silent: Should details of the classification be output as it works?
-#  interPlot: Should the classification be plotted each iteration?
+#  retCent: If cluster centres should be returned. Gives a list containing
+#   the clustered results, as well as a matrix of cluster centres.
 #
 #Returns:
-#  List containing two items:
-#    -Raster:  The classified raster file.
-#    -Centres: The centres used to classify the raster file.
+#  Depending on retCent, either a Raster* object of the classified results, or a
+#   list containing two items:
+#     -Raster:  The classified raster file.
+#     -Centres: The centres used to classify the raster file.
 
 #--Set up and build the initial centres---------------------------------------
   library("raster")
@@ -191,9 +193,6 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     centres[, !is.nan(colSums(newCentres))] <- 
      newCentres[, !is.nan(colSums(newCentres))]
     
-    if(interPlot) plot(rasterTemp)
-    #if(interPlot) plotRGB(rasterTemp, stretch = "lin")
-    
   }
   
 #--Writing iteration----------------------------------------------------------
@@ -282,5 +281,10 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
   
 #--End of function------------------------------------------------------------
   if(!silent) cat("\n")
-  return(list("Raster" = rasterTemp, "Centres" = centres / weight))
+  if(retCent){
+    ret <- list("Raster" = rasterTemp, "Centres" = centres / weight)
+  }else{
+    ret <- rasterTemp
+  }
+  return(ret)
 }

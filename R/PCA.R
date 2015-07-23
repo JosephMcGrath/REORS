@@ -1,5 +1,5 @@
 PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
-fileOut = TempRasterName(), silent = TRUE){
+fileOut = TempRasterName(), silent = TRUE, retEigen = FALSE){
 #Calculates or estimates principal components for an input image.
 #
 #Currently not able to check if it works as intended. Would need commercial
@@ -19,15 +19,16 @@ fileOut = TempRasterName(), silent = TRUE){
 #   Standardise function)
 #  fileOut: Name of file to save to, defaults to a temporary file.
 #  silent: Should the function work without progress reports?
+#  retEigen: If eigenvectors should be returned alongside the raster.
 #Returns:
-#  A list with two items:
+#  Depending on retEigen, either a Raster* object or a list with two items:
 #   -Raster: The image calculated from principal components.
 #   -Eigens: A matrix containing the eigenvectors, eigenvalues & standard devs
 
   library("raster")
   library("REORS")
   
-  cat("Calculating principal components:\n")
+  if(!silent) cat("Calculating principal components:\n")
   cat("WARNING: PCA support is currently experimental, use with caution.\n")  #<--Remove once the process is checked (if successful)
   
   rasterIn <- RasterLoad(rasterIn, "stack")
@@ -160,5 +161,10 @@ fileOut = TempRasterName(), silent = TRUE){
     rasterOut <- Standardise(rasterOut, c(0, 255), TRUE, silent = silent)
   }
   
-  return(list("Raster" = rasterOut, "Eigens" = valMat))
+  if(retEigen){
+    ret <- list("Raster" = rasterOut, "Eigens" = valMat)
+  }else{
+    ret <- rasterOut
+  }
+  return(ret)
 }

@@ -1,6 +1,6 @@
 KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
  breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE,
- fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE){
+ fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE, retCent = FALSE){
 #Uses the fuzzy c-means algorithm to attempt to classify the input image,
 # with some additional customisation available. Iteratively re-assigns pixels
 # to classes in an attempt to optimise the divisions between pixels.
@@ -38,11 +38,14 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
 #  fileOut: Name to write file to, defaults to temporary file.
 #  silent: Should details of the classification be output as it works?
 #  interPlot: Should the classification be plotted each iteration?
+#  retCent: If cluster centres should be returned. Gives a list containing
+#   the clustered results, as well as a matrix of cluster centres.
 #
 #Returns:
-#  List containing two items:
-#    -Raster:  The classified raster file.
-#    -Centres: The centres used to classify the raster file.
+#  Depending on retCent, either a Raster* object of the classified results, or a
+#   list containing two items:
+#     -Raster:  The classified raster file.
+#     -Centres: The centres used to classify the raster file.
 
 #--Set up and build the initial centres---------------------------------------
   library("raster")
@@ -267,6 +270,11 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   }
   
 #--End of function------------------------------------------------------------
-  if(!silent) cat("\n")  
-  return(list("Raster" = rasterOut, "Centres" = centres / weight))
+  if(!silent) cat("\n")
+  if(retCent){
+    ret <- list("Raster" = rasterTemp, "Centres" = centres / weight)
+  }else{
+    ret <- rasterTemp
+  }
+  return(ret)
 }

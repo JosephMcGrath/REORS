@@ -10,7 +10,7 @@ Uses the fuzzy c-means algorithm to attempt to classify the input image, with so
 }
 
 \usage{
-KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE, fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE)
+KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin", breakCon = 0.01, standIn = FALSE, distM = "euc", randRe = FALSE, fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE, retCent = FALSE)
 }
 
 \arguments{
@@ -32,10 +32,11 @@ KMeans(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin", breakCon = 0.
   \item{fileOut}{Name to write file to, defaults to temporary file.}
   \item{silent}{Should details of the classification be output as it works?}
   \item{interPlot}{Should the classification be plotted each iteration?}
+  \item{retCent}{If cluster centres should be returned. Gives a list containing the clustered results, as well as a matrix of cluster centres.}
 }
 
 \value{
-  List containing two items:
+Depending on retCent, either a Raster* object of the classified results, or a list containing two items:
   \item{Raster}{The classified raster file.}
   \item{Centres}{The centres used to classify the raster file.}
 }

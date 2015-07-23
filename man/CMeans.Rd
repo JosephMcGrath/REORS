@@ -10,7 +10,7 @@ Uses the fuzzy c-means algorithm to attempt to classify the input image, with so
 }
 
 \usage{CMeans(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2, init = "lin",, breakCon = 0.01, standIn = FALSE, distM = "euc",
- fileOut = TempRasterName(), silent = TRUE, interPlot = FALSE)
+ fileOut = TempRasterName(), silent = TRUE, retCent = FALSE)
 }
 
 \arguments{
@@ -31,11 +31,11 @@ Uses the fuzzy c-means algorithm to attempt to classify the input image, with so
    "eu2" = squared euclidean distance.}
   \item{fileOut}{Name to write file to, defaults to temporary file.}
   \item{silent}{Should details of the classification be output as it works?}
-  \item{interPlot}{Should the classification be plotted each iteration?}
+  \item{retCent}{If cluster centres should be returned. Gives a list containing the clustered results, as well as a matrix of cluster centres.}
 }
 
 \value{
-List containing two items:
+Depending on retCent, either a Raster* object of the classified results, or a list containing two items:
   \item{Raster}{The classified raster file.}
   \item{Centres}{The centres used to classify the raster file.}
 }

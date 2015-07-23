@@ -8,7 +8,7 @@ Calculates or estimates principal components for an input image.
 }
 
 \usage{
-function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE, fileOut = TempRasterName(), silent = TRUE)
+function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE, fileOut = TempRasterName(), silent = TRUE, retEigen = FALSE)
 }
 
 \arguments{
@@ -18,6 +18,7 @@ function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE, fileOut = TempRa
   \item{eigens}{Previously calculated eigenvalues to use instead of whole image. Not very transferable between images, but potentially useful to apply eigenvector from a subset of the whole image to the wider area.}
   \item{fileOut}{Name of file to save to, defaults to a temporary file.}
   \item{silent}{Should the function work without progress reports?}
+  \item{retEigen}{If eigenvectors should be returned alongside the raster.}
 }
 
 \details{
@@ -25,7 +26,7 @@ As the calculation of a correlation matrix can take a long time (~4 hours when t
 }
 
 \value{
-A matrix of two items
+Depending on retEigen, either a Raster* object or a list of two items
   \item{Raster}{The image calculated from principal components.}
   \item{Eigens}{A matrix containing the eigenvectors, eigenvalues & standard deviations.}
 }
