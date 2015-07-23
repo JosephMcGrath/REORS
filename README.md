@@ -12,15 +12,12 @@ REORS requires the "raster" package for all functions.
 ##Instalation
 To install the package, copy the following text into the R console:
 
-    install.packages(c("devtools", "raster"), dependencies = TRUE)
+    install.packages(c("devtools", "raster"))
     library("devtools")
     install_github("JosephMcGrath/REORS")
     library("REORS")
 The devtools package may suggest that RTools needs to be installed for packages to be built - this does not seem to impede workings here.  
-For any later sessions use:
-
-    library("REORS")
-To load the library (also loads the raster package and all its dependencies).  
+ 
 To update the package:
 
     library("devtools")
