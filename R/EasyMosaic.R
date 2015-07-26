@@ -1,21 +1,15 @@
-EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
- fileOut = TempRasterName(), silent = TRUE){
+EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean, fileOut = TempRasterName(), silent = TRUE){
 #Function to easily load, filter and mosaic a set of rasters.
 #Currently requires that all rasters have the same projection, resolution ect.
 #
 #Args:
 #  rasterIn: A set of files to mosaic, defaults to choose.files(). Passed
 #   through RasterLoad.
-#  resample: Boolean value - if any inputs have different resolutions
-#   ect. this will cause them to be re-sampled to the most common input.
-#   This can and will change data values, as well as take a lot of computation
-#   time. Generally un-advised but can be useful to produce an output from
-#   irregular inputs.
 #  resolve: String to choose how to resolve any resolution differences:
 #    "resample" - Resample all rasters to the most common input. Can take a
 #     significant quantity of time. Can be quite processor intensive too.
 #    "multiple" - Produces a list of mosaiced rasters, one for each different
-#     resolution in.
+#     resolution in. Multiple output rasters with sequential names are created.
 #    All other option will return only the most common resolution. In the case
 #     of two being equally common, will pick the first in the input list.
 #  sumFun: Function to be passed to mosaic function (for resolving duplicates)
@@ -30,6 +24,7 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
 #  When resampling, currently 
 
   library("REORS")
+  library("raster")
   
   #Sub-function to mosaic all rasters in a list.
   mosaicList <- function(tempIn, fun = sumFun, fileNameOut = fileOut){
@@ -114,6 +109,12 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
           cat(sprintf("\t\tCreating mosaic %s of %s", i, nrow(resCount)))
         }
         print(dataIn[resMat[, 1] == resCount[i, 1] & resMat[, 2] == resCount[i, 2]])
+        rasterTemp <- resMat[, 1] == resCount[i, 1] & 
+          resMat[, 2] == resCount[i, 2]
+        rasterTemp <-  dataIn[rasterTemp]
+        rasterOut[[i]] <- mosaicList(rasterTemp,
+         fileNameOut = sprintf("%s_%s", fileOut, i)
+        )
         #rasterOut[i] <- mosaicList(["Get List of correct rasters here"], fileNameOut = sprintf("%s_%s", fileOut, i)
       }
     #Just use the most common resolution
@@ -130,3 +131,8 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
 }
 tempResults <- EasyMosaic(resolve = "resample", silent = FALSE)
 plot(tempResults)
+
+
+
+
+

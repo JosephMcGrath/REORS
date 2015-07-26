@@ -15,7 +15,7 @@ SpectralProfiler(rasterIn, shapeIn = "point", nProfile = 1, returnSpatial = FALS
 
 \arguments{
   \item{rasterIn}{Raster* object to extract values from.}
-  \item{shapeIn}{Either a Spatial* object, or one of the following strings::\cr
+  \item{shapeIn}{Either a Spatial* object, or one of the following strings:\cr
   "point": To draw points on the plot window.\cr
   "line": To draw lines on the plot window.\cr
   "poly": To draw polygons on the plot window.}

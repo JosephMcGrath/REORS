@@ -8,12 +8,16 @@ Mosaics a variety of input Raster* objects, automatically removing or resampling
 }
 
 \usage{
-EasyMosaic(dataIn = choose.files(), resample = FALSE, fileOut = TempRasterName(), silent = TRUE)
+EasyMosaic(rasterIn = choose.files(), resolve = "", sumFun = mean, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{
   \item{dataIn}A set of files to mosaic, defaults to choose.files(). Passed through RasterLoad.}
-  \item{resample}{Boolean value - if any inputs have different resolutions ect. this will cause them to be re-sampled to the most common input. This can and will change data values, as well as take a lot of computation time. Generally un-advised but can be useful to produce an output from irregular inputs.}
+  \item{resolve}{String to choose how to resolve any resolution differences:\cr
+  "resample" - Resample all rasters to the most common input. Can take a significant quantity of time. Can be quite processor intensive too..\cr
+  "multiple" - Produces a list of mosaiced rasters, one for each different resolution in. Multiple output rasters with sequential names are created.\cr
+  All other option will return only the most common resolution. In the case of two being equally common, will pick the first in the input list.}
+  \item{sumFun}{Function to be passed to mosaic function (for resolving duplicates)}
   \item{fileOut}{Name to write file to, defaults to temporary file.}
   \item{silent}{Should the function work without progress reports?}
 }
