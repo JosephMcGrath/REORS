@@ -129,10 +129,3 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean, f
   
   return(rasterOut)
 }
-tempResults <- EasyMosaic(resolve = "resample", silent = FALSE)
-plot(tempResults)
-
-
-
-
-
