@@ -1,10 +1,10 @@
-EasyMosaic <- function(rasterIn = RasterBrowse(), resolve = "", sumFun = mean,
+EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
  fileOut = TempRasterName(), silent = TRUE){
 #Function to easily load, filter and mosaic a set of rasters with options to
 # resolve differences in resolution, projection ect.
 #
 #Args:
-#  rasterIn: A set of files to mosaic, defaults to RasterBrowse(). Passed
+#  rasterIn: A set of files to mosaic, defaults to choose.files(). Passed
 #   through RasterLoad.
 #  resolve: String to choose how to resolve any resolution differences:
 #    "resample" - Resample all rasters to the most common input. Can take a

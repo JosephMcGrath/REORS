@@ -8,7 +8,7 @@ Function to easily load, filter and mosaic a set of rasters with options to reso
 }
 
 \usage{
-EasyMosaic(rasterIn = RasterBrowse(), resolve = "", sumFun = mean, fileOut = TempRasterName(), silent = TRUE)
+EasyMosaic(rasterIn = choose.files(), resolve = "", sumFun = mean, fileOut = TempRasterName(), silent = TRUE)
 }
 
 \arguments{
