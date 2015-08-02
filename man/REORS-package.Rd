@@ -16,8 +16,8 @@ This package is intended to help fill that gap, by implementing functionality pr
 \tabular{ll}{
 Package: \tab REORS\cr
 Type: \tab Package\cr
-Version: \tab 0.1-6\cr
-Date: \tab 2014-05-12\cr
+Version: \tab 0.1-7\cr
+Date: \tab 2014-08-02\cr
 License: \tab GPL3\cr
 }
 
