@@ -1,9 +1,10 @@
-EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean, fileOut = TempRasterName(), silent = TRUE){
-#Function to easily load, filter and mosaic a set of rasters.
-#Currently requires that all rasters have the same projection, resolution ect.
+EasyMosaic <- function(rasterIn = RasterBrowse(), resolve = "", sumFun = mean,
+ fileOut = TempRasterName(), silent = TRUE){
+#Function to easily load, filter and mosaic a set of rasters with options to
+# resolve differences in resolution, projection ect.
 #
 #Args:
-#  rasterIn: A set of files to mosaic, defaults to choose.files(). Passed
+#  rasterIn: A set of files to mosaic, defaults to RasterBrowse(). Passed
 #   through RasterLoad.
 #  resolve: String to choose how to resolve any resolution differences:
 #    "resample" - Resample all rasters to the most common input. Can take a
@@ -21,7 +22,9 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean, f
 #   or resampled.
 #
 #To do:
-#  When resampling, currently 
+#  There are still a few situations where different coordinate systems can
+#   cause an error trying to mosaic several rasters.
+#  Test with regards to overlapping rasters and multi-layered rasters.
 
   library("REORS")
   library("raster")
@@ -98,9 +101,9 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean, f
           )
         }
       }
-      
       rasterOut <- mosaicList(dataIn)
-    #Create a mosaic for each resolution                                      #To Do - File names out (append 1,2,3 ect.)
+      
+    #Create a mosaic for each resolution
     } else if(resolve == "multiple") {
       if(!silent) cat(" Creating output rasters for each resolution.\n")
       rasterOut <- list()
@@ -108,15 +111,14 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean, f
         if(!silent){
           cat(sprintf("\t\tCreating mosaic %s of %s", i, nrow(resCount)))
         }
-        print(dataIn[resMat[, 1] == resCount[i, 1] & resMat[, 2] == resCount[i, 2]])
         rasterTemp <- resMat[, 1] == resCount[i, 1] & 
-          resMat[, 2] == resCount[i, 2]
+         resMat[, 2] == resCount[i, 2]
         rasterTemp <-  dataIn[rasterTemp]
         rasterOut[[i]] <- mosaicList(rasterTemp,
          fileNameOut = sprintf("%s_%s", fileOut, i)
         )
-        #rasterOut[i] <- mosaicList(["Get List of correct rasters here"], fileNameOut = sprintf("%s_%s", fileOut, i)
       }
+      
     #Just use the most common resolution
     } else {
       if(!silent) cat(" Using only the most common resolution.\n")
