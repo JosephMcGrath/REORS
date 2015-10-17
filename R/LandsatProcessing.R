@@ -191,17 +191,17 @@ LandsatProcessing <- function(filePath, props = NULL,
        row = blocks$row[i],
        nrow = blocks$nrow[i]
     )
-    cat(".")
+    if(!silent) cat(".")
     
     tempValues[rowSums(tempValues == 0 | is.na(tempValues)) > 0] <- NA
-    cat(".")
+    if(!silent) cat(".")
     
     rasterOut <- writeValues(
      x = rasterOut,
      v = tempValues,
      start = blocks$row[i]
     )
-    cat(".\n")
+    if(!silent) cat(".\n")
     
   }
   rasterOut <- writeStop(rasterOut)

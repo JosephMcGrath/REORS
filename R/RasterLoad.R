@@ -34,7 +34,7 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
       if(class(x[[i]])[1] == "RasterStack") ret <- append(ret, x[[i]])
       if(class(x[[i]])[1] == "character"){
         for(j in x[[i]]){
-          if(file.exists(j)){                                                 #<-- Test if it is a compatible format?
+          if(file.exists(j)){                                                   #<-- Test if it is a compatible format?
             temp <- brick(j)
             if(nlayers(temp) == 1){
               ret <- append(ret, raster(j))

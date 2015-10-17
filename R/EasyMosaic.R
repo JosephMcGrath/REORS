@@ -51,6 +51,7 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
   if(!silent) cat("\tLoading data.\n")
   
   for(i in 1:length(rasterIn)){
+    if(!silent) cat(sprintf("\t\tLayer %s of %s\n", i, length(rasterIn)))
     dataIn[[i]] <- RasterLoad(rasterIn[i], retForm = "stack")
     resMat[i, 1:2] <- res(dataIn[[i]])
     #resMat[i, 3] <- crs(dataIn[[i]])
@@ -126,6 +127,7 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
       rasterOut <- mosaicList(dataIn)
     }
   } else {
+    if(!silent) cat("\tNo conflicts detected, carrying out mosaicing process.\n")
     rasterOut <- mosaicList(dataIn)
   }
   

@@ -8,34 +8,12 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
 #
 #Requires: RasterLoad, RasterShell
 #
-#Hypsometric integral source: 
-# Pike,R.J., Wilson,S.E. (1971). 
-# Elevation-relief ratio, hypsometric integral, and geomorphic area-altitude
-# analysis. Geological Society of America Bulletin, 82, 1079-1084
-#
-#Topographic openness source:
-# Yokoyama R., Shirasawa M., Pike R.J. (2002)
-# Visualizing Topography by Openness: A New Application of Image Processing to
-# Digital Elevation Models. Photogrammetric Engineering & Remote Sensing.
-# 68, 257-265
-#
 #Args:
 #  rasterIn: The raster file to use in calculation, passed through RasterLoad
-#  sumFum: The function used to summarise the focal values. Should return a
-#   single value (if multiple are returned, will use the first). Several
-#   presets are available using strings:
-#   -"hyps": The hypsometric integral
-#   -"range": The difference between the maximum and minimum values in the
-#    kernel.
-#   -"wmean": Weighted mean, for when kernel values aren't equal.
-#   -"amin": The difference between the centre of the kernel and the minimum
-#    elevation in the kernel.
-#   -"bmax": The difference between the centre of the kernel and the maximum
-#    elevation in the kernel.
-#   -"topoOpennessP": The positive topographic openness. Assumes the input is
-#    a DEM and that horizontal and vertical units are the same.
-#   -"topoOpennessN": The negative topographic openness. Assumes the input is
-#    a DEM and that horizontal and vertical units are the same.
+#  sumFum: The function used to summarise the focal values. Any function that
+#   takes in a range of values will generally work (must accept an na.rm
+#   argument, even if it does not actually use it). If multiple values are
+#   returned, it will only use the first.
 #  kernelSize: The size of the kernel to be used. May be either a single
 #   number (for a square matrix), a pair of numbers (for uneven height &
 #   width). Alternatively a pre-set matrix can be given (in which case
@@ -68,6 +46,9 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
   }
 
 #--Set up the weighting matrix-------------------------------------------------
+  #NOTE: This section is also used in the Geomorphometry function. If this is
+   #updated, copy all changes across.
+  
   #Generate the initial values
   noMod <- FALSE
   if(class(kernelSize) == "matrix"){
@@ -119,72 +100,6 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
   ngbSize <- c(nrow(kernelUse), ncol(kernelUse))
   kernelUse <- c(kernelUse)
   
-#--Predefined functions-------------------------------------------------------
-  if(sumFun == "topoOpennessN" | sumFun == "topoOpennessP"){
-      kernelDist <- matrix(NA, ngbSize[1], ngbSize[2])
-      cent <- ceiling(ngbSize / 2)
-      for(i in 1:nrow(kernelDist)){
-        for(j in 1:nrow(kernelDist)){
-          kernelDist[i, j] <- sqrt(((i - cent[1]) * res(rasterIn)[1]) ^ 2 +
-           ((j - cent[2]) * res(rasterIn)[2]) ^ 2)
-        }
-      }
-      kernelDist[cent[1], cent[2]] <- NA
-      
-      mid <- ceiling(length(kernelDist) / 2)
-      diam <- floor(nrow(kernelDist) / 2)
-      pulls <- list(
-       seq(1, mid, nrow(kernelDist) + 1),
-       seq(mid, nrow(kernelDist), -1 * nrow(kernelDist) + 1),
-       seq(mid, length(kernelDist), nrow(kernelDist) + 1),
-       seq(mid, length(kernelDist) - nrow(kernelDist) + 1,
-        nrow(kernelDist) - 1),
-       seq(ceiling(nrow(kernelDist) / 2), mid, nrow(kernelDist)),
-       seq(mid, length(kernelDist) - diam, nrow(kernelDist)),
-       seq(mid - diam, mid),
-       seq(mid, mid + diam)
-      )
-      
-      kernelDist <- kernelDist[!is.na(kernelUse)]
-      for(i in 1:length(pulls)){
-        pulls[[i]] <- pulls[[i]][!(pulls[[i]] %in% which(is.na(kernelUse)))]
-      }
-    }
-  
-  if(class(sumFun) == "character"){
-    if(sumFun == "hyps"){
-      sumFun <- function(x) return((mean(x) - min(x)) / (max(x) - min(x)))
-    } else if(sumFun == "range"){
-      sumFun <- function(x) return(max(x) - min(x))
-    } else if(sumFun == "wmean"){
-      sumFun <- function(x) return(sum(x) / sum(kernelUse))
-    } else if(sumFun == "amin"){
-      sumFun <- function(x) return(x[ceiling(length(x) / 2)] - min(x))
-    } else if(sumFun == "bmax"){
-      sumFun <- function(x) return(max(x) - x[ceiling(length(x) / 2)])
-    } else if(sumFun == "topoOpennessP"){
-      sumFun <- function(x){
-        x <- atan((x - x[mid]) / kernelDist) / (2 * pi) * 360
-        return(mean(
-         max(x[pulls[[1]]], na.rm = TRUE), max(x[pulls[[2]]], na.rm = TRUE),
-         max(x[pulls[[3]]], na.rm = TRUE), max(x[pulls[[4]]], na.rm = TRUE),
-         max(x[pulls[[5]]], na.rm = TRUE), max(x[pulls[[6]]], na.rm = TRUE),
-         max(x[pulls[[7]]], na.rm = TRUE), max(x[pulls[[8]]], na.rm = TRUE)
-        ))
-      }
-    } else if(sumFun == "topoOpennessN"){
-      sumFun <- function(x){
-        x <- atan((x - x[mid]) / kernelDist) / (2 * pi) * 360
-        return(mean(
-         min(x[pulls[[1]]], na.rm = TRUE), min(x[pulls[[2]]], na.rm = TRUE),
-         min(x[pulls[[3]]], na.rm = TRUE), min(x[pulls[[4]]], na.rm = TRUE),
-         min(x[pulls[[5]]], na.rm = TRUE), min(x[pulls[[6]]], na.rm = TRUE),
-         min(x[pulls[[7]]], na.rm = TRUE), min(x[pulls[[8]]], na.rm = TRUE)
-        ))
-      }
-    } else stop("Invalid summary function defined.\n")
-  }
-  
 #--Apply the filter to the data-----------------------------------------------
   #Using conservatively small blocks to keep things manageable.
   #Results in more read/write cycles.
@@ -217,7 +132,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
       tempValues <- t(t(tempValues) * kernelUse)
       for(j in 1:nrow(tempValues)){ #Using "j" for easy conversion below
         if(!any(is.na(tempValues[j, !is.na(kernelUse)])) | na.rm){
-          writeV[j] <- sumFun(tempValues[j, ][!is.na(tempValues[j, ])])[[1]]
+          writeV[j] <- sumFun(tempValues[j, ], na.rm = na.rm)[[1]]
         }
       }
     } else {
