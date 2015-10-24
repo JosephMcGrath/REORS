@@ -13,22 +13,22 @@ RasterShell <- function(rasterIn, layers = nlayers(rasterIn)){
 #Returns:
 #  A RasterLayer/RasterBrick (depending on the number of layers requested)
 #   with no values attached.
-  
-  library("raster")
 
-  if(layers == 1){
-    ret <- raster(
-     ext = extent(rasterIn),
-     res = res(rasterIn),
-     crs = crs(rasterIn)
-    )
-  } else if(layers > 1){
-    ret <- brick(
-      x = rasterIn,
-      values = FALSE,
-      nl = layers
-    )
-  } else stop("Invalid number of layers defined")
-  
-  return(ret)
+    library("raster")
+
+    if(layers == 1){
+        ret <- raster(ext = extent(rasterIn),
+                      res = res(rasterIn),
+                      crs = crs(rasterIn)
+                      )
+    } else if(layers > 1){
+        ret <- brick(x = rasterIn,
+                     values = FALSE,
+                     nl = layers
+                     )
+    } else {
+        stop("Invalid number of layers defined")
+    }
+
+    return(ret)
 }

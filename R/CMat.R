@@ -51,172 +51,182 @@ CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
 #   reorganising: the order used to reorganise the clusters
 #   unadjusted: the confusion matrix as it was originally calculated
 
-  library("raster")
-
-  if(class(classed) == "character") classed <- raster(classed)
-  if(class(reference) == "character") reference <- raster(reference)
-  
-  if(class(classed)[1] != "RasterLayer"){
-    stop("Classified layer must be a RasterLayer.\n")
-  }
-  if(class(reference)[1] != "RasterLayer"){
-   stop("Reference layer must be a RasterLayer.\n")
-  }
-  
-  original <- crosstab(classed, reference)
-  
-  temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))
-  for(i in 1:sqrt(nrow(original))){
-    temp[, i] <- original[seq((i - 1) * nrow(temp) + 1, i * nrow(temp)), 3]
-  }
-  #Drop the rows and columns relating to NA values.
-  temp <- temp[seq(1, nrow(temp) - 1), seq(1, ncol(temp) - 1)]
-  
-#--Re-organise classes to best fit--------------------------------------------
-  if(reOrg){
-#Shuffle around classes, so that largest classified classes match with the 
- #largest "confirmed" classes.
-
-#Outputs which true class is highest for each classified
-    large <- rep(NA, nrow(temp))
-    for (i in 1:nrow(temp)){
-      #Simplest to only take one item when tied - taking the first one.
-      #This is mirrored below, changes need to be copied down.
-      large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
-    }
-  
-#temp is kept as a record of the original. Using proportions of reference
- #classes, to reduce effects from different sizes for each class.
-    sMat <- temp / rowSums(temp)
+    library("raster")
     
-  #Remove smallest items from temp matrix until best pairs remain
-    for (doNotUse in 1:length(sMat)){
-      if (length(unique(large)) == length(large)) break
-      
-      for (i in unique(large)){
-        if (sum(large == i) > 1){
-          use <- which(large == i) + (i - 1) * nrow(sMat)
-          
-          #min() is somewhat arbitrary here
-          sMat[min(use[sMat[use] == min(sMat[use])])] <- NA
+    # Input's a bit more rigid than other functions, only single RasterLayers
+    if (class(classed) == "character"){
+        classed <- raster(classed)
+    }
+    if (class(reference) == "character"){
+        reference <- raster(reference)
+    }
+
+    if (class(classed)[1] != "RasterLayer"){
+        stop("Classified layer must be a RasterLayer.\n")
+    }
+    if (class(reference)[1] != "RasterLayer"){
+        stop("Reference layer must be a RasterLayer.\n")
+    }
+    
+    #Uses the raster library's crosstab function to do the heavy lifting.
+    #May need to replace with multicore version if I go that route.             #Todo
+    original <- crosstab(classed, reference)
+    
+    #Reorganise to a format that's easier to run with.
+    temp <- matrix(ncol = sqrt(nrow(original)), nrow = sqrt(nrow(original)))
+    for (i in 1:sqrt(nrow(original))){
+        temp[, i] <- original[seq((i - 1) * nrow(temp) + 1, i * nrow(temp)), 3]
+    }
+    #Drop the rows and columns relating to NA values.
+    temp <- temp[seq(1, nrow(temp) - 1), seq(1, ncol(temp) - 1)]
+
+#--Re-organise classes to best fit--------------------------------------------
+    if(reOrg){
+        #Shuffle around classes, so that largest classified classes match with
+            #the largest "confirmed" classes.
+
+        #Outputs which true class is highest for each classified
+        large <- rep(NA, nrow(temp))
+        for (i in 1:nrow(temp)){
+            #Simplest to only take one item when tied - taking the first one.
+            #This is mirrored below, changes need to be copied down.
+            large[i] <- which(max(temp[i, ]) == temp[i, ])[1]
         }
-      }
-      
-      large <- rep(NA, nrow(sMat))
-      for (i in 1:nrow(sMat)){
-        large[i] <- which(max(sMat[i, ], na.rm = TRUE) == sMat[i, ])[1]
-      }
-    }
-  
-#Move the relevant items
-    if (length(unique(large)) == length(large)){
-      for (i in 1:nrow(temp)){
-    #    sMat[i,] <- temp[(1:length(large)) * (large == i), ]
-        sMat[i,] <- temp[(large == i), ]
-      }
+
+        #temp is kept as a record of the original. Using proportions of 
+            #reference classes, to reduce effects from different sizes
+            #for each class.
+        sMat <- temp / rowSums(temp)
+
+        #Remove smallest items from temp matrix until best pairs remain
+        for (doNotUse in 1:length(sMat)){
+            if (length(unique(large)) == length(large)){
+                break
+            }
+
+            for (i in unique(large)){
+                if (sum(large == i) > 1){
+                    use <- which(large == i) + (i - 1) * nrow(sMat)
+
+                    #min() is somewhat arbitrary here
+                    sMat[min(use[sMat[use] == min(sMat[use])])] <- NA
+                }
+            }
+
+            large <- rep(NA, nrow(sMat))
+            for (i in 1:nrow(sMat)){
+                large[i] <- which(max(sMat[i, ], na.rm = TRUE) == sMat[i, ])[1]
+            }
+        }
+
+        #Move the relevant items
+        if (length(unique(large)) == length(large)){
+            for (i in 1:nrow(temp)){
+            #    sMat[i,] <- temp[(1:length(large)) * (large == i), ]
+            sMat[i,] <- temp[(large == i), ]
+            }
+        } else {
+            stop("Error - this may be due to empty classes")
+        }
     } else {
-      stop("Error - this may be due to empty classes")
+        large <- seq(1, ncol(temp))
+        sMat <- temp
     }
-  } else {
-    large <- seq(1, ncol(temp))
-    sMat <- temp
-  }
-  
+
 #--Standardise the table between 0 and 1--------------------------------------
-  if(stand){
-    sMat <- sMat / max(sMat)
-  }
-	
-#--Calculate accuracy measures------------------------------------------------
-  tObs <- sum(sMat)
-  
-#Overall Accuracy
-  oAcc <- sum(diag(sMat)) / tObs
-  
-#Producers accuracy
-  pAcc <- rep(NA, nrow(sMat))
-  for (i in 1:nrow(sMat)){
-    pAcc[i] <- sMat[i,i] / sum(sMat[,i])
-  }
-  
-#Users accuracy
-  uAcc <- rep(NA, nrow(sMat))
-  for (i in 1:nrow(sMat)){
-    uAcc[i] <- sMat[i,i] / sum(sMat[i,])
-  }
-  
-#Kappa
-  tPos <- 0
-  mTot <- 0
-  
-  for (i in 1:nrow(sMat)){
-    tPos <- tPos + sMat[i,i]
-    mTot <- mTot + sum(sMat[i,]) * sum(sMat[,i])
-  }
-  kppa <- (tObs * tPos - mTot) / (tObs ^ 2 - mTot)
-  
-#Set up for disagreement measures
-  #refered to as "unbiased population matrix" in Pontius & Millones
-  #May be worth investigating further. Maybe investigate for more use.
-  pMat <- sMat 
-  
-  for(i in 1:nrow(pMat)){
-    for(j in 1:ncol(pMat)){
-      pMat[i, j] <- sMat[i, j] / sum(sMat[i, ]) * sum(sMat[j, ]) / sum(sMat)
+    if(stand){
+        sMat <- sMat / max(sMat)
     }
-  }
-  print(pMat)
+    
+#--Calculate accuracy measures------------------------------------------------
+    tObs <- sum(sMat)
+
+    #Overall Accuracy
+    oAcc <- sum(diag(sMat)) / tObs
+
+    #Producers accuracy
+    pAcc <- rep(NA, nrow(sMat))
+    for (i in 1:nrow(sMat)){
+        pAcc[i] <- sMat[i,i] / sum(sMat[,i])
+    }
+  
+    #Users accuracy
+    uAcc <- rep(NA, nrow(sMat))
+    for (i in 1:nrow(sMat)){
+        uAcc[i] <- sMat[i,i] / sum(sMat[i,])
+    }
+
+    #Kappa
+    tPos <- 0
+    mTot <- 0
+
+    for (i in 1:nrow(sMat)){
+        tPos <- tPos + sMat[i,i]
+        mTot <- mTot + sum(sMat[i,]) * sum(sMat[,i])
+    }
+    kppa <- (tObs * tPos - mTot) / (tObs ^ 2 - mTot)
+    
+    #Set up for disagreement measures
+        #refered to as "unbiased population matrix" in Pontius & Millones
+        #May be worth investigating further. Maybe investigate for more use.
+    pMat <- sMat 
+
+    for(i in 1:nrow(pMat)){
+        for(j in 1:ncol(pMat)){
+          pMat[i, j] <- sMat[i, j] / sum(sMat[i, ]) *
+                        sum(sMat[j, ]) / sum(sMat)
+        }
+    }
+    print(pMat)
 
 #Quantity disagreement
-  #Per class
-  qDiss <- rep(NA, nrow(sMat))
-  for(i in 1:nrow(sMat)){
-    qDiss[i] <- abs(sum(pMat[, i]) - sum(pMat[i, ]))
-  }
-  #Overall
-  qDissSum <- sum(qDiss) / 2
+    #Per class
+    qDiss <- rep(NA, nrow(sMat))
+    for(i in 1:nrow(sMat)){
+        qDiss[i] <- abs(sum(pMat[, i]) - sum(pMat[i, ]))
+    }
+    #Overall
+    qDissSum <- sum(qDiss) / 2
 
-#Allocation disagreement
-  #Per class
-  aDiss <- rep(NA, nrow(sMat))
-  for(i in 1:nrow(sMat)){
-    aDiss[i] <- 2 * min(
-     sum(pMat[, i]) - pMat[i, i],
-     sum(pMat[i, ]) - pMat[i, i]
-    )
-  }
-  #Overall
-  aDissSum <- sum(aDiss) / 2
+    #Allocation disagreement
+    #Per class
+    aDiss <- rep(NA, nrow(sMat))
+    for(i in 1:nrow(sMat)){
+        aDiss[i] <- 2 * min(sum(pMat[, i]) - pMat[i, i],
+                            sum(pMat[i, ]) - pMat[i, i]
+                            )
+    }
+    #Overall
+    aDissSum <- sum(aDiss) / 2
 
-#Overall disagreement
-  tDiss <- qDissSum + aDissSum
+    #Overall disagreement
+    tDiss <- qDissSum + aDissSum
 
-  #Check proportion correct = accuracy
-  #print(tDiss - (1 - sum(diag(pMat))))
-  
+    #Check proportion correct = accuracy
+    #print(tDiss - (1 - sum(diag(pMat))))
+
 #--Return requested statistics------------------------------------------------
 
-  if (retT == "brief"){
-    ret <- c(kppa,oAcc)
-  } else if (retT == "order"){ 
-    ret <- large
-  }else {
-    ret <- list(
-     adjusted = sMat,
-     kappaValue = as.vector(kppa),
-     producersAccuracy = pAcc,
-     usersAccuracy = uAcc,
-     overallAccuracy = as.vector(oAcc),
-     quantityDisagreement = qDiss,
-     allocationDisagreement = aDiss,
-     totalQuantityDisagreement = qDissSum,
-     totalAllocationDisagreement = aDissSum,
-     totalDisagreement = tDiss,
-     reorganising = large,
-     #UnbiasedPopulation = pMat,
-     unadjusted = temp
-    )
-  }
-  
-  return(ret)
+    if (retT == "brief"){
+        ret <- c(kppa,oAcc)
+    } else if (retT == "order"){ 
+        ret <- large
+    } else {
+        ret <- list(adjusted = sMat,
+                    kappaValue = as.vector(kppa),
+                    producersAccuracy = pAcc,
+                    usersAccuracy = uAcc,
+                    overallAccuracy = as.vector(oAcc),
+                    quantityDisagreement = qDiss,
+                    allocationDisagreement = aDiss,
+                    totalQuantityDisagreement = qDissSum,
+                    totalAllocationDisagreement = aDissSum,
+                    totalDisagreement = tDiss,
+                    reorganising = large,
+                    #UnbiasedPopulation = pMat,
+                    unadjusted = temp
+                    )   
+    }
+
+    return(ret)
 }

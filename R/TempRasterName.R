@@ -10,5 +10,5 @@ TempRasterName <- function(fileType = "out"){
 #Returns:
 #  A file name as a string.
   
-  return(tempfile(pattern = sprintf("REORS -%s- ", fileType)))
+    return(tempfile(pattern = sprintf("REORS -%s- ", fileType)))
 }

@@ -36,135 +36,150 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
 #  A Raster* object with the same number of layers as input containing the
 #   calculated values.
 
-  library("raster")
-  library("REORS")
-  
-  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
-  
-  if(kernelSize %% 2 != 1){
-    stop("Kernel must have odd number of cells per side.\n")
-  }
+    library("raster")
+    library("REORS")
+
+    rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+
+    if(kernelSize %% 2 != 1){
+        stop("Kernel must have odd number of cells per side.\n")
+    }
 
 #--Set up the weighting matrix-------------------------------------------------
   #NOTE: This section is also used in the Geomorphometry function. If this is
    #updated, copy all changes across.
   
-  #Generate the initial values
-  noMod <- FALSE
-  if(class(kernelSize) == "matrix"){
-    kernelUse <- kernelSize
-    noMod <- TRUE
-  } else if(class(kernelSize) == "numeric" |
-   class(kernelSize) == "integer"){
-    if(length(kernelSize) == 2){
-      kernelUse <- matrix(1, ncol = kernelSize[1], nrow = kernelSize[2])
-    } else if(length(kernelSize) == 1){
-      kernelUse <- matrix(1, ncol = kernelSize, nrow = kernelSize)
+    #Generate the initial values
+    noMod <- FALSE
+    if(class(kernelSize) == "matrix"){
+        kernelUse <- kernelSize
+        noMod <- TRUE
+    } else if(class(kernelSize) == "numeric" |
+              class(kernelSize) == "integer"){
+        if(length(kernelSize) == 2){
+            kernelUse <- matrix(1, ncol = kernelSize[1], nrow = kernelSize[2])
+        } else if(length(kernelSize) == 1){
+            kernelUse <- matrix(1, ncol = kernelSize, nrow = kernelSize)
+        } else {
+            stop("Invalid kernel definition.")
+        }
     } else {
-      stop("Invalid kernel definition.")
+        stop("Invalid kernel definition.")
     }
-  } else {
-    stop("Invalid kernel definition.")
-  }
-  
-  #Apply shape to the weightings
-  if(!noMod){
-    if(kernelShape == "circle"){
-      mid <- c(ceiling(ncol(kernelUse) / 2), ceiling(nrow(kernelUse) / 2))
-      for(i in 1:ncol(kernelUse)){
-        for(j in 1:nrow(kernelUse)){
-          if(sqrt((i - mid[1]) ^ 2 + (j - mid[2]) ^ 2) > (mean(mid) - 1)){
-            kernelUse[i, j] <- NA
-          }
+
+    #Apply shape to the weightings
+    if(!noMod){
+        if(kernelShape == "circle"){
+            mid <- c(ceiling(ncol(kernelUse) / 2), ceiling(nrow(kernelUse) / 2))
+            for(i in 1:ncol(kernelUse)){
+                for(j in 1:nrow(kernelUse)){
+                    if(sqrt((i - mid[1]) ^ 2 +
+                       (j - mid[2]) ^ 2) > (mean(mid) - 1)){
+                        kernelUse[i, j] <- NA
+                    }
+                }
+            }
+        } else if(kernelShape == "gaussian"){
+            mid <- c(ceiling(ncol(kernelUse) / 2), ceiling(nrow(kernelUse) / 2))
+            for(i in 1:ncol(kernelUse)){
+                for(j in 1:nrow(kernelUse)){
+                    #This could really do with cleaning up                      ToDo
+                    kernelUse[i, j] <- 1 / (2 * pi * (1 ^ 2)) *
+                                       exp(-1 * (((i - mid[1]) /
+                                           (0.2 * ncol(kernelUse))) ^ 2 +
+                                           ((j - mid[2]) /
+                                           (0.2 * nrow(kernelUse))) ^ 2) / 2 *
+                                           1 ^ 2
+                                           ) #The 1 in 1 ^ 2 here is sigma value
+                }
+            }
         }
-      }
-    } else if(kernelShape == "gaussian"){
-      mid <- c(ceiling(ncol(kernelUse) / 2), ceiling(nrow(kernelUse) / 2))
-      for(i in 1:ncol(kernelUse)){
-        for(j in 1:nrow(kernelUse)){
-          kernelUse[i, j] <- 1 / (2 * pi * (1 ^ 2)) * #1 ^ 2 here is sigma
-           exp(-1 * (((i - mid[1]) / (0.2 * ncol(kernelUse))) ^ 2 +
-           ((j - mid[2]) / (0.2 * nrow(kernelUse))) ^ 2) / 2 *
-           1 ^ 2) #The 1 in 1 ^ 2 here is sigma
-        }
-      }
     }
-  }
-    
-  if(!silent){
-    cat("Kernel used:\n")
-    print(kernelUse)
-  }
-  
-  #Finally "flatten" out the kernel
-  ngbSize <- c(nrow(kernelUse), ncol(kernelUse))
-  kernelUse <- c(kernelUse)
-  
+
+    if(!silent){
+        cat("Kernel used:\n")
+        print(kernelUse)
+    }
+
+    #Finally "flatten" out the kernel
+    ngbSize <- c(nrow(kernelUse), ncol(kernelUse))
+    kernelUse <- c(kernelUse)
+
 #--Apply the filter to the data-----------------------------------------------
   #Using conservatively small blocks to keep things manageable.
   #Results in more read/write cycles.
   #n = kernel * nlayers? For Raster*'s with many layers.
-  blocks <- blockSize(rasterIn, n = length(kernelUse))
-  rasterOut <- RasterShell(rasterIn)
-  
-  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
-   overwrite = TRUE)
-  
-  if(!silent) cat(sprintf("Applying focal operation:\nWriting to %s.tif\n",
-   fileOut))
-  
-  for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
-     i, blocks$n, round(i / blocks$n * 100)))
-     
-    tempValues <- getValuesFocal(
-     rasterIn,
-     row = blocks$row[i],
-     nrow = blocks$nrow[i],
-     ngb = ngbSize,
-     padValue = NA
-    )
-    if(!silent) cat(".")
-    
-    #These want vectorising, massively inefficient here.
-    if(nlayers(rasterIn) == 1){
-      writeV <- rep(NA, nrow(tempValues))
-      tempValues <- t(t(tempValues) * kernelUse)
-      for(j in 1:nrow(tempValues)){ #Using "j" for easy conversion below
-        if(!any(is.na(tempValues[j, !is.na(kernelUse)])) | na.rm){
-          writeV[j] <- sumFun(tempValues[j, ], na.rm = na.rm)[[1]]
-        }
-      }
-    } else {
-      writeV <- matrix(
-       NA,
-       nrow = nrow(tempValues[[1]]),
-       ncol = length(tempValues)
-      )
-      for(k in 1:length(tempValues)){
-        tempValues[[k]] <- t(t(tempValues[[k]]) * kernelUse)
-        for(j in 1:nrow(tempValues[[k]])){
-          if(!any(is.na(tempValues[[k]][j, !is.na(kernelUse)])) |
-           na.rm){
-            writeV[j, k] <- sumFun(tempValues[[k]][j, ][!is.na(
-             tempValues[[k]][j, ])])[[1]]
-          }
-        }
-      }
+    blocks <- blockSize(rasterIn, n = length(kernelUse))
+    rasterOut <- RasterShell(rasterIn)
+
+    rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
+    overwrite = TRUE)
+
+    if(!silent){
+        cat(sprintf("Applying focal operation:\nWriting to %s.tif\n",
+                    fileOut
+                    ))
     }
-    if(!silent) cat(".")
-    
-    rasterOut <- writeValues(
-     x = rasterOut,
-     v = writeV,
-     start = blocks$row[i]
-    )
-    if(!silent) cat(".\n")
-    
-  }
+
+    for(i in 1:blocks$n){
+        if(!silent){
+            cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
+                        i, blocks$n, round(i / blocks$n * 100)
+                        ))
+        }
+
+        tempValues <- getValuesFocal(rasterIn,
+                                     row = blocks$row[i],
+                                     nrow = blocks$nrow[i],
+                                     ngb = ngbSize,
+                                     padValue = NA
+                                     )
+        if(!silent){
+            cat(".")
+        }
+
+        #These want vectorising, massively inefficient here.
+        if(nlayers(rasterIn) == 1){
+            writeV <- rep(NA, nrow(tempValues))
+            tempValues <- t(t(tempValues) * kernelUse)
+            for(j in 1:nrow(tempValues)){ #Using "j" for easy conversion below
+                if(!any(is.na(tempValues[j, !is.na(kernelUse)])) | na.rm){
+                    writeV[j] <- sumFun(tempValues[j, ], na.rm = na.rm)[[1]]
+                }
+            }
+        } else {
+            writeV <- matrix(NA,
+                             nrow = nrow(tempValues[[1]]),
+                             ncol = length(tempValues)
+                             )
+            for(k in 1:length(tempValues)){
+                tempValues[[k]] <- t(t(tempValues[[k]]) * kernelUse)
+                for(j in 1:nrow(tempValues[[k]])){
+                    #Clean this section above                                   ToDo        
+                    if(!any(is.na(tempValues[[k]][j, !is.na(kernelUse)])) |
+                       na.rm){
+                        writeV[j, k] <- sumFun(tempValues[[k]][j, ][
+                                            !is.na(tempValues[[k]][j, ])
+                                            ])[[1]]
+                    }
+                }
+            }
+        }
+        if(!silent){
+            cat(".")
+        }
+
+        rasterOut <- writeValues(x = rasterOut,
+                                 v = writeV,
+                                 start = blocks$row[i]
+                                 )
+        if(!silent){
+            cat(".\n")
+        }
+    }
   
 #--Finish writing and return the final values---------------------------------  
-  rasterOut <- writeStop(rasterOut)
+    rasterOut <- writeStop(rasterOut)
 
-  return(rasterOut)
+    return(rasterOut)
 }

@@ -18,64 +18,91 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
 #
 #Returns:
 #  Either a RasterStack, RasterBrick or list containing the input data.
-  
-  library("raster")
-  
-  retForm <- tolower(retForm)
-  
-#--Convert inputs into a list-------------------------------------------------
-#Defined as a function to unpack nested lists
-  RasterLoadRec <- function(x){
-    if(!is.list(x)) x <- list(x)
-    ret <- list()
-    for(i in 1:length(x)){
-      if(class(x[[i]])[1] == "RasterLayer") ret <- append(ret, x[[i]])
-      if(class(x[[i]])[1] == "RasterBrick") ret <- append(ret, x[[i]])
-      if(class(x[[i]])[1] == "RasterStack") ret <- append(ret, x[[i]])
-      if(class(x[[i]])[1] == "character"){
-        for(j in x[[i]]){
-          if(file.exists(j)){                                                   #<-- Test if it is a compatible format?
-            temp <- brick(j)
-            if(nlayers(temp) == 1){
-              ret <- append(ret, raster(j))
-            } else {
-              ret <- append(ret, temp)
-            }
-          } else warning((sprintf("File doesn't exist: %s", j)))
+
+    library("raster")
+
+    retForm <- tolower(retForm)
+
+#--Convert inputs into a list---------------------------------------------------
+    #Defined as a function to unpack nested lists
+    RasterLoadRec <- function(rasterIn){
+        if(!is.list(rasterIn)){
+            rasterIn <- list(rasterIn)
         }
-      }
-      if(class(x[[i]])[1] == "list") ret <- append(ret, RasterLoadRec(x[[i]]))
+        ret <- list()
+        for(i in 1:length(rasterIn)){
+            if(class(rasterIn[[i]])[1] == "RasterLayer"){
+                ret <- append(ret, rasterIn[[i]])
+            }
+            if(class(rasterIn[[i]])[1] == "RasterBrick"){
+                ret <- append(ret, rasterIn[[i]])
+            }
+            if(class(rasterIn[[i]])[1] == "RasterStack"){
+                ret <- append(ret, rasterIn[[i]])
+            }
+            if(class(rasterIn[[i]])[1] == "character"){
+                for(j in rasterIn[[i]]){
+                    if(file.exists(j)){
+                        #Should check if the format is compatable?              ToDo
+                            #Weed out QGIS xml.
+#                        if(extension(j) %in% c("xml"){
+#                            next
+#                        }
+                        temp <- brick(j)
+                        if(nlayers(temp) == 1){
+                            ret <- append(ret, raster(j))
+                        } else {
+                            ret <- append(ret, temp)
+                        }
+                    } else {
+                        #Might be better with stop?                             ToDo
+                        warning((sprintf("File doesn't exist: %s", j)))
+                    }
+                }
+            }
+            if(class(rasterIn[[i]])[1] == "list"){
+                ret <- append(ret, RasterLoadRec(rasterIn[[i]]))
+            }
+        }
+
+        return(ret)
+    }
+
+    dataIn <- RasterLoadRec(dataIn)
+
+#--Convert to specified output--------------------------------------------------
+    allSame <- TRUE
+    if(retForm != "list"){
+        for(i in 1:length(dataIn)){
+            if(!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
+                allSame <- FALSE
+            }
+        }
     }
     
-    return(ret)
-  }
-  
-  dataIn <- RasterLoadRec(dataIn)
-  
-#--Convert to specified output------------------------------------------------
-  allSame <- TRUE
-  if(retForm != "list"){
-    for(i in 1:length(dataIn)){
-      if(!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
-        allSame <- FALSE
-      }
+    #Why not just stop in the above loop?                                       ToDo
+        #If keeping this, at least list off all the files that don't share.
+    if(!allSame & retForm != "list"){
+        stop("Files do not share metadata.")
     }
-  }
-  
-  if(!allSame & retForm != "list") stop("Files do not share metadata.")
-  
-  #Stacking is very fast, writing a brick is much slower.
-  if(allSame & retForm != "list"){
-    ret <- stack()
-    for(i in dataIn){
-      ret <- stack(ret, i)
-    }
-  } else ret <- dataIn
-  
-  if(retForm == "brick"){
-    ret <- brick(ret, filename = fileOut, format = "GTiff", overwrite = TRUE)
-  }
 
-#--Return the conglomerated data----------------------------------------------
-  return(ret)
+    #Stacking is very fast, writing a brick is much slower.
+    if(allSame & retForm != "list"){
+        ret <- stack()
+        for(i in dataIn){
+            ret <- stack(ret, i)
+        }
+    } else {
+        ret <- dataIn
+    }
+
+    if(retForm == "brick"){
+        ret <- brick(ret,
+                     filename = fileOut,
+                     format = "GTiff",
+                     overwrite = TRUE
+                     )
+    }
+
+    return(ret)
 }

@@ -16,15 +16,15 @@ CentDist <- function(centres1, centres2){
 #
 #Returns:
 #  The distance measure between the two cluster centres.
-  
-  library("raster")
-  
-  if(any(dim(centres1) != dim(centres2))){
-    stop("Centre matrices must have the same dimensions.\n")
-  }
-  
-  ret <- sum(abs((centres2 - centres1) / centres2) /
-   (ncol(centres1) * nrow(centres2)))
-  
-  return(ret)
+
+    library("raster")
+
+    if(any(dim(centres1) != dim(centres2))){
+        stop("Centre matrices must have the same dimensions.\n")
+    }
+
+    ret <- sum(abs((centres2 - centres1) / centres2) /
+           (ncol(centres1) * nrow(centres2)))
+
+    return(ret)
 }

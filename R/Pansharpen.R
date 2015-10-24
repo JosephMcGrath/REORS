@@ -32,73 +32,90 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
 #  A RasterBrick of the pansharpened image. Note this image is unsuitable for
 #   most forms of further processing as values have been altered away from
 #   true reflectances.
-  
-  library("raster")
-  library("REORS")
-  
-#--Prepare multispectral imagery----------------------------------------------
-  if(!silent) cat("Re-sampling multispectral input to panchromatic input.\n")
-  
-  if(nlayers(panIn) > 1) stop("Panchromatic input can only have one band.\n")
-  
-  multiIn <- RasterLoad(multiIn, retForm = "stack")
-  if(any(!bands %in% 1:nlayers(multiIn))){
-    stop("Multispectral input doesn't contain those bands.\n")
-  }
-  rasterIn <- stack()
-  for(i in 1:length(bands)){
-    rasterIn <- stack(rasterIn, raster(multiIn, bands[i]))
-  }
-  
-  rasterIn <- projectRaster(from = rasterIn, to = panIn)
-  
-  meth <- tolower(meth)
-  
-#--Set-up for processing------------------------------------------------------
-  blocks <- blockSize(rasterIn, n = length(bands) + 1)
-  rasterOut <- RasterShell(rasterIn)
-  
-  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
-   overwrite = TRUE)
-  
-  if(!silent) cat(sprintf("Pan-sharpening image:\n\tWriting to %s.tif\n",
-   fileOut))
-  
-#--Process each block in turn-------------------------------------------------
-  for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
-     i, blocks$n, round(i / blocks$n * 100)))
-     
-    tempValues <- getValues(
-     rasterIn,
-     row = blocks$row[i],
-     nrow = blocks$nrow[i]
-    )
-    
-    tempPan <- as.numeric(getValues(
-     panIn,
-     row = blocks$row[i],
-     nrow = blocks$nrow[i]
-    ))
-    if(!silent) cat(".")
-    
-    if(meth == "brovey"){
-      tempValues2 <- (tempValues * tempPan) / rowSums(tempValues)
-    } else {
-      stop("No valid method defined.\n")
+
+    library("raster")
+    library("REORS")
+
+#--Prepare multispectral imagery------------------------------------------------
+    if(!silent){
+        cat("Re-sampling multispectral input to panchromatic input.\n")
     }
-    if(!silent) cat(".")
-    
-    rasterOut <- writeValues(
-     x = rasterOut,
-     v = tempValues2,
-     start = blocks$row[i]
-    )
-    if(!silent) cat(".\n")
-  }
-    
-  rasterOut <- writeStop(rasterOut)
+
+    if(nlayers(panIn) > 1){
+        stop("Panchromatic input can only have one band.\n")
+    }
+
+    multiIn <- RasterLoad(multiIn, retForm = "stack")
+    if(any(!bands %in% 1:nlayers(multiIn))){
+        stop("Multispectral input doesn't contain those bands.\n")
+    }
+    rasterIn <- stack()
+    for(i in 1:length(bands)){
+        rasterIn <- stack(rasterIn, raster(multiIn, bands[i]))
+    }
+
+    rasterIn <- projectRaster(from = rasterIn, to = panIn)
+
+    meth <- tolower(meth)
+
+#--Set-up for processing--------------------------------------------------------
+    blocks <- blockSize(rasterIn, n = length(bands) + 1)
+    rasterOut <- RasterShell(rasterIn)
+
+    rasterOut <- writeStart(rasterOut,
+                            filename = fileOut,
+                            format = "GTiff",
+                            overwrite = TRUE
+                            )
+
+    if(!silent){
+        cat(sprintf("Pan-sharpening image:\n\tWriting to %s.tif\n",
+                    fileOut
+                    ))
   
+#--Process each block in turn---------------------------------------------------
+    for(i in 1:blocks$n){
+        if(!silent){
+            cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
+                        i,
+                        blocks$n,
+                        round(i / blocks$n * 100)
+                        ))
+        }
+
+        tempValues <- getValues(rasterIn,
+                                row = blocks$row[i],
+                                nrow = blocks$nrow[i]
+                                )
+
+        tempPan <- as.numeric(getValues(panIn,
+                              row = blocks$row[i],
+                              nrow = blocks$nrow[i]
+                              ))
+        if(!silent){
+            cat(".")
+        }
+
+        if(meth == "brovey"){
+            tempValues2 <- (tempValues * tempPan) / rowSums(tempValues)
+        } else {
+            stop("No valid method defined.\n")
+        }
+        if(!silent){
+            cat(".")
+        }
+
+        rasterOut <- writeValues(x = rasterOut,
+                                 v = tempValues2,
+                                 start = blocks$row[i]
+                                 )
+        if(!silent){
+            cat(".\n")
+        }
+    }
+
+    rasterOut <- writeStop(rasterOut)
+
 #--Post-processing goes here--------------------------------------------------
-  return(rasterOut)
+    return(rasterOut)
 }

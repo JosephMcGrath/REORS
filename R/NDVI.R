@@ -12,44 +12,56 @@ NDVI <- function(rasterIn, NIR, VIS, fileOut = TempRasterName(),
 #  fileOut: the name of the file to write out, defaults to a temporary file.
 #Returns:
 #  A RasterLayer of NDVI values.
-  
-  library("raster")
-  library("REORS")
+
+    library("raster")
+    library("REORS")
 
  #rasterIn <- RasterLoad(rasterIn, retForm = "stack")
 
-  blocks <- blockSize(rasterIn)
-  rasterOut <- RasterShell(rasterIn, 1)
-  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
-   overwrite = TRUE
-  )
+    blocks <- blockSize(rasterIn)
+    rasterOut <- RasterShell(rasterIn, 1)
+    rasterOut <- writeStart(rasterOut,
+                            filename = fileOut,
+                            format = "GTiff",
+                            overwrite = TRUE
+                            )
   
-  if(!silent) cat("Calculating NDVI.\n")
-  for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
-     i, blocks$n, round(i / blocks$n * 100)))
-    
-    tempValues <- getValues(
-     rasterIn,
-     row = blocks$row[i],
-     nrow = blocks$nrow[i]
-    )
-    if(!silent) cat(".")
+    if(!silent){
+        cat("Calculating NDVI.\n")
+    }
+    for(i in 1:blocks$n){
+        if(!silent){
+            cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
+                        i,
+                        blocks$n,
+                        round(i / blocks$n * 100)
+                        ))
+
+    tempValues <- getValues(rasterIn,
+                            row = blocks$row[i],
+                            nrow = blocks$nrow[i]
+                            )
+    if(!silent){
+        cat(".")
+    }
 
     tempValues <- (tempValues[, NIR] - tempValues[, VIS]) /
-    (tempValues[, NIR] + tempValues[, VIS])
-    if(!silent) cat(".")
-    
-    rasterOut <- writeValues(
-     x = rasterOut,
-     v = tempValues,
-     start = blocks$row[i]
-    )
-    if(!silent) cat(".\n")
-    
-  }
-    
-  rasterOut <- writeStop(rasterOut)
+                  (tempValues[, NIR] + tempValues[, VIS])
+    if(!silent){
+        cat(".")
+    }
 
-  return(rasterOut)
+    rasterOut <- writeValues(x = rasterOut,
+                             v = tempValues,
+                             start = blocks$row[i]
+                             )
+    if(!silent){
+        cat(".\n")
+    }
+
+    }
+
+    rasterOut <- writeStop(rasterOut)
+
+    return(rasterOut)
 }

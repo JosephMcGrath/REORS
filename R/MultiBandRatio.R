@@ -13,59 +13,75 @@ MultiBandRatio <- function(rasterIn, bands,
 #  silent: Should the function work without progress reports?
 #Returns:
 #  A RasterBrick of the various ratios, in the order they were given at input.
-  
-  library("raster")
-  library("REORS")
-  
-  rasterIn <- RasterLoad(rasterIn, retForm = "stack")
-  
-  if(nlayers(rasterIn) < 2) stop("Input raster needs more than one layer.\n")
-  for(i in 1:length(bands)){
-    if(length(bands[[i]]) != 2){
-      stop("Specified band pairs must be of length 2.\n")
-    }
-    if(!is.numeric(bands[[i]])){
-      stop("Bands must be specified as numeric values.\n")
-    }
-    if(max(bands[[i]]) > nlayers(rasterIn) | min(bands[[i]]) < 1){
-      stop("Ratios given reference bands that don't exist.\n")
-    }
-  }
-  
-  blocks <- blockSize(rasterIn)
-  rasterOut <- RasterShell(rasterIn, length(bands))
-  rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
-   overwrite = TRUE)
-  
-  if(!silent) cat("Calculating band ratios.\nWriting to %s.tif\n")
-  for(i in 1:blocks$n){
-    if(!silent) cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
-     i, blocks$n, round(i / blocks$n * 100)))
-    
-    tempValues <- getValues(
-     rasterIn,
-     row = blocks$row[i],
-     nrow = blocks$nrow[i]
-    )
-    if(!silent) cat(".")
-    
-    temp <- c()
-    for(j in 1:length(bands)){
-      temp <- cbind(temp, tempValues[, bands[[j]][1]] /
-       tempValues[, bands[[j]][2]])
-    }
-    if(!silent) cat(".")
-    
-    rasterOut <- writeValues(
-     x = rasterOut,
-     v = temp,
-     start = blocks$row[i]
-    )
-    if(!silent) cat(".\n")
-    
-  }
-    
-  rasterOut <- writeStop(rasterOut)
 
-  return(rasterOut)
+    library("raster")
+    library("REORS")
+
+    rasterIn <- RasterLoad(rasterIn, retForm = "stack")
+
+    if(nlayers(rasterIn) < 2){
+        stop("Input raster needs more than one layer.\n")
+    }
+    for(i in 1:length(bands)){
+        if(length(bands[[i]]) != 2){
+            stop("Specified band pairs must be of length 2.\n")
+        }
+        if(!is.numeric(bands[[i]])){
+            stop("Bands must be specified as numeric values.\n")
+        }
+        if(max(bands[[i]]) > nlayers(rasterIn) | min(bands[[i]]) < 1){
+            stop("Ratios given reference bands that don't exist.\n")
+        }
+    }
+
+    blocks <- blockSize(rasterIn)
+    rasterOut <- RasterShell(rasterIn, length(bands))
+    rasterOut <- writeStart(rasterOut,
+                            filename = fileOut,
+                            format = "GTiff",
+                            overwrite = TRUE
+                            )
+
+    if(!silent){
+        cat("Calculating band ratios.\nWriting to %s.tif\n")
+    }
+    for(i in 1:blocks$n){
+        if(!silent){
+            cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
+                        i, blocks$n, round(i / blocks$n * 100)
+                        ))
+        }
+
+        tempValues <- getValues(rasterIn,
+                                row = blocks$row[i],
+                                nrow = blocks$nrow[i]
+                                )
+        if(!silent){
+            cat(".")
+        }
+
+        temp <- c()
+        for(j in 1:length(bands)){
+            temp <- cbind(temp,
+                          tempValues[, bands[[j]][1]] /
+                              tempValues[, bands[[j]][2]]
+                          )
+        }
+        if(!silent){
+            cat(".")
+        }
+
+        rasterOut <- writeValues(x = rasterOut,
+                                 v = temp,
+                                 start = blocks$row[i]
+                                 )
+        if(!silent){
+            cat(".\n")
+        }
+
+    }
+
+    rasterOut <- writeStop(rasterOut)
+
+    return(rasterOut)
 }

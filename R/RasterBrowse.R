@@ -9,9 +9,9 @@ RasterBrowse <- function(retForm = "stack", fileOut = TempRasterName()){
 #
 #Returns:
 #  The result of the RasterLoad file, given the set input values.
-  
-  library("raster")
-  library("REORS")
-  
-  return(RasterLoad(choose.files(), retForm = retForm, fileOut = fileOut))
+
+    library("raster")
+    library("REORS")
+
+    return(RasterLoad(choose.files(), retForm = retForm, fileOut = fileOut))
 }
