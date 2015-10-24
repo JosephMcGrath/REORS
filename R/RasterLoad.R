@@ -25,31 +25,31 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
 
 #--Convert inputs into a list---------------------------------------------------
     #Defined as a function to unpack nested lists
-    RasterLoadRec <- function(rasterIn){
-        if(!is.list(rasterIn)){
+    RasterLoadRec <- function (rasterIn){
+        if (!is.list(rasterIn)){
             rasterIn <- list(rasterIn)
         }
         ret <- list()
-        for(i in 1:length(rasterIn)){
-            if(class(rasterIn[[i]])[1] == "RasterLayer"){
+        for (i in 1:length(rasterIn)){
+            if (class(rasterIn[[i]])[1] == "RasterLayer"){
                 ret <- append(ret, rasterIn[[i]])
             }
-            if(class(rasterIn[[i]])[1] == "RasterBrick"){
+            if (class(rasterIn[[i]])[1] == "RasterBrick"){
                 ret <- append(ret, rasterIn[[i]])
             }
-            if(class(rasterIn[[i]])[1] == "RasterStack"){
+            if (class(rasterIn[[i]])[1] == "RasterStack"){
                 ret <- append(ret, rasterIn[[i]])
             }
-            if(class(rasterIn[[i]])[1] == "character"){
-                for(j in rasterIn[[i]]){
-                    if(file.exists(j)){
+            if (class(rasterIn[[i]])[1] == "character"){
+                for (j in rasterIn[[i]]){
+                    if (file.exists(j)){
                         #Should check if the format is compatable?              ToDo
                             #Weed out QGIS xml.
-#                        if(extension(j) %in% c("xml"){
+#                        if (extension(j) %in% c("xml"){
 #                            next
 #                        }
                         temp <- brick(j)
-                        if(nlayers(temp) == 1){
+                        if (nlayers(temp) == 1){
                             ret <- append(ret, raster(j))
                         } else {
                             ret <- append(ret, temp)
@@ -60,7 +60,7 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
                     }
                 }
             }
-            if(class(rasterIn[[i]])[1] == "list"){
+            if (class(rasterIn[[i]])[1] == "list"){
                 ret <- append(ret, RasterLoadRec(rasterIn[[i]]))
             }
         }
@@ -72,9 +72,9 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
 
 #--Convert to specified output--------------------------------------------------
     allSame <- TRUE
-    if(retForm != "list"){
-        for(i in 1:length(dataIn)){
-            if(!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
+    if (retForm != "list"){
+        for (i in 1:length(dataIn)){
+            if (!compareRaster(dataIn[[1]], dataIn[[i]], stopiffalse = FALSE)){
                 allSame <- FALSE
             }
         }
@@ -82,21 +82,21 @@ RasterLoad <- function(dataIn, retForm = "list", fileOut = TempRasterName()){
     
     #Why not just stop in the above loop?                                       ToDo
         #If keeping this, at least list off all the files that don't share.
-    if(!allSame & retForm != "list"){
+    if (!allSame & retForm != "list"){
         stop("Files do not share metadata.")
     }
 
     #Stacking is very fast, writing a brick is much slower.
-    if(allSame & retForm != "list"){
+    if (allSame & retForm != "list"){
         ret <- stack()
-        for(i in dataIn){
+        for (i in dataIn){
             ret <- stack(ret, i)
         }
     } else {
         ret <- dataIn
     }
 
-    if(retForm == "brick"){
+    if (retForm == "brick"){
         ret <- brick(ret,
                      filename = fileOut,
                      format = "GTiff",

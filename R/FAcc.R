@@ -1,5 +1,5 @@
 FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
- silent = TRUE){
+                 silent = TRUE){
 #Visualises the relationship between membership values and reference classes.
 #Takes fuzzy membership values from a classification, along with reference
 # classes to compare to. Using this, the accuracy is calculated at a range of

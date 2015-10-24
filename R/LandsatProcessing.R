@@ -1,5 +1,6 @@
 LandsatProcessing <- function(filePath, props = NULL,
- fileOut = paste0(c(filePath, "Processed"), collapse = "/"), silent = TRUE){
+                              fileOut = paste0(c(filePath, "Processed"),
+                              collapse = "/"), silent = TRUE){
 #Pulls in Landsat bands from single layers and stacks them together. The
 # function assumes that the files are the only files in the set folder. Also
 # assumes default naming scheme.
@@ -49,7 +50,7 @@ LandsatProcessing <- function(filePath, props = NULL,
 
     #Converts the text names into integers for proper sorting
     bandOrder <- c()
-    for(i in strsplit(toUse, "_B")){
+    for (i in strsplit(toUse, "_B")){
         bandOrder <- append(bandOrder,
                             #Masks out bands without numerical names
                             suppressWarnings(as.numeric(
@@ -84,8 +85,8 @@ LandsatProcessing <- function(filePath, props = NULL,
     #Prevents the later steps breaking
     rasterTemp <- raster(toUse[1])
 
-    for(i in 2:length(toUse)){
-        if(!is.na(bandOrder[i]) &
+    for (i in 2:length(toUse)){
+        if (!is.na(bandOrder[i]) &
            compareRaster(rasterTemp, raster(toUse[i]), stopiffalse = FALSE)){
             rasterTemp <- stack(rasterTemp, raster(toUse[i]))
         } else {
@@ -107,13 +108,13 @@ LandsatProcessing <- function(filePath, props = NULL,
     #By filename
     lsType1 <- as.numeric(substr(names(rasterTemp)[[1]], 3, 3))
 
-    if(lsType1 >= 1 & lsType1 <= 3){
+    if (lsType1 >= 1 & lsType1 <= 3){
         lsType1 <- 1
-    } else if(lsType1 >= 4 & lsType1 <= 5){
+    } else if (lsType1 >= 4 & lsType1 <= 5){
         lsType1 <- 4
-    } else if(lsType1 == 7){
+    } else if (lsType1 == 7){
         lsType1 <- 7
-    } else if(lsType1 == 8){
+    } else if (lsType1 == 8){
         lsType1 <- 8
     } else {
         lsType1 <- NA
@@ -121,24 +122,24 @@ LandsatProcessing <- function(filePath, props = NULL,
   
 #By number of bands
     numBand <- sum(!is.na(bandOrder))
-    if(numBand == 4){
+    if (numBand == 4){
         lsType2 <- 1
-    } else if(numBand == 7){
+    } else if (numBand == 7){
         lsType2 <- 4
-    } else if(numBand == 8){
+    } else if (numBand == 8){
         lsType2 <- 7
-    } else if(numBand == 10){
+    } else if (numBand == 10){
         lsType2 <- 8
     } else {
         lsType2 <- NA
     }
   
-    if(any(is.na(c(lsType1, lsType2)))){
+    if (any(is.na(c(lsType1, lsType2)))){
         stop("No valid sensor type detected.\n")
     }
-    if(lsType1 == lsType2){
+    if (lsType1 == lsType2){
         lsType <- lsType1
-        if(!silent){
+        if (!silent){
             cat(sprintf("\tSensor group identified as LS %s\n", lsType))
         }
     } else {
@@ -146,17 +147,17 @@ LandsatProcessing <- function(filePath, props = NULL,
         warning("Potential error detecting Landsat sensor.\n")
     }
   
-    if(lsType == 1){
+    if (lsType == 1){
         bandNames <- c("Green", "Red", "?", "?")
-    } else if(lsType == 4){
+    } else if (lsType == 4){
         bandNames <- c("Blue", "Green", "Red", "Near IR", "Short wave IR  1",
                        "Thermal IR", "Short wave IR 2"
                        )
-    } else if(lsType == 7){
+    } else if (lsType == 7){
         bandNames <- c("Blue", "Green", "Red", "Near IR", "Short wave IR  1",
                        "Thermal IR A", "Thermal IR B", "Short wave IR 2"
                        )
-    } else if(lsType == 8){
+    } else if (lsType == 8){
         bandNames <- c("Costal", "Blue", "Green", "Red", "Near IR",
                        "Short wave IR  1", "Short wave IR  1", "Cirrus",
                        "Panchromatic", "Thermal IR 1", "Thermal IR 2"
@@ -175,7 +176,7 @@ LandsatProcessing <- function(filePath, props = NULL,
               quote = FALSE
               )
   
-    if(!silent){
+    if (!silent){
         cat("\tLayers used:\n")
         cat(sprintf("\t\t%s\n", names(rasterTemp)))
     }
@@ -191,11 +192,11 @@ LandsatProcessing <- function(filePath, props = NULL,
                             overwrite = TRUE
                             )
 
-    if(!silent){ 
+    if (!silent){ 
         cat(sprintf("\tStacking layers.\n\t\tWriting to %s.tif\n", fileOut))
     }
-    for(i in 1:blocks$n){
-        if(!silent) cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
+    for (i in 1:blocks$n){
+        if (!silent) cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
                                 i, blocks$n, round(i / blocks$n * 100)
                                 ))
 
@@ -203,12 +204,12 @@ LandsatProcessing <- function(filePath, props = NULL,
                                 row = blocks$row[i],
                                 nrow = blocks$nrow[i]
                                 )
-        if(!silent){
+        if (!silent){
             cat(".")
         }
 
         tempValues[rowSums(tempValues == 0 | is.na(tempValues)) > 0] <- NA
-        if(!silent){
+        if (!silent){
             cat(".")
         }
 
@@ -216,7 +217,7 @@ LandsatProcessing <- function(filePath, props = NULL,
                                  v = tempValues,
                                  start = blocks$row[i]
                                  )
-        if(!silent){
+        if (!silent){
             cat(".\n")
         }
 
@@ -227,8 +228,8 @@ LandsatProcessing <- function(filePath, props = NULL,
 #Would ideally put this step before above filtering to potentially reduce the
  #number of cells that need processing, but seems to have a few issues.
 
-    if(class(props)[[1]] %in% c("RasterLayer", "RasterBrick", "RasterStack")){
-        if(!silent){
+    if (class(props)[[1]] %in% c("RasterLayer", "RasterBrick", "RasterStack")){
+        if (!silent){
             cat("\tReprojecting image to 'props'.\n")
         }
         rasterOut <- projectRaster(from = rasterOut,
@@ -242,8 +243,8 @@ LandsatProcessing <- function(filePath, props = NULL,
                                                           ))
                                     )
         #Not the best test for if something is a valid CRS
-    } else if(!is.null(props)) {
-        if(!silent){
+    } else if (!is.null(props)) {
+        if (!silent){
             cat("\tReprojecting image to 'props'.\n")
         }
         rasterOut <- projectRaster(from = rasterOut,

@@ -16,12 +16,12 @@ RasterShell <- function(rasterIn, layers = nlayers(rasterIn)){
 
     library("raster")
 
-    if(layers == 1){
+    if (layers == 1){
         ret <- raster(ext = extent(rasterIn),
                       res = res(rasterIn),
                       crs = crs(rasterIn)
                       )
-    } else if(layers > 1){
+    } else if (layers > 1){
         ret <- brick(x = rasterIn,
                      values = FALSE,
                      nl = layers

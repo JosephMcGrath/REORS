@@ -1,5 +1,5 @@
 FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
- na.rm = FALSE, fileOut = TempRasterName(), silent = TRUE){
+                      na.rm = FALSE, fileOut = TempRasterName(), silent = TRUE){
 #Takes the area surrounding a given Raster* object (one or several layers) and
 # summarises them based on a used-defined, or pre-set function.
 #

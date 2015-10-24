@@ -22,7 +22,7 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
 
     rasterIn <- RasterLoad(rasterIn, "stack")  
 
-    if(!silent){
+    if (!silent){
         cat(sprintf(paste0("Standardising input between %s and %s.",
                            "%socking to whole numbers\n"
                            ),
@@ -31,8 +31,8 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
     }
 
     #May be best to do this manually?                                           ToDo
-    if(recalc){
-        if(!silent){
+    if (recalc){
+        if (!silent){
             cat("\tCalculating minimum and maximum values of input.\n")
         }
         rasterIn <- setMinMax(rasterIn)
@@ -45,7 +45,7 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
     ret <- RasterShell(rasterIn)
     blocks <- blockSize(rasterIn)
 
-    if(intLock){
+    if (intLock){
         dataTypeD <- sprintf("INT%s%s",
                              max(c(ceiling(log(max(abs(minMax)), base = 2)/ 8),
                                    1
@@ -66,15 +66,15 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
                       )
 
 #--Perform the calculations-----------------------------------------------------
-    if(!silent){
+    if (!silent){
         cat(sprintf(paste0("\tCalculating standardised values.",
                            ":\n\t\tWriting to %s.tif\n"
                            ),
                     fileOut
                     ))
     }
-    for(i in 1:blocks$n){
-        if(!silent){
+    for (i in 1:blocks$n){
+        if (!silent){
             cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
                         i, blocks$n, round(i / blocks$n * 100)
                         ))
@@ -85,14 +85,14 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
                                 row = blocks$row[i],
                                 nrow = blocks$nrow[i]
                                 ))
-        if(!silent) {
+        if (!silent) {
             cat(".")
         }
 
         tempValues <- t((t(tempValues) - mv[[1]]) /
                         mv[[3]] * (minMax[2] - minMax[1]) + minMax[1]
                         )
-        if(intLock){
+        if (intLock){
             tempValues <- round(tempValues)
         }
         if(!silent){
@@ -103,7 +103,7 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
                            v = tempValues,
                            start = blocks$row[i]
                            )
-        if(!silent){
+        if (!silent){
             cat(".\n")
         }
     }

@@ -1,5 +1,5 @@
 CMat <- function(classed, reference, retT = "Full", reOrg = FALSE,
- stand = TRUE){
+                 stand = TRUE){
 #Calculates the confusion matrix between two classified raster layers.
 #Calculates a wide variety of accuracy measures.
 #Added functionality with unsupervised classifications to link up best

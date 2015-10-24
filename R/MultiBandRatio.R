@@ -1,5 +1,5 @@
-MultiBandRatio <- function(rasterIn, bands,
- fileOut = TempRasterName(), silent = TRUE){
+MultiBandRatio <- function(rasterIn, bands, fileOut = TempRasterName(),
+                           silent = TRUE){
 #Calculates many band ratios in one pass, useful for cases where there are a
 # large number of ratios per image.
 #
@@ -19,17 +19,17 @@ MultiBandRatio <- function(rasterIn, bands,
 
     rasterIn <- RasterLoad(rasterIn, retForm = "stack")
 
-    if(nlayers(rasterIn) < 2){
+    if (nlayers(rasterIn) < 2){
         stop("Input raster needs more than one layer.\n")
     }
-    for(i in 1:length(bands)){
-        if(length(bands[[i]]) != 2){
+    for (i in 1:length(bands)){
+        if (length(bands[[i]]) != 2){
             stop("Specified band pairs must be of length 2.\n")
         }
-        if(!is.numeric(bands[[i]])){
+        if (!is.numeric(bands[[i]])){
             stop("Bands must be specified as numeric values.\n")
         }
-        if(max(bands[[i]]) > nlayers(rasterIn) | min(bands[[i]]) < 1){
+        if max(bands[[i]]) > nlayers(rasterIn) | min(bands[[i]]) < 1){
             stop("Ratios given reference bands that don't exist.\n")
         }
     }
@@ -42,11 +42,11 @@ MultiBandRatio <- function(rasterIn, bands,
                             overwrite = TRUE
                             )
 
-    if(!silent){
+    if (!silent){
         cat("Calculating band ratios.\nWriting to %s.tif\n")
     }
-    for(i in 1:blocks$n){
-        if(!silent){
+    for (i in 1:blocks$n){
+        if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
                         i, blocks$n, round(i / blocks$n * 100)
                         ))
@@ -56,18 +56,18 @@ MultiBandRatio <- function(rasterIn, bands,
                                 row = blocks$row[i],
                                 nrow = blocks$nrow[i]
                                 )
-        if(!silent){
+        if (!silent){
             cat(".")
         }
 
         temp <- c()
-        for(j in 1:length(bands)){
+        for (j in 1:length(bands)){
             temp <- cbind(temp,
                           tempValues[, bands[[j]][1]] /
                               tempValues[, bands[[j]][2]]
                           )
         }
-        if(!silent){
+        if (!silent){
             cat(".")
         }
 
@@ -75,7 +75,7 @@ MultiBandRatio <- function(rasterIn, bands,
                                  v = temp,
                                  start = blocks$row[i]
                                  )
-        if(!silent){
+        if (!silent){
             cat(".\n")
         }
 

@@ -1,5 +1,6 @@
 Multishade <- function(rasterIn,  angles = c(15, 20, 15),
- directions = c(100, 125, 150), autoPlot = TRUE, fileOut = TempRasterName()){
+                       directions = c(100, 125, 150), autoPlot = TRUE,
+                       fileOut = TempRasterName()){
 #Function to calculate a hill-shade from multiple angles simultaneously
 #
 #Requires: RasterLoad

@@ -1,6 +1,6 @@
 Geomorphometry <- function(rasterIn, funIn, kernelSize, vEx = 1,
- kernelShape = "circle", na.rm = FALSE, fileOut = TempRasterName(),
- silent = TRUE){
+                           kernelShape = "circle", na.rm = FALSE,
+                           fileOut = TempRasterName(), silent = TRUE){
 #A wrapper function for FocalCalc containing a number of pre-defined functions
 # to calculate geomorphometric derivatives of a DEM.
 #

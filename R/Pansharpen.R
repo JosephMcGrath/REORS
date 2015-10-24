@@ -1,5 +1,5 @@
 Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
- fileOut = TempRasterName(), silent = TRUE){
+                       fileOut = TempRasterName(), silent = TRUE){
 #Applies pan-sharpening to a multispectral image to increase the apparent
 # resolution of the input. Care should be taken that the panchromatic band
 # is relevant to the multispectral bands being sharpened.

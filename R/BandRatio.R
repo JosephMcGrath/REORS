@@ -1,5 +1,5 @@
-BandRatio <- function(rasterIn, band1, band2,
- fileOut = TempRasterName(), silent = TRUE){
+BandRatio <- function(rasterIn, band1, band2, fileOut = TempRasterName(),
+                      silent = TRUE){
 #Calculates a band ratio from a multi-layer raster. 
 #
 #Requires: RasterLoad, RasterShell
@@ -29,7 +29,9 @@ BandRatio <- function(rasterIn, band1, band2,
     rasterOut <- RasterShell(rasterIn, 1)
     blocks <- blockSize(rasterIn)
 
-    rasterOut <- writeStart(rasterOut, filename = fileOut, format = "GTiff",
+    rasterOut <- writeStart(x         = rasterOut,
+                            filename  = fileOut,
+                            format    = "GTiff",
                             overwrite = TRUE
                             )
 
@@ -43,8 +45,8 @@ BandRatio <- function(rasterIn, band1, band2,
                         ))
         }
 
-        tempValues <- getValues(rasterIn,
-                                row = blocks$row[i],
+        tempValues <- getValues(x    = rasterIn,
+                                row  = blocks$row[i],
                                 nrow = blocks$nrow[i]
                                 )
 

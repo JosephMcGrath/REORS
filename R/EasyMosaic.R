@@ -1,5 +1,5 @@
 EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
- fileOut = TempRasterName(), silent = TRUE){
+                       fileOut = TempRasterName(), silent = TRUE){
 #Function to easily load, filter and mosaic a set of rasters with options to
 # resolve differences in resolution, projection ect.
 #

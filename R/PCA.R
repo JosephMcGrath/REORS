@@ -1,5 +1,5 @@
 PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
-fileOut = TempRasterName(), silent = TRUE, retEigen = FALSE){
+                fileOut = TempRasterName(), silent = TRUE, retEigen = FALSE){
 #Calculates or estimates principal components for an input image.
 #
 #Currently not able to check if it works as intended. Would need commercial

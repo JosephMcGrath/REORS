@@ -1,5 +1,5 @@
 NDVI <- function(rasterIn, NIR, VIS, fileOut = TempRasterName(),
- silent = TRUE){
+                 silent = TRUE){
 #A specialised form of band maths, may be replaced later with a more general
 # function incorporating several common functions.
 #
