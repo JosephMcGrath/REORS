@@ -27,7 +27,8 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
                            "%socking to whole numbers\n"
                            ),
                     minMax[1], minMax[2], if(intLock) "L" else "Not l"
-                    ))
+                    )
+            )
     }
 
     #May be best to do this manually?                                           ToDo
@@ -49,7 +50,8 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
         dataTypeD <- sprintf("INT%s%s",
                              max(c(ceiling(log(max(abs(minMax)), base = 2)/ 8),
                                    1
-                                   )),
+                                   )
+                                 ),
                              if(minMax[2] < 0){
                                  "S" else "U"
                              }
@@ -71,13 +73,15 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
                            ":\n\t\tWriting to %s.tif\n"
                            ),
                     fileOut
-                    ))
+                    )
+            )
     }
     for (i in 1:blocks$n){
         if (!silent){
             cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         #as.matrix to stop errors with a single layer.

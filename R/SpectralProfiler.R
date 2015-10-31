@@ -139,9 +139,9 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
         cat("Extracting values from raster, this may take some time.\n")
     }
     extractType <- class(shapeIn)[[1]]
-    if (any(c("SpatialPolygonsDataFrame", "SpatialPolygons") %in% extractType)){
+    if (extractType %in% c("SpatialPolygonsDataFrame", "SpatialPolygons")){
         dataOut <- extract(rasterIn, shapeIn, fun = mean)
-    } else if (any(c("SpatialLinesDataFrame", "SpatialLines") %in% extractType)){
+    } else if (extractType %in% c("SpatialLinesDataFrame", "SpatialLines")){
         temp <- extract(rasterIn, shapeIn, along = TRUE)
         for (i in 1:length(temp)){
             temp[[i]] <- as.matrix(temp[[i]])
@@ -167,18 +167,16 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
         cat("Data extracted successfully.\n")
     }
     
-#--Output extracted data------------------------------------------------------
+#--Output extracted data--------------------------------------------------------
     if (returnSpatial){
         if (!silent){
             cat("Converting to spatial object.\n")
         }
-        if (any(c("SpatialLinesDataFrame", "SpatialLines") %in% extractType)){
+        if (extractType %in% c("SpatialLinesDataFrame", "SpatialLines")){
             rownames(dataOut) <- names(shapeIn)
             dataOut <- data.frame(dataOut)
         }
-        if (any(c("SpatialPolygonsDataFrame",
-                 "SpatialPolygons"
-                 ) %in% extractType)){
+        if (extractType %in% c("SpatialPolygonsDataFrame",  "SpatialPolygons")){
             dataOut <- SpatialPolygonsDataFrame(shapeIn, dataOut)
         } else if (any(c("SpatialLinesDataFrame",
                          "SpatialLines"
@@ -192,9 +190,9 @@ SpectralProfiler <- function(rasterIn, shapeIn = "point", nProfile = 1,
             #    temp[[i]] <- cellFromXY(rasterIn, temp[[i]])
             #}
 
-        } else if (any(c("SpatialPointsDataFrame",
-                        "SpatialPoints"
-                        ) %in% extractType)){
+        } else if (extractType %in% 
+                   c("SpatialPointsDataFrame", "SpatialPoints")
+                  ){
             dataOut <- SpatialPointsDataFrame(shapeIn, dataOut)
         } else {
             stop("Unable to recognise Spatial* object.")

@@ -35,7 +35,8 @@ NDVI <- function(rasterIn, NIR, VIS, fileOut = TempRasterName(),
                         i,
                         blocks$n,
                         round(i / blocks$n * 100)
-                        ))
+                        )
+                )
 
     tempValues <- getValues(rasterIn,
                             row = blocks$row[i],

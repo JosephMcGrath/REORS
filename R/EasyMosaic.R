@@ -66,7 +66,8 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
         if(!silent){
             cat(sprintf("\t%s different resolutions present.",
                         nrow(unique(resMat))
-                        ))
+                        )
+                )
         }
 
         #List resolutions and which is inputs belong to the most common one.
@@ -91,7 +92,8 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
                 if(!silent){
                 cat(sprintf("\t\tResampling raster %s of %s\n",
                             i, sum(!mostCommon)
-                            ))
+                            )
+                    )
                 }
 
                 if(crs(dataIn[[i]]) == crs(protoType)){
@@ -132,7 +134,8 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
                 if(!silent){
                     cat(sprintf("\t\tCreating mosaic %s of %s",
                                 i, nrow(resCount)
-                                ))
+                                )
+                        )
                 }
                 rasterTemp <- resMat[, 1] == resCount[i, 1] & 
                 resMat[, 2] == resCount[i, 2]

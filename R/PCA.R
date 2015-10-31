@@ -59,7 +59,8 @@ PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
                         i,
                         blocks$n,
                         round(i / blocks$n * 100)
-                        ))
+                        )
+                )
 
         tempValues <- getValues(rasterIn,
                                 row = blocks$row[i],
@@ -88,7 +89,8 @@ PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
                         i,
                         blocks$n,
                         round(i / blocks$n * 100)
-                        ))
+                        )
+                )
 
         tempValues <- getValues(rasterIn,
                                 row = blocks$row[i],
@@ -142,7 +144,8 @@ PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
         cat("\tCalculating PCA. (Step 3/3)\n")
         cat(sprintf("\tCalculating PCA. (Step 3/3)\n\tWriting to %s.tif\n",
                     fileOut
-                    ))
+                    )
+            )
     }
     for(i in 1:blocks$n){
         if(!silent){
@@ -150,7 +153,8 @@ PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
                         i,
                         blocks$n,
                         round(i / blocks$n * 100)
-                        ))
+                        )
+                )
 
         tempValues <- getValues(rasterIn,
                                 row = blocks$row[i],

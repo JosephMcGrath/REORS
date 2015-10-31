@@ -59,7 +59,8 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
     if (length(weight) != 1 & length(weight) != nlayers(rasterIn)){
         stop(paste0("Weights must have values for each layer of ",
                     "input or a single value"
-                    ))
+                    )
+             )
     }
     if (fuzz == 1){
         stop("Fuzzification parameter may not be 1.")
@@ -150,7 +151,8 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
             if (!silent){
                 cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
                             j, blocks$n, round(j / blocks$n * 100)
-                            ))
+                            )
+                    )
             }
 
             tempValue <- getValues(rasterIn,
@@ -207,7 +209,8 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
         if (!silent){
                     cat(sprintf("%s difference since last iteration.\n",
                                 round(diffSince, 3)
-                                ))
+                                )
+                        )
         }
 
         if (diffSince <= breakCon) {
@@ -244,7 +247,8 @@ CMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, fuzz = 2,
         if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
                         j, blocks$n, round(j / blocks$n * 100)
-                        ))
+                        )
+                )
         }
         tempValue <- getValues(rasterIn,
                                row = blocks$row[j],

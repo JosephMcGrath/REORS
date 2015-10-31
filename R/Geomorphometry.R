@@ -90,6 +90,7 @@ Geomorphometry <- function(rasterIn, funIn, kernelSize, vEx = 1,
             } else if(length(kernelSize) == 1){
                 kernelUse <- matrix(1, ncol = kernelSize, nrow = kernelSize)
             } else {
+                #Should not have indentical error messages                      ToDo
                 stop("Invalid kernel definition.")
             }
         } else {
@@ -168,16 +169,21 @@ Geomorphometry <- function(rasterIn, funIn, kernelSize, vEx = 1,
 
         #Define the actual functions here
         if(funIn == "topoOpennessP"){
-        sumFun <- function(x){
-            get("pulls")
-            x <- atan((x - x[mid]) / kernelDist) / (2 * pi) * 360
-            return(mean(
-            max(x[pulls[[1]]], na.rm = TRUE), max(x[pulls[[2]]], na.rm = TRUE),
-            max(x[pulls[[3]]], na.rm = TRUE), max(x[pulls[[4]]], na.rm = TRUE),
-            max(x[pulls[[5]]], na.rm = TRUE), max(x[pulls[[6]]], na.rm = TRUE),
-            max(x[pulls[[7]]], na.rm = TRUE), max(x[pulls[[8]]], na.rm = TRUE)
-            ))
-        }
+            sumFun <- function(x){
+                get("pulls")
+                x <- atan((x - x[mid]) / kernelDist) / (2 * pi) * 360
+                return(mean(
+                            max(x[pulls[[1]]], na.rm = TRUE),
+                            max(x[pulls[[2]]], na.rm = TRUE),
+                            max(x[pulls[[3]]], na.rm = TRUE),
+                            max(x[pulls[[4]]], na.rm = TRUE),
+                            max(x[pulls[[5]]], na.rm = TRUE),
+                            max(x[pulls[[6]]], na.rm = TRUE),
+                            max(x[pulls[[7]]], na.rm = TRUE),
+                            max(x[pulls[[8]]], na.rm = TRUE)
+                            )
+                       )
+            }
         } else if(funIn == "topoOpennessN"){
             sumFun <- function(x){
                 get("pulls")
@@ -190,7 +196,8 @@ Geomorphometry <- function(rasterIn, funIn, kernelSize, vEx = 1,
                             min(x[pulls[[6]]], na.rm = TRUE),
                             min(x[pulls[[7]]], na.rm = TRUE),
                             min(x[pulls[[8]]], na.rm = TRUE)
-                            ))
+                            )
+                       )
             }
         }
     } else {

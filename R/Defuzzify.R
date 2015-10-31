@@ -54,7 +54,8 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
         if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         tempValue <- getValues(rasterIn,
@@ -85,7 +86,8 @@ Defuzzify <- function(rasterIn, meth = "max", opt = NULL,
         if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         tempValue <- getValues(rasterIn,

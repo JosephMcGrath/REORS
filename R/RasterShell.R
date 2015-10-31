@@ -21,7 +21,7 @@ RasterShell <- function(rasterIn, layers = nlayers(rasterIn)){
                       res = res(rasterIn),
                       crs = crs(rasterIn)
                       )
-    } else if (layers > 1){
+    } else if (layers > 1 & layers %% 1 == 0){
         ret <- brick(x = rasterIn,
                      values = FALSE,
                      nl = layers

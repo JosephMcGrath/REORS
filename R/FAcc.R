@@ -46,7 +46,8 @@ FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
         if(!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         classedValues <-   getValues(classed,

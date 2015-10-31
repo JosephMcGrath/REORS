@@ -42,7 +42,8 @@ BandRatio <- function(rasterIn, band1, band2, fileOut = TempRasterName(),
         if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         tempValues <- getValues(x    = rasterIn,

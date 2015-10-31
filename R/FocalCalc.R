@@ -118,14 +118,16 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
     if(!silent){
         cat(sprintf("Applying focal operation:\nWriting to %s.tif\n",
                     fileOut
-                    ))
+                    )
+            )
     }
 
     for(i in 1:blocks$n){
         if(!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         tempValues <- getValuesFocal(rasterIn,

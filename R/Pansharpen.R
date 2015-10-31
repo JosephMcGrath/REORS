@@ -71,7 +71,8 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
     if(!silent){
         cat(sprintf("Pan-sharpening image:\n\tWriting to %s.tif\n",
                     fileOut
-                    ))
+                    )
+            )
   
 #--Process each block in turn---------------------------------------------------
     for(i in 1:blocks$n){
@@ -80,7 +81,8 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
                         i,
                         blocks$n,
                         round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         tempValues <- getValues(rasterIn,
@@ -89,9 +91,10 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
                                 )
 
         tempPan <- as.numeric(getValues(panIn,
-                              row = blocks$row[i],
-                              nrow = blocks$nrow[i]
-                              ))
+                                        row = blocks$row[i],
+                                        nrow = blocks$nrow[i]
+                                        )
+                              )
         if(!silent){
             cat(".")
         }

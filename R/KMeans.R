@@ -57,7 +57,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
     if (length(weight) != 1 & length(weight) != nlayers(rasterIn)){
         stop(paste0("Weights must have values for each ",
                     "layer of input or a single value"
-                    ))
+                    )
+        )
     }
 
     centres <- matrix(ncol = nCentres, nrow = nlayers(rasterIn))
@@ -143,7 +144,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
             if (!silent){
                 cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
                             j, blocks$n, round(j / blocks$n * 100)
-                            ))
+                            )
+                    )
             }
 
             tempValue <- getValues(rasterIn,
@@ -189,7 +191,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         if (!silent){
             cat(sprintf("%s difference since last iteration.\n",
                         round(diffSince, 3)
-                        ))
+                        )
+                )
         }
         
         
@@ -242,7 +245,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
                         j, blocks$n, round(j / blocks$n * 100)
-                        ))
+                        )
+                )
         }
         tempValue <- getValues(rasterIn,
                                row = blocks$row[j],

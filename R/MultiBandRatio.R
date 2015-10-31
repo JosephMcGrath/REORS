@@ -49,7 +49,8 @@ MultiBandRatio <- function(rasterIn, bands, fileOut = TempRasterName(),
         if (!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)",
                         i, blocks$n, round(i / blocks$n * 100)
-                        ))
+                        )
+                )
         }
 
         tempValues <- getValues(rasterIn,
