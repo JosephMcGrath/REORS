@@ -49,77 +49,81 @@ PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
   
   if(is.null(eigens)){
 #--Calculate mean values--------------------------------------------------------
-    if(!silent){
-        cat("\tCalculating mean values. (Step 1/3)\n")
-    }
-    mVals <- rep(0, nlayers(rasterIn))
-    for(i in 1:blocks$n){
         if(!silent){
-            cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
-                        i,
-                        blocks$n,
-                        round(i / blocks$n * 100)
-                        )
-                )
-
-        tempValues <- getValues(rasterIn,
-                                row = blocks$row[i],
-                                nrow = blocks$nrow[i]
-                                )
-        if(!silent){
-            cat(".")
+            cat("\tCalculating mean values. (Step 1/3)\n")
         }
+        mVals <- rep(0, nlayers(rasterIn))
+        for(i in 1:blocks$n){
+            if(!silent){
+                cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
+                            i,
+                            blocks$n,
+                            round(i / blocks$n * 100)
+                            )
+                    )
+            }
 
-        mVals <- mVals + colSums(tempValues, na.rm = TRUE)
-        if(!silent){
-            cat(".\n")
-        }
-    }
+            tempValues <- getValues(rasterIn,
+                                    row = blocks$row[i],
+                                    nrow = blocks$nrow[i]
+                                    )
+            if(!silent){
+                cat(".")
+            }
 
-    mVals <- mVals / ncell(rasterIn)
-    covMat <- matrix(0, ncol = nlayers(rasterIn), nrow = nlayers(rasterIn))
-
-#--Calculate covariance matrix--------------------------------------------------
-    if(!silent){
-        cat("\tCalculating covariance matrix. (Step 2/3)\n")
-    }
-    for(i in 1:blocks$n){
-        if(!silent){
-            cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
-                        i,
-                        blocks$n,
-                        round(i / blocks$n * 100)
-                        )
-                )
-
-        tempValues <- getValues(rasterIn,
-                                row = blocks$row[i],
-                                nrow = blocks$nrow[i]
-                                )
-        if(!silent){
-            cat(".")
-        }
-
-        tempValues <- t(t(tempValues) - mVals)
-
-        for(j in 1:nlayers(rasterIn)){
-            for(k in 1:nlayers(rasterIn)){
-                if(j <= k){
-                    temp <- sum(tempValues[, j] * tempValues[, k], na.rm = TRUE)
-                    covMat[j, k] <- covMat[j, k] + temp
-                    covMat[k, j] <- covMat[j, k]
-                }
+            mVals <- mVals + colSums(tempValues, na.rm = TRUE)
+            if(!silent){
+                cat(".\n")
             }
         }
-        if(!silent){
-            cat(".\n")
-        }
-    }
 
-    covMat <- covMat / (ncell(rasterIn))
+        mVals <- mVals / ncell(rasterIn)
+        covMat <- matrix(0, ncol = nlayers(rasterIn), nrow = nlayers(rasterIn))
+
+#--Calculate covariance matrix--------------------------------------------------
+        if(!silent){
+            cat("\tCalculating covariance matrix. (Step 2/3)\n")
+        }
+        for(i in 1:blocks$n){
+            if(!silent){
+                cat(sprintf("\t\tProcessing block %s of %s\t(%s percent)",
+                            i,
+                            blocks$n,
+                            round(i / blocks$n * 100)
+                            )
+                    )
+            }
+
+            tempValues <- getValues(rasterIn,
+                                    row = blocks$row[i],
+                                    nrow = blocks$nrow[i]
+                                    )
+            if(!silent){
+                cat(".")
+            }
+
+            tempValues <- t(t(tempValues) - mVals)
+
+            for(j in 1:nlayers(rasterIn)){
+                for(k in 1:nlayers(rasterIn)){
+                    if(j <= k){
+                        temp <- sum(tempValues[, j] * tempValues[, k],
+                                    na.rm = TRUE
+                                    )
+                        covMat[j, k] <- covMat[j, k] + temp
+                        covMat[k, j] <- covMat[j, k]
+                    }
+                }
+            }
+            if(!silent){
+                cat(".\n")
+            }
+        }
+
+        covMat <- covMat / (ncell(rasterIn))
 
 #--Calculate eigenvalues & principal components---------------------------------
-    eigens <- eigen(covMat)
+        eigens <- eigen(covMat)
     } else {
         if(nrow(eigens) - 3 == npc){
         if(!silent){
@@ -155,6 +159,7 @@ PCA <- function(rasterIn, npc = NULL, eigens = NULL, standOut = FALSE,
                         round(i / blocks$n * 100)
                         )
                 )
+        }
 
         tempValues <- getValues(rasterIn,
                                 row = blocks$row[i],

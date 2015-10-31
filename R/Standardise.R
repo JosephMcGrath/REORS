@@ -53,7 +53,9 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
                                    )
                                  ),
                              if(minMax[2] < 0){
-                                 "S" else "U"
+                                "S"
+                             } else {
+                                "U"
                              }
                              )
     } else {

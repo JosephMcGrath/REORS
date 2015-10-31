@@ -40,6 +40,7 @@ OIF <- function(rasterIn, layersIn = 3, silent = TRUE){
                         round(i / blocks$n * 100)
                         )
                 )
+        }
 
         tempValues <- getValues(rasterIn,
                                 row = blocks$row[i],
@@ -71,6 +72,7 @@ OIF <- function(rasterIn, layersIn = 3, silent = TRUE){
                         round(i / blocks$n * 100)
                         )
                 )
+        }
 
         tempValues <- getValues(rasterIn,
                                 row = blocks$row[i],

@@ -73,6 +73,7 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
                     fileOut
                     )
             )
+    }
   
 #--Process each block in turn---------------------------------------------------
     for(i in 1:blocks$n){
