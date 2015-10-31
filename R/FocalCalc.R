@@ -45,7 +45,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
         stop("Kernel must have odd number of cells per side.\n")
     }
 
-#--Set up the weighting matrix-------------------------------------------------
+#--Set up the weighting matrix--------------------------------------------------
   #NOTE: This section is also used in the Geomorphometry function. If this is
    #updated, copy all changes across.
   
@@ -83,14 +83,24 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
             mid <- c(ceiling(ncol(kernelUse) / 2), ceiling(nrow(kernelUse) / 2))
             for(i in 1:ncol(kernelUse)){
                 for(j in 1:nrow(kernelUse)){
-                    #This could really do with cleaning up                      ToDo
+                    #Not entirely happy with the indentation here.
                     kernelUse[i, j] <- 1 / (2 * pi * (1 ^ 2)) *
-                                       exp(-1 * (((i - mid[1]) /
-                                           (0.2 * ncol(kernelUse))) ^ 2 +
-                                           ((j - mid[2]) /
-                                           (0.2 * nrow(kernelUse))) ^ 2) / 2 *
-                                           1 ^ 2
-                                           ) #The 1 in 1 ^ 2 here is sigma value
+                                       exp(-1 * (
+                                                 ((i - mid[1]) /
+                                                  (0.2 * ncol(kernelUse))
+                                                  ) ^ 2 +
+                                                 ((j - mid[2]) /
+                                                  (0.2 * nrow(kernelUse))
+                                                  ) ^ 2
+                                                 ) / 2
+                                           )
+                    #Full equation would be
+                    #1 / (2 * pi * (1 ^ 2)) * exp(-1 * (((i - mid[1]) /
+                    #                       (0.2 * ncol(kernelUse))) ^ 2 +
+                    #                       ((j - mid[2]) /
+                    #                       (0.2 * nrow(kernelUse))) ^ 2) / 2 *
+                    #                       1 ^ 2
+                    #                       )
                 }
             }
         }
@@ -105,7 +115,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
     ngbSize <- c(nrow(kernelUse), ncol(kernelUse))
     kernelUse <- c(kernelUse)
 
-#--Apply the filter to the data-----------------------------------------------
+#--Apply the filter to the data-------------------------------------------------
   #Using conservatively small blocks to keep things manageable.
   #Results in more read/write cycles.
   #n = kernel * nlayers? For Raster*'s with many layers.
@@ -155,14 +165,11 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
                              ncol = length(tempValues)
                              )
             for(k in 1:length(tempValues)){
-                tempValues[[k]] <- t(t(tempValues[[k]]) * kernelUse)
-                for(j in 1:nrow(tempValues[[k]])){
-                    #Clean this section above                                   ToDo        
-                    if(!any(is.na(tempValues[[k]][j, !is.na(kernelUse)])) |
-                       na.rm){
-                        writeV[j, k] <- sumFun(tempValues[[k]][j, ][
-                                            !is.na(tempValues[[k]][j, ])
-                                            ])[[1]]
+                curDim <- t(t(tempValues[[k]]) * kernelUse)
+                for(j in 1:nrow(curDim)){      
+                    if(!any(is.na(curDim[j, !is.na(kernelUse)])) | na.rm){
+                        writeV[j, k] <- sumFun(curDim[j, ]
+                                            [!is.na(curDim[j, ])])[[1]]
                     }
                 }
             }
@@ -180,7 +187,7 @@ FocalCalc <- function(rasterIn, sumFun, kernelSize, kernelShape = "circle",
         }
     }
   
-#--Finish writing and return the final values---------------------------------  
+#--Finish writing and return the final values-----------------------------------
     rasterOut <- writeStop(rasterOut)
 
     return(rasterOut)

@@ -31,7 +31,7 @@ Standardise <- function(rasterIn, minMax = c(0, 1), intLock = FALSE,
             )
     }
 
-    #May be best to do this manually?                                           ToDo
+    #May be quicker to impliment my own method?                                 ToDo
     if (recalc){
         if (!silent){
             cat("\tCalculating minimum and maximum values of input.\n")

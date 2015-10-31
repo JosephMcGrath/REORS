@@ -28,7 +28,7 @@ FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
         stop("\"reference\" input must have one layer.")
     }
 
-#--Set up bins for fuzzy accuracy measure-------------------------------------
+#--Set up bins for fuzzy accuracy measure---------------------------------------
     blocks <- blockSize(classed, n = nlayers(classed) + 1)
     accM <- matrix(0, nlayers(classed), bins + 1)
     colnames(accM) <- seq(0, 1, length.out = bins + 1)
@@ -41,7 +41,7 @@ FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
     if (!silent){
         cat("Assessing fuzzy accuracy:\n")
     }
-#--Run for each block---------------------------------------------------------
+#--Run for each block-----------------------------------------------------------
     for(i in 1:blocks$n){
         if(!silent){
             cat(sprintf("\tProcessing block %s of %s\t(%s percent)\n",
@@ -83,7 +83,7 @@ FAcc <- function(classed, reference, bins = 100, plotOut = FALSE,
         }
     }
 
-#--Calculate accuracy percentage----------------------------------------------
+#--Calculate accuracy percentage------------------------------------------------
     accOut <- accM / binCount
     accOut[binCount == 0] <- NA
 

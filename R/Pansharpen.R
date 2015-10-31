@@ -119,6 +119,6 @@ Pansharpen <- function(multiIn, panIn, bands, meth = "brovey",
 
     rasterOut <- writeStop(rasterOut)
 
-#--Post-processing goes here--------------------------------------------------
+#--Post-processing goes here----------------------------------------------------
     return(rasterOut)
 }

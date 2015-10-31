@@ -181,10 +181,10 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
         }
     
         newCentres <- t(t(tempCentres) / classCount)
+        newCols <- !is.nan(colSums(newCentres))
         
         #is.nan() used to compensate for clusters with 0 pixels in the cluster
-        diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-                      newCentres[, !is.nan(colSums(newCentres))])) / 
+        diffSince <- (sum(abs(centres[, newCols] -  newCentres[, newCols])) / 
                       (ncol(centres) * mean(weight))) /
                       #Divide by the maximum distance in populated feature-space
                       sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
@@ -205,11 +205,8 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
             break
         }
         
-        #Keeping centres with no changes as they are.
-        #centres <- newCentres[, !is.nan(colSums(newCentres))]
-        #Style is a little odd here                                             ToDo                    
-        centres[, !is.nan(colSums(newCentres))] <- newCentres[, !is.nan(
-                                                       colSums(newCentres))]
+        #Keeping centres with no changes as they are.                
+        centres[, newCols] <- newCentres[, newCols]
         
         if (randRe){
             for (j in 1:ncol(centres)){
@@ -290,18 +287,16 @@ KMeans <- function(rasterIn, nCentres = 10, its = 1, weight = 1, init = "lin",
   rasterOut <- writeStop(rasterOut)
   
   newCentres <- t(t(tempCentres) / classCount)
+  newCols <- !is.nan(colSums(newCentres))
   
   #is.nan() used to compensate for clusters with 0 pixels in the cluster
-  diffSince <- (sum(abs(centres[, !is.nan(colSums(newCentres))] - 
-               newCentres[, !is.nan(colSums(newCentres))])) / 
+  diffSince <- (sum(abs(centres[, newCols] -  newCentres[, newCols])) / 
                (ncol(centres) * mean(weight))) /
                #Divide by the maximum distance in populated feature-space.
                sqrt(sum((maxValue(rasterIn) - minValue(rasterIn)) ^ 2))
 
     #Keeping centres with no changes as they are.
-    #centres <- newCentres[, !is.nan(colSums(newCentres))]
-    centres[, !is.nan(colSums(newCentres))] <- 
-    newCentres[, !is.nan(colSums(newCentres))]
+    centres[, newCols] <-  newCentres[, newCols]
   
     #If any clusters are still empty, set them to NA to avoid implying they have
         #data points attached to them.

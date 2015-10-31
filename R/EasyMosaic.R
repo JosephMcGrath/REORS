@@ -97,13 +97,14 @@ EasyMosaic <- function(rasterIn = choose.files(), resolve = "", sumFun = mean,
                 }
 
                 if(crs(dataIn[[i]]) == crs(protoType)){
-                    #Any way to clean up the indentation here?                  ToDo  
+                    #Not entirely happy about the indentation here, but seems
+                    # it's the only way to keep it under 80 characters per line.
                     dataIn[i] <- resample(x = dataIn[[i]],
                                           y = raster(crs = crs(dataIn[[i]]),
                                                      ext = alignExtent(
-                                                            extent(dataIn[[i]]),
-                                                            protoType
-                                                            ),
+                                                           extent(dataIn[[i]]),
+                                                           protoType
+                                                           ),
                                                      resolution = resCount
                                                      ),
                                           filename = TempRasterName("int")
